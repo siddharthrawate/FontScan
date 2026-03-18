@@ -1,0 +1,282 @@
+{
+  "-apple-system": {
+    "confidence": "high",
+    "designer": "Apple Inc.",
+    "foundry": "Apple",
+    "license": "OS Default",
+    "license_detail": "Bundled with macOS and iOS as a system font"
+  },
+  "andale mono": {
+    "confidence": "high",
+    "designer": "Steve Matteson",
+    "foundry": "Monotype",
+    "license": "OS Default",
+    "license_detail": "Bundled with Windows and macOS"
+  },
+  "apple color emoji": {
+    "confidence": "high",
+    "designer": "Apple Inc.",
+    "foundry": "Apple",
+    "license": "OS Default",
+    "license_detail": "Bundled with macOS and iOS"
+  },
+  "arial": {
+    "confidence": "high",
+    "designer": "Robin Nicholas, Patricia Saunders",
+    "foundry": "Monotype",
+    "license": "Paid",
+    "license_detail": "Bundled with Windows and macOS operating systems"
+  },
+  "bitstream charter": {
+    "confidence": "high",
+    "designer": "Matthew Carter",
+    "foundry": "Bitstream",
+    "license": "Free (GPL)",
+    "license_detail": "Bitstream Charter is available under the GPL with a font exception, allowing it to be used freely in documents and embedded in PDFs."
+  },
+  "bitstream vera sans": {
+    "confidence": "high",
+    "designer": "Jim Lyles",
+    "foundry": "Bitstream",
+    "license": "Free (GPL)",
+    "license_detail": "Bitstream Vera fonts are released under the GNU General Public License with a font exception, allowing embedding in documents."
+  },
+  "blinkmacsystemfont": {
+    "confidence": "high",
+    "designer": "Apple Inc.",
+    "foundry": "Apple",
+    "license": "OS Default",
+    "license_detail": "Bundled with macOS as a system font"
+  },
+  "cantarell": {
+    "confidence": "high",
+    "designer": "Dave Crossland",
+    "foundry": "Dave Crossland",
+    "license": "Free (GPL)",
+    "license_detail": "SIL Open Font License, Version 1.1"
+  },
+  "courier": {
+    "confidence": "high",
+    "designer": "Howard Kettler",
+    "foundry": "Monotype",
+    "license": "Restricted",
+    "license_detail": "Bundled with most operating systems as a default monospaced font"
+  },
+  "courier new": {
+    "confidence": "high",
+    "designer": "Howard Kettler",
+    "foundry": "Monotype / Microsoft",
+    "license": "Restricted",
+    "license_detail": "Bundled with Windows and macOS"
+  },
+  "georgia": {
+    "confidence": "high",
+    "designer": "Matthew Carter",
+    "foundry": "Microsoft",
+    "license": "Paid",
+    "license_detail": "Bundled with Microsoft Windows and macOS"
+  },
+  "google sans": {
+    "confidence": "high",
+    "designer": "Google",
+    "foundry": "Google",
+    "license": "Restricted",
+    "license_detail": "Google Sans is a proprietary font used by Google in its branding and is not available for public use or download."
+  },
+  "helvetica": {
+    "confidence": "high",
+    "designer": "Max Miedinger, Eduard Hoffmann",
+    "foundry": "Monotype / Linotype",
+    "license": "Paid",
+    "license_detail": "Helvetica is a trademarked typeface and requires a license for commercial use. It is available for purchase from Linotype and other authorized distributors."
+  },
+  "helvetica neue": {
+    "confidence": "high",
+    "designer": "Max Miedinger, Eduard Hoffmann",
+    "foundry": "Linotype",
+    "license": "Paid",
+    "license_detail": "Helvetica Neue is a commercial typeface available for purchase from Linotype and other authorized distributors."
+  },
+  "inherit": {
+    "confidence": "low",
+    "designer": "Unknown Designer (inferred)",
+    "foundry": "Unknown Foundry (inferred)",
+    "license": "Restricted",
+    "license_detail": "The font name 'inherit' suggests it might be a placeholder or CSS keyword, not a commercially released font."
+  },
+  "inherit )": {
+    "confidence": "low",
+    "designer": "Unknown Designer (inferred)",
+    "foundry": "Unknown Foundry (inferred)",
+    "license": "Restricted",
+    "license_detail": "The font name 'inherit )' suggests it might be a placeholder or system-related font, often used in CSS or web development contexts. It is not a commercially recognized font name."
+  },
+  "lato": {
+    "confidence": "high",
+    "designer": "\u0141ukasz Dziedzic",
+    "foundry": "Google",
+    "license": "Free (OFL)",
+    "license_detail": "Lato is available under the Open Font License (OFL), which allows for free use, modification, and distribution."
+  },
+  "lucida grande": {
+    "confidence": "high",
+    "designer": "Charles Bigelow, Kris Holmes",
+    "foundry": "Bigelow & Holmes",
+    "license": "Paid",
+    "license_detail": "Bundled with macOS"
+  },
+  "lucida sans unicode": {
+    "confidence": "high",
+    "designer": "Charles Bigelow, Kris Holmes",
+    "foundry": "Bigelow & Holmes",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows"
+  },
+  "monospace": {
+    "confidence": "medium",
+    "designer": "(inferred) Various",
+    "foundry": "System",
+    "license": "OS Default",
+    "license_detail": "Typically bundled with operating systems as a default monospaced font"
+  },
+  "open sans": {
+    "confidence": "high",
+    "designer": "Steve Matteson",
+    "foundry": "Google",
+    "license": "Free (OFL)",
+    "license_detail": "Open Sans is licensed under the Apache License, Version 2.0."
+  },
+  "oxygen-sans": {
+    "confidence": "high",
+    "designer": "Vernon Adams",
+    "foundry": "Vernon Adams",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1"
+  },
+  "roboto": {
+    "confidence": "high",
+    "designer": "Christian Robertson",
+    "foundry": "Christian Robertson / Google",
+    "license": "Free (OFL)",
+    "license_detail": "Licensed under the Apache License, Version 2.0"
+  },
+  "robotodraft": {
+    "confidence": "high",
+    "designer": "Christian Robertson",
+    "foundry": "Christian Robertson / Google",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1"
+  },
+  "roobert": {
+    "confidence": "high",
+    "designer": "Martin V\u00e1cha",
+    "foundry": "Displaay Type Foundry",
+    "license": "Paid",
+    "license_detail": "Available for purchase from Displaay Type Foundry"
+  },
+  "roobert trial": {
+    "confidence": "high",
+    "designer": "Martin V\u00e1cha",
+    "foundry": "Displaay Type Foundry",
+    "license": "Paid",
+    "license_detail": "Trial version available with limited use; full license requires purchase"
+  },
+  "sans serif": {
+    "confidence": "low",
+    "designer": "Various",
+    "foundry": "System",
+    "license": "OS Default",
+    "license_detail": "The term 'sans serif' is generic and can refer to any number of sans serif typefaces. Licensing depends on the specific typeface."
+  },
+  "sans-serif": {
+    "confidence": "high",
+    "designer": "Various",
+    "foundry": "System",
+    "license": "OS Default",
+    "license_detail": "Bundled with operating systems as a generic fallback font"
+  },
+  "segoe ui": {
+    "confidence": "high",
+    "designer": "Steve Matteson",
+    "foundry": "Microsoft",
+    "license": "Paid",
+    "license_detail": "Bundled with Windows operating systems"
+  },
+  "segoe ui emoji": {
+    "confidence": "high",
+    "designer": "Microsoft Corporation",
+    "foundry": "Microsoft",
+    "license": "OS Default",
+    "license_detail": "Bundled with Windows operating systems"
+  },
+  "segoe ui symbol": {
+    "confidence": "high",
+    "designer": "Steve Matteson",
+    "foundry": "Microsoft",
+    "license": "OS Default",
+    "license_detail": "Bundled with Windows operating systems"
+  },
+  "serif": {
+    "confidence": "medium",
+    "designer": "Multiple Designers",
+    "foundry": "System",
+    "license": "OS Default",
+    "license_detail": "This font is part of the Google Fonts collection and is licensed under the Open Font License."
+  },
+  "slick": {
+    "confidence": "medium",
+    "designer": "Ken Wheeler",
+    "foundry": "Ken Wheeler",
+    "license": "Paid",
+    "license_detail": "Slick is a paid font available for personal and commercial use."
+  },
+  "times": {
+    "confidence": "high",
+    "designer": "Stanley Morison, Victor Lardent",
+    "foundry": "Linotype",
+    "license": "Paid",
+    "license_detail": "Commercial license required for use outside of system defaults"
+  },
+  "times new": {
+    "confidence": "high",
+    "designer": "Stanley Morison, Victor Lardent",
+    "foundry": "Monotype",
+    "license": "Paid",
+    "license_detail": "Typically requires a license purchase for commercial use"
+  },
+  "trebuchet ms": {
+    "confidence": "high",
+    "designer": "Vincent Connare",
+    "foundry": "Microsoft",
+    "license": "Paid",
+    "license_detail": "Bundled with Microsoft Windows and macOS"
+  },
+  "ubuntu": {
+    "confidence": "high",
+    "designer": "Dalton Maag",
+    "foundry": "Dalton Maag",
+    "license": "Free (OFL)",
+    "license_detail": "Ubuntu Font License"
+  },
+  "var( --ls-affix-ff": {
+    "confidence": "low",
+    "designer": "Inferred from context",
+    "foundry": "Inferred from context",
+    "license": "Restricted",
+    "license_detail": "Likely a custom or proprietary font used in a specific web application or service, indicated by the CSS variable syntax."
+  },
+  "var(--input-font)": {
+    "confidence": "low",
+    "designer": "(inferred)",
+    "foundry": "(inferred)",
+    "license": "Restricted",
+    "license_detail": "This appears to be a CSS variable placeholder for a font, typically used in web development. The actual font would depend on the CSS variable definition."
+  },
+  "verdana": {
+    "confidence": "high",
+    "designer": "Matthew Carter",
+    "foundry": "Microsoft",
+    "license": "Paid",
+    "license_detail": "Bundled with Windows and macOS operating systems"
+  }
+}

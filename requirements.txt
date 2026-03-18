@@ -1,0 +1,9 @@
+fonttools
+fastapi
+uvicorn[standard]
+selenium
+pytrends
+Pillow
+requests
+pandas
+openpyxl

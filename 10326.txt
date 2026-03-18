@@ -1,0 +1,12 @@
+10/3/26
+
+
+challenges of website
+
+glenmark: wrong path and wrong font name(today site is glitching)
+bristlecone: not many errors need to verify about the correct values with the project generated
+kpit: not many errors 
+sunpharma: to populate all font details of this we need to search for one more website which is inside the sunpharma site named seebeyoundsugar.com after adding these both site links it populates all answer( still there are places for improvement)
+cipla:
+credence: mostly correct but need verification
+synechron: path is extended need proper working
