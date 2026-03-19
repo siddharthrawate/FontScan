@@ -1,9 +1,4 @@
-fonttools
 fastapi
-uvicorn[standard]
-selenium
-pytrends
-Pillow
+uvicorn
+python-dotenv
 requests
-pandas
-openpyxl
