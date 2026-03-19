@@ -27,6 +27,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from dotenv import load_dotenv
 
+
+
 # ── Stealth browser stack ──────────────────────────────────────
 import undetected_chromedriver as uc
 from selenium_stealth import stealth
@@ -46,6 +48,10 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 OPENAI_MODEL  = "gpt-4o"
 AI_CACHE_FILE = "font_ai_cache.json"
+
+# Create FastAPI app
+app = FastAPI()
+
 
 # ── Values that mean "we don't know yet" ──────────────────────
 _UNKNOWN_VALUES = {
