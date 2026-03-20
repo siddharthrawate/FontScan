@@ -12278,5 +12278,15 @@
     "category": "Icon/Symbol",
     "confidence": "high",
     "source": "ai"
+  },
+  "sans-serif!important": {
+    "foundry": "Unknown Foundry",
+    "designer": "Unknown Designer",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a custom or web-specific font declaration rather than a standard typeface.",
+    "year": null,
+    "category": "Sans-serif",
+    "confidence": "low",
+    "source": "ai"
   }
 }
