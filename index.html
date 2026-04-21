@@ -10,228 +10,280 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ey-yellow:#FFE600;--ey-yellow-dk:#E6CF00;--ey-black:#000;
-  --ey-charcoal:#1A1A24;--ey-dark:#23232F;--ey-dark2:#2E2E38;--ey-dark3:#3A3A4A;
-  --bg:var(--ey-charcoal);--surface:var(--ey-dark);--surface2:var(--ey-dark2);--surface3:var(--ey-dark3);
-  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
-  --accent:var(--ey-yellow);--accent2:var(--ey-yellow-dk);
-  --free:#2DB87A;--paid:#FF9B42;--restricted:#E8425A;--os:#60C8F5;--ai:#C4A8FF;
-  --embedded:#5BC4E8;--css-font:#F0A04B;--traffic:#7EC8A4;
+  --ey-yellow:#FFE600;--ey-black:#000;--ey-charcoal:#1A1A24;
+  --ey-dark:#23232F;--ey-dark2:#2E2E38;--ey-dark3:#3A3A4A;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.14);
+  --free:#2DB87A;--paid:#FF9B42;--restricted:#E8425A;--os:#60C8F5;
+  --ai:#C4A8FF;--traffic:#7EC8A4;--embedded:#5BC4E8;--css-font:#F0A04B;
   --text:#F2F2F4;--muted:#6B6A7E;--muted2:#9A99AD;
   --font-ui:'IBM Plex Sans',sans-serif;--font-data:'IBM Plex Mono',monospace;
-  --radius:8px;--radius-sm:5px;
+  --r:8px;--rs:5px;
 }
 html{font-size:14px}
-body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+body{background:var(--ey-charcoal);color:var(--text);font-family:var(--font-ui);
+  min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:linear-gradient(rgba(255,230,0,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,230,0,.018) 1px,transparent 1px);
+  background-image:linear-gradient(rgba(255,230,0,.016) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,230,0,.016) 1px,transparent 1px);
   background-size:40px 40px}
 
 /* ── NAV ── */
-nav{position:sticky;top:0;z-index:100;background:var(--ey-black);border-bottom:3px solid var(--ey-yellow);
-  padding:0 24px;height:60px;display:flex;align-items:center;gap:16px}
+nav{position:sticky;top:0;z-index:100;background:var(--ey-black);
+  border-bottom:3px solid var(--ey-yellow);padding:0 20px;height:58px;
+  display:flex;align-items:center;gap:14px}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;
-  border-right:1px solid rgba(255,255,255,.12);padding-right:20px;margin-right:4px}
-.ey-logo-svg{flex-shrink:0;display:block}
-.ey-tagline{font-size:6.5px;color:rgba(255,255,255,.5);letter-spacing:.3px;text-transform:uppercase;font-weight:400;line-height:1.5;white-space:nowrap}
-.nav-app-name{font-size:12px;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.6px;text-transform:uppercase}
-.scan-bar{flex:1;max-width:580px;display:flex;align-items:center;background:var(--surface2);
-  border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:0 4px 0 12px;gap:8px;transition:border-color .2s,box-shadow .2s}
-.scan-bar:focus-within{border-color:var(--ey-yellow);box-shadow:0 0 0 3px rgba(255,230,0,.1)}
-.scan-bar input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--font-data);font-size:13px;padding:10px 0}
+  border-right:1px solid rgba(255,255,255,.12);padding-right:18px}
+.ey-tag{font-size:6.5px;color:rgba(255,255,255,.45);letter-spacing:.3px;
+  text-transform:uppercase;line-height:1.5;white-space:nowrap}
+.nav-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.55);
+  letter-spacing:.6px;text-transform:uppercase}
+.scan-bar{flex:1;max-width:560px;display:flex;align-items:center;
+  background:var(--ey-dark2);border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--rs);padding:0 4px 0 11px;gap:7px;
+  transition:border-color .2s,box-shadow .2s}
+.scan-bar:focus-within{border-color:var(--ey-yellow);
+  box-shadow:0 0 0 3px rgba(255,230,0,.09)}
+.scan-bar input{flex:1;background:none;border:none;outline:none;
+  color:var(--text);font-family:var(--font-data);font-size:13px;padding:9px 0}
 .scan-bar input::placeholder{color:var(--muted)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);
-  font-family:var(--font-ui);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s;letter-spacing:.4px;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 15px;
+  border-radius:var(--rs);font-family:var(--font-ui);font-size:12px;
+  font-weight:600;cursor:pointer;border:none;transition:all .15s;
+  letter-spacing:.4px;white-space:nowrap}
 .btn-primary{background:var(--ey-yellow);color:var(--ey-black)}
-.btn-primary:hover{background:#FFF033;transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,230,0,.22)}
+.btn-primary:hover{background:#FFF033;transform:translateY(-1px)}
 .btn-ghost{background:transparent;color:var(--muted2);border:1px solid rgba(255,255,255,.1)}
 .btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
 .btn-danger{background:var(--restricted);color:#fff}
-.btn-danger:hover{background:#CC2B43}
+.btn-danger:hover{background:#cc2b43}
 .btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
-.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:7px}
 
-/* ── LAYOUT ── */
+/* ── LIVE INDICATORS ── */
+.live-chip{display:none;align-items:center;gap:5px;padding:3px 9px;
+  border-radius:20px;font-size:10px;font-weight:600;font-family:var(--font-data);
+  border:1px solid}
+.live-chip.active{display:inline-flex}
+.live-chip.ai{background:rgba(196,168,255,.12);color:var(--ai);border-color:rgba(196,168,255,.3)}
+.live-chip.tr{background:rgba(126,200,164,.1);color:var(--traffic);border-color:rgba(126,200,164,.3)}
+.live-dot{width:6px;height:6px;border-radius:50%;animation:dot-pulse 1s ease infinite}
+.live-chip.ai .live-dot{background:var(--ai)}
+.live-chip.tr .live-dot{background:var(--traffic)}
+@keyframes dot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+
+/* ── BODY ── */
 .app-body{display:flex;flex:1;position:relative;z-index:1;min-height:0}
 
 /* ── SIDEBAR ── */
-.sidebar{width:256px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;overflow-y:auto;position:sticky;top:60px;height:calc(100vh - 60px)}
-.sidebar-section{padding:16px;border-bottom:1px solid var(--border)}
-.sidebar-section:last-child{border-bottom:none;flex:1;overflow-y:auto;min-height:0}
-.section-title{font-size:9.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
-.section-title::before{content:'';display:inline-block;width:3px;height:10px;
-  background:var(--ey-yellow);border-radius:2px;margin-right:8px;flex-shrink:0}
-.field-row{margin-bottom:10px}
-.field-label{font-size:11px;color:var(--muted2);margin-bottom:5px;display:flex;justify-content:space-between}
-.field-label span{color:var(--ey-yellow);font-family:var(--font-data)}
+.sidebar{width:252px;flex-shrink:0;background:var(--ey-dark);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  overflow-y:auto;position:sticky;top:58px;height:calc(100vh - 58px)}
+.sb-sec{padding:15px;border-bottom:1px solid var(--border)}
+.sb-sec:last-child{border-bottom:none;flex:1;overflow-y:auto}
+.sb-title{font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.sb-title::before{content:'';width:3px;height:9px;background:var(--ey-yellow);
+  border-radius:2px;flex-shrink:0}
+.field{margin-bottom:9px}
+.field-lbl{font-size:11px;color:var(--muted2);margin-bottom:4px;
+  display:flex;justify-content:space-between}
+.field-lbl span{color:var(--ey-yellow);font-family:var(--font-data)}
 input[type=range]{width:100%;accent-color:var(--ey-yellow);cursor:pointer}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.toggle-label{font-size:12px;color:var(--muted2)}
-.toggle{position:relative;width:32px;height:18px;cursor:pointer}
-.toggle input{opacity:0;width:0;height:0}
-.toggle-track{position:absolute;inset:0;background:var(--surface3);border-radius:9px;transition:background .2s}
-.toggle input:checked~.toggle-track{background:var(--ey-yellow)}
-.toggle-thumb{position:absolute;top:3px;left:3px;width:12px;height:12px;background:var(--ey-black);border-radius:50%;transition:transform .2s}
-.toggle input:checked~.toggle-thumb{transform:translateX(14px)}
-.ai-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:var(--font-data);padding:2px 8px;border-radius:4px}
+.tog-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.tog-lbl{font-size:12px;color:var(--muted2)}
+.tog{position:relative;width:32px;height:18px;cursor:pointer;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-track{position:absolute;inset:0;background:var(--ey-dark3);border-radius:9px;transition:background .2s}
+.tog input:checked~.tog-track{background:var(--ey-yellow)}
+.tog-thumb{position:absolute;top:3px;left:3px;width:12px;height:12px;
+  background:var(--ey-black);border-radius:50%;transition:transform .2s}
+.tog input:checked~.tog-thumb{transform:translateX(14px)}
+.ai-status{font-size:10px;font-family:var(--font-data);padding:2px 7px;border-radius:4px;
+  display:inline-flex;align-items:center;gap:3px}
 .ai-status.ok{background:rgba(45,184,122,.1);color:var(--free)}
 .ai-status.off{background:rgba(232,66,90,.1);color:var(--restricted)}
 .ai-status.pending{background:rgba(107,106,126,.1);color:var(--muted2)}
 
-/* ── HISTORY ── */
-.history-item{padding:10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .12s;border:1px solid transparent;margin-bottom:6px}
-.history-item:hover{background:var(--surface2);border-color:var(--border)}
-.hi-domain{font-size:12px;color:var(--text);font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hi-meta{font-size:10px;color:var(--muted);font-family:var(--font-data);display:flex;gap:8px;flex-wrap:wrap}
-.hi-count{color:var(--ey-yellow);font-weight:600}
-.history-empty{font-size:11px;color:var(--muted);font-style:italic}
+/* ── HISTORY ITEMS ── */
+.hi{padding:9px;border-radius:var(--rs);cursor:pointer;transition:background .12s;
+  border:1px solid transparent;margin-bottom:5px}
+.hi:hover{background:var(--ey-dark2);border-color:var(--border)}
+.hi-dom{font-size:12px;color:var(--text);font-weight:600;margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi-meta{font-size:10px;color:var(--muted);font-family:var(--font-data);
+  display:flex;gap:7px;flex-wrap:wrap}
+.hi-n{color:var(--ey-yellow);font-weight:600}
+.hi-empty{font-size:11px;color:var(--muted);font-style:italic}
 
 /* ── STATS ── */
-.stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
-.stat-card{background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:3px;position:relative;overflow:hidden}
-.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ey-yellow);opacity:.2}
-.stat-value{font-size:20px;font-weight:700;color:var(--text);font-family:var(--font-data);letter-spacing:-1px}
-.stat-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;
+  background:var(--border);border-bottom:1px solid var(--border)}
+.stat{background:var(--ey-dark);padding:11px 13px;display:flex;
+  flex-direction:column;gap:2px;position:relative;overflow:hidden}
+.stat::after{content:'';position:absolute;bottom:0;left:0;right:0;
+  height:2px;background:var(--ey-yellow);opacity:.18}
+.stat-val{font-size:20px;font-weight:700;font-family:var(--font-data);
+  color:var(--text);letter-spacing:-1px}
+.stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
 
-/* ── MAIN ── */
-.main-area{flex:1;display:flex;flex-direction:column;min-width:0}
-.toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap}
-.search-box{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--radius-sm);padding:0 10px;flex:1;max-width:240px;transition:border-color .2s}
+/* ── MAIN AREA ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.toolbar{display:flex;align-items:center;gap:9px;padding:9px 14px;
+  border-bottom:1px solid var(--border);background:var(--ey-dark);flex-wrap:wrap}
+.search-box{display:flex;align-items:center;gap:7px;background:var(--ey-dark2);
+  border:1px solid var(--border);border-radius:var(--rs);padding:0 9px;
+  flex:1;max-width:230px;transition:border-color .2s}
 .search-box:focus-within{border-color:var(--ey-yellow)}
-.search-box input{background:none;border:none;outline:none;color:var(--text);font-family:var(--font-data);font-size:12px;padding:7px 0;width:100%}
+.search-box input{background:none;border:none;outline:none;color:var(--text);
+  font-family:var(--font-data);font-size:12px;padding:6px 0;width:100%}
 .search-box input::placeholder{color:var(--muted)}
-.filter-pills{display:flex;gap:6px;flex-wrap:wrap}
-.pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s;letter-spacing:.3px}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;
+  cursor:pointer;border:1px solid;transition:all .15s}
 .pill.all{border-color:rgba(255,255,255,.15);color:var(--muted2)}
 .pill.all.active,.pill.all:hover{background:var(--ey-yellow);color:var(--ey-black);border-color:transparent}
 .pill.free{border-color:rgba(45,184,122,.3);color:var(--free)}
-.pill.free.active{background:rgba(45,184,122,.15);border-color:var(--free)}
+.pill.free.active{background:rgba(45,184,122,.14);border-color:var(--free)}
 .pill.paid{border-color:rgba(255,155,66,.3);color:var(--paid)}
-.pill.paid.active{background:rgba(255,155,66,.15);border-color:var(--paid)}
+.pill.paid.active{background:rgba(255,155,66,.14);border-color:var(--paid)}
 .spacer{flex:1}
+#countLbl{font-size:11px;color:var(--muted);font-family:var(--font-data)}
 
-/* ── TABLE ── */
-.section-header{display:flex;align-items:center;gap:10px;padding:10px 16px;
-  background:var(--surface2);border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
-.section-header:hover{background:var(--surface3)}
-.section-header-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
-.section-header-count{font-size:10px;font-family:var(--font-data);color:var(--ey-yellow);font-weight:600}
-.section-header-chevron{margin-left:auto;color:var(--muted);font-size:11px;transition:transform .2s}
-.section-header.collapsed .section-header-chevron{transform:rotate(-90deg)}
-
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-family:var(--font-data);font-size:12px;min-width:900px}
-thead th{background:var(--surface);padding:9px 12px;text-align:left;font-weight:600;font-size:9px;
-  text-transform:uppercase;letter-spacing:.8px;color:var(--muted);white-space:nowrap;
-  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;cursor:pointer;user-select:none;transition:color .15s}
-thead th:hover{color:var(--ey-yellow)}
-thead tr th:first-child{border-left:3px solid var(--ey-yellow)}
-thead th.no-sort{cursor:default}
-thead th.no-sort:hover{color:var(--muted)}
-tbody tr{border-bottom:1px solid var(--border);transition:background .12s;animation:rowIn .22s ease both}
-tbody tr:hover{background:rgba(255,230,0,.025)}
-tbody tr.selected{background:rgba(255,230,0,.06)!important}
-@keyframes rowIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
-tbody td{padding:9px 12px;vertical-align:middle;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-tbody td.font-name{color:var(--text);font-weight:500;max-width:160px}
-tbody td.font-family{color:var(--muted2);max-width:140px}
-tbody td.path-cell{font-size:10px;color:var(--muted);max-width:260px}
-tbody td.path-cell .seg{color:var(--muted)}
-tbody td.path-cell .fname{color:var(--ey-yellow);opacity:.75}
-tbody td.traffic-cell{text-align:right;min-width:110px}
-
-/* ── BADGES ── */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
-.badge-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.badge.free{background:rgba(45,184,122,.12);color:var(--free)}.badge.free .badge-dot{background:var(--free)}
-.badge.paid{background:rgba(255,155,66,.12);color:var(--paid)}.badge.paid .badge-dot{background:var(--paid)}
-.badge.restricted{background:rgba(232,66,90,.12);color:var(--restricted)}.badge.restricted .badge-dot{background:var(--restricted)}
-.badge.check{background:rgba(255,255,255,.06);color:var(--muted2)}.badge.check .badge-dot{background:var(--muted)}
-
-/* ── FONT TYPE TAG ── */
-.ftype-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
-.ftype-tag.embedded{background:rgba(91,196,232,.12);color:var(--embedded)}
-.ftype-tag.css{background:rgba(240,160,75,.12);color:var(--css-font)}
-
-/* ── TRAFFIC CELL ── */
-.traffic-val{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;
-  font-size:11px;font-weight:700;font-family:var(--font-data);background:rgba(126,200,164,.1);color:var(--traffic)}
-.traffic-val.loading{color:var(--muted);background:rgba(255,255,255,.04);animation:trafficPulse 1.4s ease infinite}
-.traffic-val.na{color:var(--muted);background:transparent;font-weight:400}
-@keyframes trafficPulse{0%,100%{opacity:.6}50%{opacity:1}}
+/* ── SECTION HEADERS ── */
+.sec-hdr{display:flex;align-items:center;gap:9px;padding:8px 14px;
+  background:var(--ey-dark2);border-bottom:1px solid var(--border);
+  cursor:pointer;user-select:none}
+.sec-hdr:hover{background:var(--ey-dark3)}
+.sec-hdr-title{font-size:9.5px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;color:var(--muted2)}
+.sec-hdr-count{font-size:10px;font-family:var(--font-data);
+  color:var(--ey-yellow);font-weight:700}
+.sec-hdr-chev{margin-left:auto;color:var(--muted);font-size:10px;transition:transform .2s}
+.sec-hdr.collapsed .sec-hdr-chev{transform:rotate(-90deg)}
 
 /* ── RESTRICTED SECTION ── */
-.restricted-section{border-top:2px solid rgba(232,66,90,.25)}
-.restricted-section .section-header{background:rgba(232,66,90,.04);border-bottom-color:rgba(232,66,90,.15)}
-.restricted-section .section-header:hover{background:rgba(232,66,90,.08)}
-.restricted-section .section-header-title{color:var(--restricted)}
-.restricted-section .section-header::before{content:'🔒 ';font-size:11px}
-.restricted-section thead tr th:first-child{border-left-color:var(--restricted)}
-.restricted-section thead th{background:rgba(232,66,90,.04)}
-.restricted-note{padding:10px 16px;font-size:10px;color:var(--restricted);font-family:var(--font-data);
-  background:rgba(232,66,90,.04);border-bottom:1px solid rgba(232,66,90,.1);
-  display:flex;align-items:center;gap:6px}
+.res-sec{border-top:2px solid rgba(232,66,90,.22)}
+.res-sec .sec-hdr{background:rgba(232,66,90,.04)}
+.res-sec .sec-hdr:hover{background:rgba(232,66,90,.08)}
+.res-sec .sec-hdr-title{color:var(--restricted)}
+.res-note{padding:8px 14px;font-size:10px;color:var(--restricted);
+  font-family:var(--font-data);background:rgba(232,66,90,.04);
+  border-bottom:1px solid rgba(232,66,90,.1)}
 
-/* ── AI LIVE ── */
-.ai-live{display:none;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;
-  font-family:var(--font-data);background:rgba(196,168,255,.15);color:var(--ai);border:1px solid rgba(196,168,255,.3)}
-.ai-live.active{display:inline-flex}
-.ai-pulse{width:7px;height:7px;border-radius:50%;background:var(--ai);animation:pulse 1s ease-in-out infinite}
-.traffic-live{display:none;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;
-  font-family:var(--font-data);background:rgba(126,200,164,.12);color:var(--traffic);border:1px solid rgba(126,200,164,.3)}
-.traffic-live.active{display:inline-flex}
-.traffic-pulse{width:7px;height:7px;border-radius:50%;background:var(--traffic);animation:pulse 1s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-family:var(--font-data);font-size:12px;min-width:880px}
+thead th{background:var(--ey-dark);padding:8px 11px;text-align:left;
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;
+  position:sticky;top:0;z-index:10;cursor:pointer;user-select:none;transition:color .15s}
+thead th:hover{color:var(--ey-yellow)}
+thead th.nosort{cursor:default}
+thead th.nosort:hover{color:var(--muted)}
+thead tr th:first-child{border-left:3px solid var(--ey-yellow)}
+.res-sec thead tr th:first-child{border-left-color:var(--restricted)}
+.res-sec thead th{background:rgba(232,66,90,.04)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s;
+  animation:ri .2s ease both}
+tbody tr:hover{background:rgba(255,230,0,.022)}
+tbody tr.sel{background:rgba(255,230,0,.055)!important}
+@keyframes ri{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+tbody td{padding:8px 11px;vertical-align:middle;color:var(--muted2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+tbody td.nm{color:var(--text);font-weight:500;max-width:160px}
+tbody td.fam{max-width:140px}
+tbody td.path{font-size:10px;max-width:240px}
+tbody td.path .seg{color:var(--muted)}
+tbody td.path .fn{color:var(--ey-yellow);opacity:.8}
+tbody td.tv{text-align:right;min-width:110px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;
+  border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.4px;white-space:nowrap}
+.badge .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge.free{background:rgba(45,184,122,.11);color:var(--free)}.badge.free .dot{background:var(--free)}
+.badge.paid{background:rgba(255,155,66,.11);color:var(--paid)}.badge.paid .dot{background:var(--paid)}
+.badge.restricted{background:rgba(232,66,90,.11);color:var(--restricted)}.badge.restricted .dot{background:var(--restricted)}
+.badge.check{background:rgba(255,255,255,.05);color:var(--muted2)}.badge.check .dot{background:var(--muted)}
+
+/* ── FONT TYPE TAG ── */
+.ftag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;
+  border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.ftag.emb{background:rgba(91,196,232,.12);color:var(--embedded)}
+.ftag.emb::before{content:'⬛';font-size:7px;opacity:.7}
+.ftag.css{background:rgba(240,160,75,.12);color:var(--css-font)}
+.ftag.css::before{content:'◻';font-size:7px;opacity:.7}
+
+/* ── TRAFFIC VALUE ── */
+.tv-val{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;
+  border-radius:4px;font-size:11px;font-weight:700;font-family:var(--font-data)}
+.tv-val.live{background:rgba(126,200,164,.1);color:var(--traffic)}
+.tv-val.loading{color:var(--muted);background:rgba(255,255,255,.04);
+  animation:tp 1.3s ease infinite}
+.tv-val.na{color:var(--muted);background:transparent;font-weight:400;font-size:10px}
+@keyframes tp{0%,100%{opacity:.5}50%{opacity:1}}
 
 /* ── EMPTY STATE ── */
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:300px;gap:14px;color:var(--muted);font-size:13px}
-.empty-state strong{color:var(--muted2);font-size:15px}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:280px;gap:12px;color:var(--muted);font-size:13px}
+.empty strong{color:var(--muted2);font-size:15px}
+.empty svg{opacity:.08}
 
 /* ── PROGRESS ── */
-.progress-bar{height:2px;background:var(--surface3);overflow:hidden}
-.pb-fill{height:100%;background:linear-gradient(90deg,transparent,var(--ey-yellow),transparent);animation:indeterminate 1.4s ease infinite;width:40%}
-@keyframes indeterminate{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+.prog{height:2px;background:var(--ey-dark3);overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,transparent,var(--ey-yellow),transparent);
+  animation:ind 1.4s ease infinite;width:40%}
+@keyframes ind{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
 
 /* ── LOG ── */
-.log-panel{background:rgba(0,0,0,.5);border-top:1px solid var(--border);padding:8px 16px;
-  font-family:var(--font-data);font-size:10px;color:var(--muted);max-height:64px;overflow-y:auto;white-space:nowrap}
-.log-entry{animation:rowIn .2s ease both}
-.log-entry.info{color:var(--muted2)}.log-entry.font{color:var(--free)}
-.log-entry.error{color:var(--restricted)}.log-entry.done{color:var(--ey-yellow);font-weight:600}
-.log-entry.traffic{color:var(--traffic)}
+.log{background:rgba(0,0,0,.5);border-top:1px solid var(--border);padding:7px 14px;
+  font-family:var(--font-data);font-size:10px;color:var(--muted);
+  max-height:62px;overflow-y:auto;white-space:nowrap}
+.log-e{animation:ri .18s ease both}
+.log-e.info{color:var(--muted2)}.log-e.font{color:var(--free)}
+.log-e.error{color:var(--restricted)}.log-e.done{color:var(--ey-yellow);font-weight:700}
+.log-e.tr{color:var(--traffic)}
 
 /* ── DETAIL BAR ── */
-.detail-bar{background:var(--surface2);border-top:2px solid rgba(255,230,0,.18);padding:11px 20px;display:none;gap:18px;flex-wrap:wrap;font-size:12px}
-.detail-bar.visible{display:flex}
-.detail-kv{display:flex;flex-direction:column;gap:2px;min-width:80px}
-.detail-k{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
-.detail-v{color:var(--text);font-family:var(--font-data);font-size:12px}
+.dbar{background:var(--ey-dark2);border-top:2px solid rgba(255,230,0,.15);
+  padding:10px 18px;display:none;gap:16px;flex-wrap:wrap}
+.dbar.on{display:flex}
+.dkv{display:flex;flex-direction:column;gap:2px;min-width:80px}
+.dk{font-size:9px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
+.dv{color:var(--text);font-family:var(--font-data);font-size:12px}
 
 /* ── MODAL ── */
-.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border2);border-top:3px solid var(--ey-yellow);
-  border-radius:var(--radius);width:min(1000px,96vw);max-height:82vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.7)}
-.modal-header{display:flex;align-items:flex-start;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border)}
-.modal-title{font-size:16px;font-weight:600;flex:1;color:var(--text)}
-.modal-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
-.modal-meta span{font-size:10px;font-family:var(--font-data);color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:4px}
-.modal-meta .mc-free{color:var(--free)}.modal-meta .mc-paid{color:var(--paid)}.modal-meta .mc-res{color:var(--restricted)}
+.modal-ov{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.8);backdrop-filter:blur(10px);
+  align-items:center;justify-content:center}
+.modal-ov.open{display:flex}
+.modal{background:var(--ey-dark);border:1px solid var(--border2);
+  border-top:3px solid var(--ey-yellow);border-radius:var(--r);
+  width:min(1020px,96vw);max-height:82vh;display:flex;flex-direction:column;
+  overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.7)}
+.modal-hdr{display:flex;align-items:flex-start;gap:11px;padding:16px 18px;
+  border-bottom:1px solid var(--border)}
+.modal-title{font-size:15px;font-weight:600;flex:1;color:var(--text)}
+.modal-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.modal-meta span{font-size:10px;font-family:var(--font-data);color:var(--muted);
+  background:var(--ey-dark2);padding:2px 7px;border-radius:4px}
+.mc-free{color:var(--free)!important}.mc-paid{color:var(--paid)!important}
+.mc-res{color:var(--restricted)!important}
 .modal-body{overflow-y:auto;flex:1}
-.modal-table{width:100%;border-collapse:collapse;font-family:var(--font-data);font-size:12px;min-width:800px}
-.modal-table th{background:var(--surface2);padding:9px 12px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600;position:sticky;top:0;z-index:5}
-.modal-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--muted2);vertical-align:middle}
-.modal-table td:first-child{color:var(--text);font-weight:500}
-.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
-.modal-footer-note{font-size:11px;color:var(--muted);flex:1}
+.mtbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-size:12px;min-width:860px}
+.mtbl th{background:var(--ey-dark2);padding:8px 11px;text-align:left;font-size:9px;
+  text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+  border-bottom:1px solid var(--border);font-weight:700;position:sticky;top:0;z-index:5}
+.mtbl td{padding:8px 11px;border-bottom:1px solid var(--border);
+  color:var(--muted2);vertical-align:middle}
+.modal-foot{padding:11px 18px;border-top:1px solid var(--border);
+  display:flex;gap:9px;align-items:center}
+.modal-foot-note{font-size:11px;color:var(--muted);flex:1}
 
-::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:rgba(255,230,0,.25)}
+::-webkit-scrollbar-thumb{background:var(--ey-dark3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,230,0,.22)}
 </style>
 </head>
 <body>
@@ -239,40 +291,35 @@ tbody td.traffic-cell{text-align:right;min-width:110px}
 <!-- NAV -->
 <nav>
   <a class="nav-logo" href="#">
-    <svg class="ey-logo-svg" width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="46" height="46" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="100" height="100" fill="#000"/>
       <polygon points="8,42 88,12 88,28" fill="#FFE600"/>
-      <text x="50" y="90" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="40" fill="#fff" letter-spacing="-1">EY</text>
+      <text x="50" y="90" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+            font-weight="900" font-size="40" fill="#fff" letter-spacing="-1">EY</text>
     </svg>
-    <div><div class="ey-tagline">Shape the future<br>with confidence</div></div>
+    <div class="ey-tag">Shape the future<br>with confidence</div>
   </a>
-  <span class="nav-app-name">FontScan</span>
+  <span class="nav-title">FontScan</span>
 
   <div class="scan-bar">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" style="flex-shrink:0">
       <circle cx="6" cy="6" r="4.5" stroke="#6B6A7E" stroke-width="1.3"/>
       <path d="M10 10l2.5 2.5" stroke="#6B6A7E" stroke-width="1.3" stroke-linecap="round"/>
     </svg>
-    <input type="text" id="urlInput" placeholder="Enter website URL to scan fonts…" autocomplete="off" spellcheck="false"/>
+    <input id="urlInput" type="text" placeholder="Enter website URL to scan fonts…"
+           autocomplete="off" spellcheck="false"/>
     <button class="btn btn-primary" id="scanBtn" onclick="startScan()">
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
         <circle cx="6" cy="6" r="4" stroke="#000" stroke-width="1.3"/>
         <circle cx="6" cy="6" r="1.5" fill="#000"/>
-      </svg>
-      Scan
+      </svg>Scan
     </button>
     <button class="btn btn-danger" id="stopBtn" onclick="stopScan()" style="display:none">Stop</button>
   </div>
 
   <div class="nav-right">
-    <span class="traffic-live" id="trafficLiveIndicator">
-      <span class="traffic-pulse"></span>
-      Estimating traffic…
-    </span>
-    <span class="ai-live" id="aiLiveIndicator">
-      <span class="ai-pulse"></span>
-      GPT-4o querying…
-    </span>
+    <span class="live-chip tr" id="trChip"><span class="live-dot"></span>Traffic…</span>
+    <span class="live-chip ai" id="aiChip"><span class="live-dot"></span>GPT-4o…</span>
     <button class="btn btn-ghost" onclick="exportCSV()">↓ CSV</button>
     <button class="btn btn-ghost" onclick="exportExcel()">↓ Excel</button>
   </div>
@@ -283,132 +330,129 @@ tbody td.traffic-cell{text-align:right;min-width:110px}
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sidebar-section">
-      <div class="section-title">Scan Settings</div>
-      <div class="field-row">
-        <div class="field-label">Page wait <span id="waitVal">8s</span></div>
+    <div class="sb-sec">
+      <div class="sb-title">Scan Settings</div>
+      <div class="field">
+        <div class="field-lbl">Page wait <span id="waitVal">8s</span></div>
         <input type="range" id="waitSlider" min="2" max="30" value="8"
                oninput="document.getElementById('waitVal').textContent=this.value+'s'">
       </div>
-      <div class="field-row">
-        <div class="field-label">Scroll steps <span id="scrollVal">3</span></div>
+      <div class="field">
+        <div class="field-lbl">Scroll steps <span id="scrollVal">3</span></div>
         <input type="range" id="scrollSlider" min="0" max="10" value="3"
                oninput="document.getElementById('scrollVal').textContent=this.value">
       </div>
     </div>
 
-    <div class="sidebar-section">
-      <div class="section-title">
-        AI Lookup
-        <span class="ai-status pending" id="aiStatus">…</span>
+    <div class="sb-sec">
+      <div class="sb-title">AI Lookup
+        <span class="ai-status pending" id="aiStat">…</span>
       </div>
-      <div class="toggle-row">
-        <span class="toggle-label">Use OpenAI (GPT-4o)</span>
-        <label class="toggle">
-          <input type="checkbox" id="aiToggle" checked>
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
+      <div class="tog-row">
+        <span class="tog-lbl">Use OpenAI (GPT-4o)</span>
+        <label class="tog">
+          <input type="checkbox" id="aiTog" checked>
+          <div class="tog-track"></div>
+          <div class="tog-thumb"></div>
         </label>
       </div>
-      <div style="font-size:10px;color:var(--muted);line-height:1.6">
-        API key set in <code style="color:var(--ey-yellow)">backend.py</code>.<br>
-        GPT-4o identifies foundry, license, and estimates monthly traffic.
+      <div style="font-size:10px;color:var(--muted);line-height:1.65">
+        Key set in <code style="color:var(--ey-yellow)">backend.py</code>.<br>
+        GPT-4o resolves foundry, license + estimates monthly traffic.
       </div>
     </div>
 
-    <div class="sidebar-section" style="flex:1;overflow-y:auto;min-height:0">
-      <div class="section-title">Recent Scans
-        <button onclick="refreshHistory()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px">⟳</button>
+    <div class="sb-sec" style="flex:1;overflow-y:auto">
+      <div class="sb-title">Recent Scans
+        <button onclick="loadHistory()" style="background:none;border:none;cursor:pointer;
+          color:var(--muted);font-size:11px">⟳</button>
       </div>
-      <div id="historyList"><div class="history-empty">No scans yet</div></div>
+      <div id="histList"><div class="hi-empty">No scans yet</div></div>
     </div>
 
-    <div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px">
+    <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:7px">
       <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="exportCSV()">CSV</button>
       <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="exportExcel()">Excel</button>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
-  <div class="main-area">
+  <!-- MAIN -->
+  <div class="main">
 
-    <!-- STATS ROW -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value" id="statTotal">—</div>
-        <div class="stat-label">Total Fonts</div>
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val" id="sTotal">—</div>
+        <div class="stat-lbl">Total Fonts</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" style="color:var(--free)" id="statFree">—</div>
-        <div class="stat-label">Free</div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--free)" id="sFree">—</div>
+        <div class="stat-lbl">Free</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" style="color:var(--paid)" id="statPaid">—</div>
-        <div class="stat-label">Paid</div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--paid)" id="sPaid">—</div>
+        <div class="stat-lbl">Paid</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" style="color:var(--restricted)" id="statRestricted">—</div>
-        <div class="stat-label">Restricted</div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--restricted)" id="sRestr">—</div>
+        <div class="stat-lbl">Restricted</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" style="color:var(--ai)" id="statAI">—</div>
-        <div class="stat-label">AI Resolved</div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--ai)" id="sAI">—</div>
+        <div class="stat-lbl">AI Resolved</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-value" style="color:var(--traffic)" id="statTraffic">—</div>
-        <div class="stat-label">Monthly Visits</div>
+      <div class="stat">
+        <div class="stat-val" style="color:var(--traffic)" id="sTraffic">—</div>
+        <div class="stat-lbl">Monthly Visits</div>
       </div>
     </div>
 
-    <!-- PROGRESS BAR -->
-    <div class="progress-bar" id="progressBar" style="display:none">
-      <div class="pb-fill"></div>
-    </div>
+    <!-- PROGRESS -->
+    <div class="prog" id="progBar" style="display:none"><div class="prog-fill"></div></div>
 
-    <!-- TOOLBAR (All Fonts section) -->
+    <!-- TOOLBAR -->
     <div class="toolbar">
       <div class="search-box">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
           <circle cx="5.5" cy="5.5" r="3.5" stroke="#6B6A7E" stroke-width="1.2"/>
           <path d="M8.5 8.5l2 2" stroke="#6B6A7E" stroke-width="1.2" stroke-linecap="round"/>
         </svg>
         <input type="text" id="filterInput" placeholder="Filter fonts…" oninput="renderTable()"/>
       </div>
-      <div class="filter-pills">
+      <div class="pills">
         <span class="pill all active" onclick="setPill('all',this)">All</span>
         <span class="pill free"       onclick="setPill('free',this)">Free</span>
         <span class="pill paid"       onclick="setPill('paid',this)">Paid</span>
       </div>
       <div class="spacer"></div>
-      <span id="countLabel" style="font-size:11px;color:var(--muted);font-family:var(--font-data)"></span>
+      <span id="countLbl"></span>
     </div>
 
-    <!-- ══ ALL FONTS TABLE (Free + Paid) ══ -->
-    <div class="section-header" id="allSectionHeader" onclick="toggleSection('all')">
-      <span class="section-header-title">All Fonts — Free &amp; Paid</span>
-      <span class="section-header-count" id="allSectionCount"></span>
-      <span class="section-header-chevron">▼</span>
+    <!-- ══ ALL FONTS TABLE ══ -->
+    <div class="sec-hdr" id="allHdr" onclick="toggleSec('all')">
+      <span class="sec-hdr-title">All Fonts — Free &amp; Paid</span>
+      <span class="sec-hdr-count" id="allCnt"></span>
+      <span class="sec-hdr-chev">▼</span>
     </div>
-
-    <div id="allSectionBody">
-      <div class="table-wrap">
-        <div class="empty-state" id="emptyState">
-          <svg width="48" height="48" viewBox="0 0 46 46" fill="none" style="opacity:.1">
-            <rect width="46" height="46" fill="#2E2E38"/>
-            <polygon points="4,46 14,46 42,0 32,0" fill="#FFE600"/>
-          </svg>
-          <strong>No fonts scanned yet</strong>
-          Enter a URL above and click Scan
-        </div>
-        <table id="resultsTable" style="display:none">
+    <div id="allBody">
+      <div class="empty" id="emptyState">
+        <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+          <rect width="46" height="46" fill="#2E2E38"/>
+          <polygon points="4,46 14,46 42,0 32,0" fill="#FFE600"/>
+        </svg>
+        <strong>No fonts scanned yet</strong>
+        Enter a URL above and click Scan
+      </div>
+      <div class="tbl-wrap">
+        <table id="resTbl" style="display:none">
           <thead>
             <tr>
-              <th onclick="sortBy('name')"     style="min-width:140px">Font Name ↕</th>
-              <th onclick="sortBy('family')"   style="min-width:130px">Font Family ↕</th>
-              <th onclick="sortBy('license')"  style="width:110px">License ↕</th>
-              <th class="no-sort"             style="min-width:230px">Source Path</th>
-              <th onclick="sortBy('font_type')" style="width:115px">Font Type ↕</th>
-              <th class="no-sort"             style="width:110px;text-align:right">Monthly Visits (AI)</th>
+              <th onclick="sortBy('name')"      style="min-width:148px">Font Name ↕</th>
+              <th onclick="sortBy('family')"    style="min-width:130px">Font Family ↕</th>
+              <th onclick="sortBy('license')"   style="width:108px">License ↕</th>
+              <th class="nosort"               style="min-width:220px">Source Path</th>
+              <th onclick="sortBy('font_type')" style="width:118px">Font Type ↕</th>
+              <th class="nosort"               style="width:115px;text-align:right">Monthly Visits</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -417,107 +461,85 @@ tbody td.traffic-cell{text-align:right;min-width:110px}
     </div>
 
     <!-- ══ RESTRICTED FONTS TABLE ══ -->
-    <div class="restricted-section" id="restrictedSection" style="display:none">
-      <div class="section-header" id="resSectionHeader" onclick="toggleSection('restricted')">
-        <span class="section-header-title">Restricted Fonts</span>
-        <span class="section-header-count" id="resSectionCount"></span>
-        <span class="section-header-chevron">▼</span>
+    <div class="res-sec" id="resSection" style="display:none">
+      <div class="sec-hdr" id="resHdr" onclick="toggleSec('res')">
+        <span class="sec-hdr-title">🔒 Restricted Fonts</span>
+        <span class="sec-hdr-count" id="resCnt"></span>
+        <span class="sec-hdr-chev">▼</span>
       </div>
-      <div id="resSectionBody">
-        <div class="restricted-note">
-          ⚠ Restricted fonts are excluded from the All Fonts table. They may require a license for web embedding.
+      <div id="resBody">
+        <div class="res-note">
+          ⚠ These fonts may require a license for web embedding. Not shown in All Fonts section.
         </div>
-        <div class="table-wrap">
-          <table id="restrictedTable">
+        <div class="tbl-wrap">
+          <table id="resTbl">
             <thead>
               <tr>
-                <th style="min-width:140px">Font Name</th>
+                <th style="min-width:148px">Font Name</th>
                 <th style="min-width:130px">Font Family</th>
                 <th style="width:130px">License</th>
-                <th style="min-width:230px">Source Path</th>
-                <th style="width:115px">Font Type</th>
-                <th style="width:110px;text-align:right">Monthly Visits (AI)</th>
+                <th style="min-width:220px">Source Path</th>
+                <th style="width:118px">Font Type</th>
+                <th style="width:115px;text-align:right">Monthly Visits</th>
               </tr>
             </thead>
-            <tbody id="restrictedTbody"></tbody>
+            <tbody id="resTbody"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- LOG PANEL -->
-    <div class="log-panel" id="logPanel"></div>
+    <!-- LOG -->
+    <div class="log" id="logPanel"></div>
 
     <!-- DETAIL BAR -->
-    <div class="detail-bar" id="detailBar">
-      <div class="detail-kv">
-        <div class="detail-k">Font Name</div>
-        <div class="detail-v" id="dFont">—</div>
-      </div>
-      <div class="detail-kv">
-        <div class="detail-k">Family</div>
-        <div class="detail-v" id="dFamily">—</div>
-      </div>
-      <div class="detail-kv">
-        <div class="detail-k">Foundry</div>
-        <div class="detail-v" id="dFoundry">—</div>
-      </div>
-      <div class="detail-kv">
-        <div class="detail-k">Designer</div>
-        <div class="detail-v" id="dDesigner">—</div>
-      </div>
-      <div class="detail-kv">
-        <div class="detail-k">License</div>
-        <div class="detail-v" id="dLicense">—</div>
-      </div>
-      <div class="detail-kv">
-        <div class="detail-k">Font Type</div>
-        <div class="detail-v" id="dFontType">—</div>
-      </div>
-      <div class="detail-kv" style="flex:1">
-        <div class="detail-k">License Note</div>
-        <div class="detail-v" id="dLicNote" style="font-size:10px;color:var(--muted2)">—</div>
-      </div>
-      <div class="detail-kv">
-        <div class="detail-k">AI Source</div>
-        <div class="detail-v" id="dSrc">—</div>
-      </div>
+    <div class="dbar" id="dbar">
+      <div class="dkv"><div class="dk">Font Name</div><div class="dv" id="dName">—</div></div>
+      <div class="dkv"><div class="dk">Family</div><div class="dv" id="dFam">—</div></div>
+      <div class="dkv"><div class="dk">Foundry</div><div class="dv" id="dFoundry">—</div></div>
+      <div class="dkv"><div class="dk">Designer</div><div class="dv" id="dDesigner">—</div></div>
+      <div class="dkv"><div class="dk">License</div><div class="dv" id="dLic">—</div></div>
+      <div class="dkv"><div class="dk">Font Type</div><div class="dv" id="dFType">—</div></div>
+      <div class="dkv"><div class="dk">Monthly Visits</div><div class="dv" id="dTraffic" style="color:var(--traffic)">—</div></div>
+      <div class="dkv" style="flex:1"><div class="dk">License Note</div>
+        <div class="dv" id="dNote" style="font-size:10px;color:var(--muted2)">—</div></div>
+      <div class="dkv"><div class="dk">AI Source</div><div class="dv" id="dSrc">—</div></div>
     </div>
 
-  </div><!-- /main-area -->
+  </div><!-- /main -->
 </div><!-- /app-body -->
 
 <!-- HISTORY MODAL -->
-<div class="modal-overlay" id="historyModal" onclick="if(event.target===this)closeModal()">
+<div class="modal-ov" id="histModal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-hdr">
       <div style="flex:1">
-        <div class="modal-title" id="modalTitle">—</div>
-        <div class="modal-meta" id="modalMeta"></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:6px;font-family:var(--font-data)" id="modalUrl"></div>
+        <div class="modal-title" id="mTitle">—</div>
+        <div class="modal-meta" id="mMeta"></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:5px;font-family:var(--font-data)" id="mUrl"></div>
       </div>
       <button class="btn btn-ghost" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <table class="modal-table">
+      <table class="mtbl">
         <thead>
           <tr>
-            <th style="min-width:140px">Font Name</th>
+            <th style="min-width:148px">Font Name</th>
             <th style="min-width:130px">Font Family</th>
-            <th style="width:110px">License</th>
-            <th style="min-width:230px">Source Path</th>
-            <th style="width:115px">Font Type</th>
-            <th style="width:110px;text-align:right">Monthly Visits</th>
+            <th style="width:108px">License</th>
+            <th style="min-width:220px">Source Path</th>
+            <th style="width:118px">Font Type</th>
+            <th style="width:115px;text-align:right">Monthly Visits</th>
           </tr>
         </thead>
-        <tbody id="modalTbody"></tbody>
+        <tbody id="mTbody"></tbody>
       </table>
     </div>
-    <div class="modal-footer">
-      <span class="modal-footer-note" id="modalFooterNote"></span>
+    <div class="modal-foot">
+      <span class="modal-foot-note" id="mNote"></span>
       <button class="btn btn-ghost" onclick="exportModalCSV()">↓ CSV</button>
       <button class="btn btn-ghost" onclick="exportModalXLSX()">↓ Excel</button>
-      <button class="btn btn-primary" onclick="loadHistoryScan()">Load into view →</button>
+      <button class="btn btn-primary" onclick="loadIntoMain()">Load into view →</button>
     </div>
   </div>
 </div>
@@ -526,77 +548,67 @@ tbody td.traffic-cell{text-align:right;min-width:110px}
 // ═══════════════════════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════════════════════
-let allFonts        = [];   // free + paid
-let restrictedFonts = [];   // restricted only
-let pillFilter      = 'all';
-let sortKey         = null;
-let sortAsc         = true;
-let scanning        = false;
-let sse             = null;
-let modalFonts      = [];
-let modalScanId     = null;
-let monthlyVisits   = '—';  // current scan's traffic estimate
-
-window.currentScanUrl = '';
-window.modalScanUrl   = '';
+let allFonts   = [];   // free + paid
+let restrFonts = [];   // restricted only
+let pill       = 'all';
+let sortKey    = null;
+let sortAsc    = true;
+let scanning   = false;
+let sse        = null;
+let mFonts     = [];
+let mScanId    = null;
+let traffic    = '—';  // current scan traffic estimate
+window.curUrl  = '';
+window.mUrl    = '';
 
 // ═══════════════════════════════════════════════════════════
 //  HEALTH CHECK
 // ═══════════════════════════════════════════════════════════
 async function checkHealth() {
-  const el = document.getElementById('aiStatus');
+  const el = document.getElementById('aiStat');
   try {
-    const r = await fetch('/api/health');
-    const d = await r.json();
-    const trafficCached = d.cached_traffic_est || 0;
-    el.textContent = `✓ ${d.cached_ai_lookups} / 📊${trafficCached}`;
-    el.className   = 'ai-status ok';
-  } catch(e) {
+    const d = await fetch('/api/health').then(r=>r.json());
+    el.textContent = `✓ ${d.cached_ai_lookups} fonts / 📊${d.cached_traffic_est||0} traffic`;
+    el.className = 'ai-status ok';
+  } catch {
     el.textContent = 'offline';
-    el.className   = 'ai-status off';
+    el.className = 'ai-status off';
   }
 }
 checkHealth();
 
 // ═══════════════════════════════════════════════════════════
-//  TRAFFIC ESTIMATION
+//  TRAFFIC ESTIMATION  (called in parallel with scan)
 // ═══════════════════════════════════════════════════════════
-async function fetchTrafficEstimate(url) {
-  const indicator = document.getElementById('trafficLiveIndicator');
-  indicator.classList.add('active');
-  document.getElementById('statTraffic').textContent = '…';
-  addLog(`📊 Estimating monthly traffic for ${url}…`, 'traffic');
+async function doTrafficEstimate(url) {
+  const chip = document.getElementById('trChip');
+  chip.classList.add('active');
+  document.getElementById('sTraffic').textContent = '…';
+  log(`📊 Estimating monthly traffic for ${url}…`, 'tr');
 
   try {
-    const r = await fetch(`/api/estimate-traffic?url=${encodeURIComponent(url)}`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-
-    monthlyVisits = d.estimate || 'N/A';
-    document.getElementById('statTraffic').textContent = monthlyVisits;
-
-    const cached = d.cached ? ' (cached)' : '';
-    addLog(`📊 Traffic estimate → ${d.domain}: ${monthlyVisits}${cached}`, 'traffic');
-
-    // Update all existing rows with the traffic value
-    updateTrafficCells(monthlyVisits);
-
+    const d = await fetch(`/api/estimate-traffic?url=${encodeURIComponent(url)}`).then(r=>r.json());
+    traffic = d.estimate || 'N/A';
+    document.getElementById('sTraffic').textContent = traffic;
+    document.getElementById('dTraffic').textContent  = traffic;
+    const note = d.cached ? ' (cached)' : '';
+    log(`📊 Traffic → ${d.domain}: ${traffic}${note}`, 'tr');
+    refreshTrafficCells();
   } catch(e) {
-    monthlyVisits = 'N/A';
-    document.getElementById('statTraffic').textContent = 'N/A';
-    addLog(`📊 Traffic estimate unavailable: ${e.message}`, 'error');
-    updateTrafficCells('N/A');
+    traffic = 'N/A';
+    document.getElementById('sTraffic').textContent = 'N/A';
+    log(`📊 Traffic unavailable: ${e.message}`, 'error');
+    refreshTrafficCells();
   } finally {
-    indicator.classList.remove('active');
+    chip.classList.remove('active');
+    checkHealth();
   }
 }
 
-function updateTrafficCells(value) {
-  document.querySelectorAll('.traffic-cell').forEach(cell => {
-    const isNA = !value || value === 'N/A';
-    cell.innerHTML = isNA
-      ? '<span class="traffic-val na">N/A</span>'
-      : `<span class="traffic-val">📈 ${value}</span>`;
+function refreshTrafficCells() {
+  // Update every traffic cell in both tables
+  document.querySelectorAll('.tv').forEach(td => {
+    td.innerHTML = tvHTML(traffic);
   });
 }
 
@@ -611,105 +623,87 @@ function startScan() {
 
   const wait   = document.getElementById('waitSlider').value;
   const scroll = document.getElementById('scrollSlider').value;
-  const useAi  = document.getElementById('aiToggle').checked;
+  const useAi  = document.getElementById('aiTog').checked;
 
-  // Reset state
-  allFonts        = [];
-  restrictedFonts = [];
-  monthlyVisits   = '…';
-  window.currentScanUrl = url;
+  // Reset
+  allFonts   = [];
+  restrFonts = [];
+  traffic    = '—';
+  window.curUrl = url;
 
-  document.getElementById('tbody').innerHTML = '';
-  document.getElementById('restrictedTbody').innerHTML = '';
-  document.getElementById('resultsTable').style.display  = 'none';
-  document.getElementById('emptyState').style.display    = 'flex';
-  document.getElementById('restrictedSection').style.display = 'none';
-  document.getElementById('detailBar').classList.remove('visible');
-  document.getElementById('aiLiveIndicator').classList.remove('active');
+  document.getElementById('tbody').innerHTML     = '';
+  document.getElementById('resTbody').innerHTML  = '';
+  document.getElementById('resTbl').style.display    = 'none';
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('resSection').style.display = 'none';
+  document.getElementById('dbar').classList.remove('on');
+  document.getElementById('aiChip').classList.remove('active');
+  document.getElementById('sTraffic').textContent = '—';
+  document.getElementById('dTraffic').textContent  = '—';
 
   setScanning(true);
   updateStats();
   clearLog();
 
-  // Kick off traffic estimate in parallel
-  fetchTrafficEstimate(url);
+  // Traffic in parallel
+  doTrafficEstimate(url);
 
-  // Start SSE font scan
-  const params = new URLSearchParams({ url, wait, scroll, use_ai: useAi });
-  sse = new EventSource('/api/scan?' + params);
+  // Font scan SSE
+  const p = new URLSearchParams({url, wait, scroll, use_ai: useAi});
+  sse = new EventSource('/api/scan?' + p);
 
   sse.onmessage = e => {
     const d = JSON.parse(e.data);
-    switch(d.type) {
-      case 'status':
-        addLog(d.message, 'info');
-        break;
-
-      case 'font':
-        d._url = d.site_url || window.currentScanUrl || '';
-        if (d.is_restricted) {
-          restrictedFonts.push(d);
-          appendRestrictedRow(d);
-        } else {
-          allFonts.push(d);
-          appendRow(d);
-        }
-        updateStats();
-        addLog(`✦ ${d.name}  [${d.foundry}]  ${d.license}  — ${d.font_type}`, 'font');
-        break;
-
-      case 'ai_call':
-        document.getElementById('aiLiveIndicator').classList.add('active');
-        addLog(`🤖 GPT-4o querying: "${d.font}"`, 'info');
-        break;
-
-      case 'ai_done':
-        document.getElementById('aiLiveIndicator').classList.remove('active');
-        updateStats();
-        addLog(`🤖 Resolved: "${d.font}" → ${d.foundry} | ${d.license}`, 'info');
-        break;
-
-      case 'ai_error':
-        document.getElementById('aiLiveIndicator').classList.remove('active');
-        addLog(`⚠ GPT-4o error for "${d.font}": HTTP ${d.status}`, 'error');
-        break;
-
-      case 'done':
-        document.getElementById('aiLiveIndicator').classList.remove('active');
-        addLog(`✓ Done — ${d.total} fonts (${d.ai_resolved||0} via AI, ${d.restricted||0} restricted)`, 'done');
-        setScanning(false);
-        sse.close();
-        refreshHistory();
-        checkHealth();
-        break;
-
-      case 'error':
-        addLog(`✗ ${d.message}`, 'error');
-        setScanning(false);
-        sse.close();
-        break;
-    }
-  };
-
-  sse.onerror = () => {
-    if (scanning) {
-      addLog('Connection lost', 'error');
+    if (d.type === 'status') {
+      log(d.message, 'info');
+    } else if (d.type === 'font') {
+      d._url = d.site_url || window.curUrl || '';
+      if (d.is_restricted) {
+        restrFonts.push(d);
+        appendResRow(d);
+      } else {
+        allFonts.push(d);
+        appendRow(d);
+      }
+      updateStats();
+      log(`✦ ${d.name}  [${d.foundry}]  ${d.license}  — ${d.font_type||''}`, 'font');
+    } else if (d.type === 'ai_call') {
+      document.getElementById('aiChip').classList.add('active');
+      log(`🤖 GPT-4o querying: "${d.font}"`, 'info');
+    } else if (d.type === 'ai_done') {
+      document.getElementById('aiChip').classList.remove('active');
+      updateStats();
+      log(`🤖 Resolved: "${d.font}" → ${d.foundry} | ${d.license}`, 'info');
+    } else if (d.type === 'ai_error') {
+      document.getElementById('aiChip').classList.remove('active');
+      log(`⚠ GPT-4o error for "${d.font}"`, 'error');
+    } else if (d.type === 'done') {
+      document.getElementById('aiChip').classList.remove('active');
+      log(`✓ Done — ${d.total} fonts (${d.ai_resolved||0} AI, ${d.restricted||0} restricted)`, 'done');
       setScanning(false);
+      sse.close();
+      loadHistory();
+      checkHealth();
+    } else if (d.type === 'error') {
+      log(`✗ ${d.message}`, 'error');
+      setScanning(false);
+      sse.close();
     }
   };
+  sse.onerror = () => { if (scanning) { log('Connection lost', 'error'); setScanning(false); } };
 }
 
 function stopScan() {
   if (sse) { sse.close(); sse = null; }
   setScanning(false);
-  addLog('Scan stopped.', 'info');
+  log('Scan stopped.', 'info');
 }
 
 function setScanning(v) {
   scanning = v;
-  document.getElementById('scanBtn').disabled         = v;
-  document.getElementById('stopBtn').style.display    = v ? 'inline-flex' : 'none';
-  document.getElementById('progressBar').style.display = v ? 'block' : 'none';
+  document.getElementById('scanBtn').disabled        = v;
+  document.getElementById('stopBtn').style.display   = v ? 'inline-flex' : 'none';
+  document.getElementById('progBar').style.display   = v ? 'block' : 'none';
 }
 
 document.getElementById('urlInput').addEventListener('keydown', e => {
@@ -720,102 +714,99 @@ document.getElementById('urlInput').addEventListener('keydown', e => {
 //  HELPERS
 // ═══════════════════════════════════════════════════════════
 function licClass(lic) {
-  const l = (lic || '').toLowerCase();
+  const l = (lic||'').toLowerCase();
   if (l.includes('free'))       return 'free';
   if (l.includes('paid'))       return 'paid';
   if (l.includes('restricted')) return 'restricted';
   return 'check';
 }
 
-function ftypeClass(ft) {
-  return (ft || '').toLowerCase().includes('css') ? 'css' : 'embedded';
+function ftClass(ft) {
+  return (ft||'').toLowerCase().includes('css') ? 'css' : 'emb';
+}
+
+function ftLabel(ft) {
+  return (ft||'').toLowerCase().includes('css') ? 'CSS Font' : 'Embedded Font';
+}
+
+function tvHTML(v) {
+  if (!v || v === '—' || v === 'N/A')
+    return '<span class="tv-val na">N/A</span>';
+  if (v === '…')
+    return '<span class="tv-val loading">estimating…</span>';
+  return `<span class="tv-val live">📈 ${esc(v)}</span>`;
 }
 
 function fmtPath(path) {
-  const segs = path.split('→').map(s => s.trim());
-  const last  = segs.pop();
-  return segs.map(s => `<span class="seg">${s} →</span> `).join('') +
-         `<span class="fname">${last}</span>`;
+  if (!path) return '—';
+  path = path.replace(/â†'/g,'→').replace(/&#8594;/g,'→')
+             .replace(/\s*[-=]>\s*/g,' → ').replace(/\s*→\s*/g,' → ').trim();
+  const parts = path.split(' → ');
+  const last  = parts.pop();
+  return parts.map(s=>`<span class="seg">${esc(s)} → </span>`).join('') +
+         `<span class="fn">${esc(last)}</span>`;
 }
 
-function cleanPath(p) {
-  if (!p) return '';
-  return p.replace(/â†'/g, '→').replace(/&#8594;/g, '→')
-          .replace(/\s*[-=]>\s*/g, ' → ').replace(/\s*→\s*/g, ' → ').trim();
-}
-
-function trafficCell(visits) {
-  if (!visits || visits === '—' || visits === 'N/A') {
-    return '<td class="traffic-cell"><span class="traffic-val na">N/A</span></td>';
-  }
-  if (visits === '…') {
-    return '<td class="traffic-cell"><span class="traffic-val loading">estimating…</span></td>';
-  }
-  return `<td class="traffic-cell"><span class="traffic-val">📈 ${visits}</span></td>`;
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ═══════════════════════════════════════════════════════════
-//  ROW FACTORIES
+//  ROW BUILDERS
 // ═══════════════════════════════════════════════════════════
 function makeRow(font, onClick) {
   const tr  = document.createElement('tr');
   const lc  = licClass(font.license);
-  const ftc = ftypeClass(font.font_type);
-  const tv  = monthlyVisits;
+  const ftc = ftClass(font.font_type);
+  const ftl = ftLabel(font.font_type);
 
   tr.innerHTML = `
-    <td class="font-name">${esc(font.name)}</td>
-    <td class="font-family">${esc(font.family || font.name)}</td>
-    <td><span class="badge ${lc}"><span class="badge-dot"></span>${esc(font.license)}</span></td>
-    <td class="path-cell">${fmtPath(cleanPath(font.path))}</td>
-    <td><span class="ftype-tag ${ftc}">${esc(font.font_type || '—')}</span></td>
-    ${trafficCell(tv)}`;
+    <td class="nm">${esc(font.name)}</td>
+    <td class="fam">${esc(font.family||font.name)}</td>
+    <td><span class="badge ${lc}"><span class="dot"></span>${esc(font.license)}</span></td>
+    <td class="path">${fmtPath(font.path)}</td>
+    <td><span class="ftag ${ftc}">${esc(ftl)}</span></td>
+    <td class="tv">${tvHTML(traffic)}</td>`;
 
-  tr.querySelector('.traffic-cell').classList.add('traffic-cell');
   tr.addEventListener('click', () => onClick(tr, font));
   return tr;
 }
 
-function makeRestrictedRow(font) {
+function makeResRow(font) {
   const tr  = document.createElement('tr');
-  const ftc = ftypeClass(font.font_type);
-  const tv  = monthlyVisits;
+  const ftc = ftClass(font.font_type);
+  const ftl = ftLabel(font.font_type);
 
   tr.innerHTML = `
-    <td class="font-name">${esc(font.name)}</td>
-    <td class="font-family">${esc(font.family || font.name)}</td>
-    <td><span class="badge restricted"><span class="badge-dot"></span>${esc(font.license)}</span></td>
-    <td class="path-cell">${fmtPath(cleanPath(font.path))}</td>
-    <td><span class="ftype-tag ${ftc}">${esc(font.font_type || '—')}</span></td>
-    ${trafficCell(tv)}`;
+    <td class="nm">${esc(font.name)}</td>
+    <td class="fam">${esc(font.family||font.name)}</td>
+    <td><span class="badge restricted"><span class="dot"></span>${esc(font.license)}</span></td>
+    <td class="path">${fmtPath(font.path)}</td>
+    <td><span class="ftag ${ftc}">${esc(ftl)}</span></td>
+    <td class="tv">${tvHTML(traffic)}</td>`;
 
   tr.addEventListener('click', () => selectRow(tr, font));
   return tr;
 }
 
-function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
 // ═══════════════════════════════════════════════════════════
-//  APPEND ROWS (live during scan)
+//  APPEND ROWS LIVE
 // ═══════════════════════════════════════════════════════════
 function appendRow(font) {
-  document.getElementById('emptyState').style.display  = 'none';
-  document.getElementById('resultsTable').style.display = 'table';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resTbl').style.display     = 'table';
   document.getElementById('tbody').appendChild(makeRow(font, selectRow));
-  updateAllSectionCount();
+  updateAllCnt();
 }
 
-function appendRestrictedRow(font) {
-  const sec = document.getElementById('restrictedSection');
-  sec.style.display = 'block';
-  document.getElementById('restrictedTbody').appendChild(makeRestrictedRow(font));
-  updateResSectionCount();
+function appendResRow(font) {
+  document.getElementById('resSection').style.display = 'block';
+  document.getElementById('resTbody').appendChild(makeResRow(font));
+  updateResCnt();
 }
 
 // ═══════════════════════════════════════════════════════════
-//  RENDER TABLE (filter / sort)
+//  RENDER (filter / sort)
 // ═══════════════════════════════════════════════════════════
 function renderTable() {
   const tbody = document.getElementById('tbody');
@@ -823,85 +814,72 @@ function renderTable() {
 
   const q = document.getElementById('filterInput').value.toLowerCase();
   let rows = [...allFonts];
-
-  if (pillFilter !== 'all') rows = rows.filter(f => licClass(f.license) === pillFilter);
+  if (pill !== 'all') rows = rows.filter(f => licClass(f.license) === pill);
   if (q) rows = rows.filter(f => JSON.stringify(f).toLowerCase().includes(q));
-
   if (sortKey) {
-    rows.sort((a, b) => {
-      const av = (a[sortKey] || '').toLowerCase();
-      const bv = (b[sortKey] || '').toLowerCase();
+    rows.sort((a,b) => {
+      const av=(a[sortKey]||'').toLowerCase(), bv=(b[sortKey]||'').toLowerCase();
       return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
     });
   }
 
   if (rows.length) {
-    document.getElementById('emptyState').style.display   = 'none';
-    document.getElementById('resultsTable').style.display = 'table';
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('resTbl').style.display     = 'table';
     rows.forEach(f => tbody.appendChild(makeRow(f, selectRow)));
   } else {
-    document.getElementById('resultsTable').style.display = 'none';
-    document.getElementById('emptyState').style.display   = 'flex';
+    document.getElementById('resTbl').style.display     = 'none';
+    document.getElementById('emptyState').style.display = 'flex';
   }
-
-  updateAllSectionCount();
+  updateAllCnt();
 }
 
 // ═══════════════════════════════════════════════════════════
 //  STATS & COUNTS
 // ═══════════════════════════════════════════════════════════
 function updateStats() {
-  const total    = allFonts.length + restrictedFonts.length;
-  const free     = allFonts.filter(f => licClass(f.license) === 'free').length;
-  const paid     = allFonts.filter(f => licClass(f.license) === 'paid').length;
-  const restr    = restrictedFonts.length;
-  const aiCount  = [...allFonts, ...restrictedFonts].filter(f => f.source === 'ai').length;
-  const dash     = '—';
-
-  document.getElementById('statTotal').textContent      = (scanning || total) ? total : dash;
-  document.getElementById('statFree').textContent       = (scanning || total) ? free  : dash;
-  document.getElementById('statPaid').textContent       = (scanning || total) ? paid  : dash;
-  document.getElementById('statRestricted').textContent = (scanning || total) ? restr : dash;
-  document.getElementById('statAI').textContent         = (scanning || total) ? aiCount : dash;
+  const total  = allFonts.length + restrFonts.length;
+  const free   = allFonts.filter(f=>licClass(f.license)==='free').length;
+  const paid   = allFonts.filter(f=>licClass(f.license)==='paid').length;
+  const restr  = restrFonts.length;
+  const ai     = [...allFonts,...restrFonts].filter(f=>f.source==='ai').length;
+  const d      = '—';
+  document.getElementById('sTotal').textContent  = (scanning||total) ? total : d;
+  document.getElementById('sFree').textContent   = (scanning||total) ? free  : d;
+  document.getElementById('sPaid').textContent   = (scanning||total) ? paid  : d;
+  document.getElementById('sRestr').textContent  = (scanning||total) ? restr : d;
+  document.getElementById('sAI').textContent     = (scanning||total) ? ai    : d;
 }
 
-function updateAllSectionCount() {
+function updateAllCnt() {
   const n = document.getElementById('tbody').children.length;
-  document.getElementById('allSectionCount').textContent = n ? `${n} fonts` : '';
-  document.getElementById('countLabel').textContent =
-    n ? `${n} font${n !== 1 ? 's' : ''} shown` : '';
+  document.getElementById('allCnt').textContent  = n ? `${n} fonts` : '';
+  document.getElementById('countLbl').textContent = n ? `${n} font${n!==1?'s':''} shown` : '';
 }
 
-function updateResSectionCount() {
-  const n = restrictedFonts.length;
-  document.getElementById('resSectionCount').textContent = n ? `${n} fonts` : '';
+function updateResCnt() {
+  const n = restrFonts.length;
+  document.getElementById('resCnt').textContent = n ? `${n} fonts` : '';
 }
 
 // ═══════════════════════════════════════════════════════════
 //  SECTION COLLAPSE
 // ═══════════════════════════════════════════════════════════
-function toggleSection(which) {
-  if (which === 'all') {
-    const body   = document.getElementById('allSectionBody');
-    const header = document.getElementById('allSectionHeader');
-    const hidden = body.style.display === 'none';
-    body.style.display = hidden ? '' : 'none';
-    header.classList.toggle('collapsed', !hidden);
-  } else {
-    const body   = document.getElementById('resSectionBody');
-    const header = document.getElementById('resSectionHeader');
-    const hidden = body.style.display === 'none';
-    body.style.display = hidden ? '' : 'none';
-    header.classList.toggle('collapsed', !hidden);
-  }
+function toggleSec(which) {
+  const [body, hdr] = which === 'all'
+    ? [document.getElementById('allBody'), document.getElementById('allHdr')]
+    : [document.getElementById('resBody'),  document.getElementById('resHdr')];
+  const hidden = body.style.display === 'none';
+  body.style.display = hidden ? '' : 'none';
+  hdr.classList.toggle('collapsed', !hidden);
 }
 
 // ═══════════════════════════════════════════════════════════
-//  FILTER & SORT
+//  SORT & FILTER
 // ═══════════════════════════════════════════════════════════
 function setPill(type, el) {
-  pillFilter = type;
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  pill = type;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   renderTable();
 }
@@ -913,198 +891,180 @@ function sortBy(key) {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  ROW SELECTION → DETAIL BAR
+//  ROW SELECTION
 // ═══════════════════════════════════════════════════════════
 function selectRow(tr, font) {
-  document.querySelectorAll('tbody tr').forEach(r => r.classList.remove('selected'));
-  tr.classList.add('selected');
-  document.getElementById('dFont').textContent     = font.name;
-  document.getElementById('dFamily').textContent   = font.family || font.name;
-  document.getElementById('dFoundry').textContent  = font.foundry || '—';
-  document.getElementById('dDesigner').textContent = font.designer || '—';
-  document.getElementById('dLicense').textContent  = font.license;
-  document.getElementById('dFontType').textContent = font.font_type || '—';
-  document.getElementById('dLicNote').textContent  = font.license_detail || '—';
-  document.getElementById('dSrc').textContent      = font.source || '—';
-  document.getElementById('detailBar').classList.add('visible');
+  document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('sel'));
+  tr.classList.add('sel');
+  document.getElementById('dName').textContent    = font.name;
+  document.getElementById('dFam').textContent     = font.family||font.name;
+  document.getElementById('dFoundry').textContent = font.foundry||'—';
+  document.getElementById('dDesigner').textContent= font.designer||'—';
+  document.getElementById('dLic').textContent     = font.license;
+  document.getElementById('dFType').textContent   = font.font_type||'—';
+  document.getElementById('dTraffic').textContent = traffic !== '—' ? traffic : '…';
+  document.getElementById('dNote').textContent    = font.license_detail||'—';
+  document.getElementById('dSrc').textContent     = font.source||'—';
+  document.getElementById('dbar').classList.add('on');
 }
 
 // ═══════════════════════════════════════════════════════════
 //  LOG
 // ═══════════════════════════════════════════════════════════
-function addLog(msg, cls = 'info') {
+function log(msg, cls='info') {
   const lp = document.getElementById('logPanel');
   const d  = document.createElement('div');
-  d.className   = `log-entry ${cls}`;
+  d.className   = `log-e ${cls}`;
   d.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
   lp.appendChild(d);
   lp.scrollTop = lp.scrollHeight;
 }
-function clearLog() { document.getElementById('logPanel').innerHTML = ''; }
+function clearLog() { document.getElementById('logPanel').innerHTML=''; }
 
 // ═══════════════════════════════════════════════════════════
 //  HISTORY
 // ═══════════════════════════════════════════════════════════
-async function refreshHistory() {
+async function loadHistory() {
   try {
-    const r = await fetch('/api/history');
-    const d = await r.json();
-    const el = document.getElementById('historyList');
+    const d  = await fetch('/api/history').then(r=>r.json());
+    const el = document.getElementById('histList');
     if (!d.history.length) {
-      el.innerHTML = '<div class="history-empty">No scans yet</div>';
+      el.innerHTML = '<div class="hi-empty">No scans yet</div>';
       return;
     }
-    el.innerHTML = d.history.map(h => `
-      <div class="history-item" onclick="openHistoryModal('${h.scan_id}')">
-        <div class="hi-domain">${h.domain}</div>
+    el.innerHTML = d.history.map(h=>`
+      <div class="hi" onclick="openModal('${h.scan_id}')">
+        <div class="hi-dom">${esc(h.domain)}</div>
         <div class="hi-meta">
-          <span>${h.ts}</span>
-          <span class="hi-count">${h.total || 0} fonts</span>
-          ${h.restricted_count ? `<span style="color:var(--restricted)">${h.restricted_count} restricted</span>` : ''}
-          ${!h.done ? '<span style="color:var(--paid)">scanning…</span>' : ''}
+          <span>${esc(h.ts)}</span>
+          <span class="hi-n">${h.total||0} fonts</span>
+          ${h.restricted_count?`<span style="color:var(--restricted)">${h.restricted_count} restricted</span>`:''}
+          ${!h.done?'<span style="color:var(--paid)">scanning…</span>':''}
         </div>
       </div>`).join('');
-  } catch(e) {}
+  } catch{}
 }
 
-async function openHistoryModal(scan_id) {
+async function openModal(scanId) {
   try {
-    const r = await fetch(`/api/history/${scan_id}`);
-    if (!r.ok) { alert('Scan data not found.'); return; }
+    const r = await fetch(`/api/history/${scanId}`);
+    if (!r.ok) { alert('Scan not found.'); return; }
     const d = await r.json();
 
-    modalScanId     = scan_id;
-    modalFonts      = d.fonts || [];
-    window.modalScanUrl = d.url || '';
-    modalFonts.forEach(f => { f._url = f.site_url || window.modalScanUrl || ''; });
+    mScanId = scanId;
+    mFonts  = d.fonts||[];
+    window.mUrl = d.url||'';
+    mFonts.forEach(f => { f._url = f.site_url||window.mUrl||''; });
 
-    document.getElementById('modalTitle').textContent = d.domain;
-    document.getElementById('modalUrl').textContent   = d.url;
+    document.getElementById('mTitle').textContent = d.domain;
+    document.getElementById('mUrl').textContent   = d.url;
 
-    const free  = modalFonts.filter(f => licClass(f.license) === 'free').length;
-    const paid  = modalFonts.filter(f => licClass(f.license) === 'paid').length;
-    const restr = modalFonts.filter(f => f.is_restricted).length;
+    const free  = mFonts.filter(f=>licClass(f.license)==='free').length;
+    const paid  = mFonts.filter(f=>licClass(f.license)==='paid').length;
+    const restr = mFonts.filter(f=>f.is_restricted).length;
 
-    document.getElementById('modalMeta').innerHTML =
-      `<span>${d.ts}</span><span>${modalFonts.length} fonts</span>` +
+    document.getElementById('mMeta').innerHTML =
+      `<span>${esc(d.ts)}</span><span>${mFonts.length} fonts</span>` +
       `<span class="mc-free">${free} free</span>` +
       `<span class="mc-paid">${paid} paid</span>` +
-      (restr ? `<span class="mc-res">${restr} restricted</span>` : '');
+      (restr?`<span class="mc-res">${restr} restricted</span>`:'');
 
-    document.getElementById('modalFooterNote').textContent =
-      `${modalFonts.filter(f => f.source === 'ai').length} fonts identified by GPT-4o`;
+    document.getElementById('mNote').textContent =
+      `${mFonts.filter(f=>f.source==='ai').length} fonts identified by GPT-4o`;
 
-    const tbody = document.getElementById('modalTbody');
-    tbody.innerHTML = '';
-    modalFonts.forEach(f => {
+    const tb = document.getElementById('mTbody');
+    tb.innerHTML = '';
+    mFonts.forEach(f => {
       const lc  = f.is_restricted ? 'restricted' : licClass(f.license);
-      const ftc = ftypeClass(f.font_type);
+      const ftc = ftClass(f.font_type);
+      const ftl = ftLabel(f.font_type);
       const tr  = document.createElement('tr');
       tr.innerHTML = `
-        <td>${esc(f.name)}</td>
-        <td>${esc(f.family || f.name)}</td>
-        <td><span class="badge ${lc}"><span class="badge-dot"></span>${esc(f.license)}</span></td>
-        <td style="font-size:10px;color:var(--muted2);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-          ${cleanPath(f.path)}</td>
-        <td><span class="ftype-tag ${ftc}">${esc(f.font_type || '—')}</span></td>
-        <td style="text-align:right;font-size:11px;color:var(--traffic);font-family:var(--font-data)">
-          ${esc(f._traffic || '—')}</td>`;
-      tbody.appendChild(tr);
+        <td style="font-weight:500;color:var(--text)">${esc(f.name)}</td>
+        <td>${esc(f.family||f.name)}</td>
+        <td><span class="badge ${lc}"><span class="dot"></span>${esc(f.license)}</span></td>
+        <td style="font-size:10px;color:var(--muted2);max-width:220px;
+            overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+          ${esc((f.path||'').replace(/â†'/g,'→').replace(/&#8594;/g,'→').trim())}</td>
+        <td><span class="ftag ${ftc}">${esc(ftl)}</span></td>
+        <td style="text-align:right;font-family:var(--font-data);font-size:11px;color:var(--traffic)">
+          ${esc(f._traffic||'—')}</td>`;
+      tb.appendChild(tr);
     });
 
-    document.getElementById('historyModal').classList.add('open');
-  } catch(e) {
-    alert(`Error loading history: ${e.message}`);
-  }
+    document.getElementById('histModal').classList.add('open');
+  } catch(e) { alert(`Error: ${e.message}`); }
 }
 
-function closeModal() { document.getElementById('historyModal').classList.remove('open'); }
+function closeModal() { document.getElementById('histModal').classList.remove('open'); }
 
-function loadHistoryScan() {
-  allFonts        = modalFonts.filter(f => !f.is_restricted);
-  restrictedFonts = modalFonts.filter(f =>  f.is_restricted);
-  allFonts.forEach(f => { f._url = f._url || f.site_url || window.modalScanUrl || ''; });
-  window.currentScanUrl = window.modalScanUrl || '';
-  monthlyVisits = '—';
+function loadIntoMain() {
+  allFonts   = mFonts.filter(f=>!f.is_restricted);
+  restrFonts = mFonts.filter(f=> f.is_restricted);
+  allFonts.forEach(f => { f._url = f._url||f.site_url||window.mUrl||''; });
+  window.curUrl = window.mUrl||'';
+  traffic = '—';
+  document.getElementById('sTraffic').textContent = '—';
 
   renderTable();
   updateStats();
   closeModal();
 
-  // Re-render restricted section
-  const rtbody = document.getElementById('restrictedTbody');
-  rtbody.innerHTML = '';
-  restrictedFonts.forEach(f => rtbody.appendChild(makeRestrictedRow(f)));
-  document.getElementById('restrictedSection').style.display = restrictedFonts.length ? 'block' : 'none';
-  updateResSectionCount();
+  // Re-render restricted
+  const rtb = document.getElementById('resTbody');
+  rtb.innerHTML = '';
+  restrFonts.forEach(f => rtb.appendChild(makeResRow(f)));
+  document.getElementById('resSection').style.display = restrFonts.length ? 'block' : 'none';
+  updateResCnt();
 
-  addLog(`Loaded history scan — ${allFonts.length} fonts + ${restrictedFonts.length} restricted`, 'done');
+  log(`Loaded history — ${allFonts.length} fonts + ${restrFonts.length} restricted`, 'done');
 }
 
 // ═══════════════════════════════════════════════════════════
 //  EXPORT
 // ═══════════════════════════════════════════════════════════
-const EXPORT_COLS = ['Font Name','Font Family','License','Source Path','Font Type','Monthly Visits (AI)'];
+const COLS = ['Font Name','Font Family','License','Source Path','Font Type','Monthly Visits (AI)'];
 
 function fontToRow(f) {
+  const path = (f.path||'').replace(/â†'/g,'→').replace(/&#8594;/g,'→')
+                            .replace(/\s*→\s*/g,' → ').trim();
   return [
-    f.name    || '',
-    f.family  || f.name || '',
-    f.license || '',
-    cleanPath(f.path),
-    f.font_type || '',
-    f._traffic  || monthlyVisits || '—',
+    f.name||'', f.family||f.name||'', f.license||'',
+    path, f.font_type||'',
+    f._traffic||traffic||'—'
   ];
 }
 
-function downloadCSV(rows, filename) {
-  const BOM = '\uFEFF';
-  const csv = BOM + rows.map(r =>
-    r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')
-  ).join('\r\n');
-  const a = document.createElement('a');
-  a.href     = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-}
-
-function downloadXLSX(rows, filename) {
-  if (typeof XLSX === 'undefined') { alert('SheetJS not loaded.'); return; }
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = rows[0].map((_, ci) => {
-    const max = rows.reduce((m, r) => Math.max(m, String(r[ci] || '').length), 0);
-    return { wch: Math.min(Math.max(max + 2, 12), 80) };
+function dlCSV(rows, fn) {
+  const csv = '\uFEFF' + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const a   = Object.assign(document.createElement('a'),{
+    href: URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),
+    download: fn
   });
-  ws['!freeze'] = { xSplit: 0, ySplit: 1 };
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Font Scan');
-  XLSX.writeFile(wb, filename);
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
 
-function exportCSV() {
-  const all  = [...allFonts, ...restrictedFonts];
-  if (!all.length) return;
-  downloadCSV([EXPORT_COLS, ...all.map(fontToRow)], `fontscan_${Date.now()}.csv`);
+function dlXLSX(rows, fn) {
+  if (typeof XLSX==='undefined'){alert('SheetJS not loaded.');return;}
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = rows[0].map((_,ci)=>{
+    const max=rows.reduce((m,r)=>Math.max(m,String(r[ci]||'').length),0);
+    return {wch:Math.min(Math.max(max+2,12),80)};
+  });
+  ws['!freeze'] = {xSplit:0,ySplit:1};
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Font Scan');
+  XLSX.writeFile(wb,fn);
 }
-function exportExcel() {
-  const all = [...allFonts, ...restrictedFonts];
-  if (!all.length) return;
-  downloadXLSX([EXPORT_COLS, ...all.map(fontToRow)], `fontscan_${Date.now()}.xlsx`);
-}
-function exportModalCSV() {
-  if (!modalFonts.length) return;
-  downloadCSV([EXPORT_COLS, ...modalFonts.map(fontToRow)], `history_${modalScanId}.csv`);
-}
-function exportModalXLSX() {
-  if (!modalFonts.length) return;
-  downloadXLSX([EXPORT_COLS, ...modalFonts.map(fontToRow)], `history_${modalScanId}.xlsx`);
-}
+
+function exportCSV()      { const a=[...allFonts,...restrFonts]; if(!a.length)return; dlCSV([COLS,...a.map(fontToRow)],`fontscan_${Date.now()}.csv`); }
+function exportExcel()    { const a=[...allFonts,...restrFonts]; if(!a.length)return; dlXLSX([COLS,...a.map(fontToRow)],`fontscan_${Date.now()}.xlsx`); }
+function exportModalCSV() { if(!mFonts.length)return; dlCSV([COLS,...mFonts.map(fontToRow)],`history_${mScanId}.csv`); }
+function exportModalXLSX(){ if(!mFonts.length)return; dlXLSX([COLS,...mFonts.map(fontToRow)],`history_${mScanId}.xlsx`); }
 
 // ─── Init ────────────────────────────────────────────────────
-refreshHistory();
+loadHistory();
 </script>
 </body>
 </html>
