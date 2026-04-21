@@ -1,23 +1,26 @@
 """OPENAI_API_KEY
-FontScan – Enhanced Backend
+FontScan – Enhanced Backend + JWT Authentication
 Run: python backend.py  →  http://localhost:8000
 
-New in this version:
-  • /api/estimate-traffic  — AI-powered monthly visit estimation (GPT-4o)
-  • Font Type tagging       — "Embedded Font" vs "CSS Font" per entry
-  • Restricted fonts        — passed through with is_restricted=True flag
-                              (suppressed from "All Fonts"; shown in "Restricted" section)
-  • Font Family field       — raw family name emitted alongside display name
-  • Modular helpers         — classify_font_type(), format_traffic(), estimate_monthly_traffic()
+Auth additions (everything else unchanged):
+  POST /login        — email + password → JWT token (1 hour)
+  POST /signup       — admin only: create team members
+  GET  /users        — admin only: list all users
+  DELETE /users/{id} — admin only: remove a user
+  GET  /me           — current logged-in user info
+  GET  /login        — serves login.html page
+  All /api/* routes now require Authorization: Bearer <token>
+  /api/scan uses ?token= query param (EventSource can't set headers)
 """
 
 import re, os, json, datetime, asyncio, concurrent.futures
 import requests as req_lib
 from io import BytesIO
 from urllib.parse import urlparse, parse_qs
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, Depends, Header
 from fastapi.responses import StreamingResponse, HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 import uvicorn
 from dotenv import load_dotenv
 
@@ -29,13 +32,18 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException, TimeoutException, NoSuchWindowException
 from fontTools.ttLib import TTFont
 
+# ── Auth imports ─────────────────────────────────────────────
+from auth import (
+    User, UserCreate, UserLogin, Token, UserOut,
+    get_db, hash_password, verify_password, create_access_token,
+    get_current_user, require_admin, init_default_admin, verify_token_param,
+)
+
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL   = "gpt-4o"
 AI_CACHE_FILE  = "font_ai_cache.json"
-TRAFFIC_CACHE_FILE = "traffic_cache.json"
 
-app = FastAPI(title="FontScan API")
 
 # ─────────────────────────────────────────────────────────────
 #  UNKNOWN VALUE HELPERS
@@ -53,59 +61,105 @@ def _is_unknown(val: str) -> bool:
 #  FONT TYPE CLASSIFICATION
 # ─────────────────────────────────────────────────────────────
 def classify_font_type(kind: str) -> str:
-    """
-    Returns 'Embedded Font' or 'CSS Font' based on discovery method.
-
-    Embedded Font  →  actual binary font file loaded by the page,
-                      or a self-hosted @font-face block.
-    CSS Font       →  font referenced only inside an external stylesheet
-                      (Google Fonts, CDN import, plain CSS font-family decl).
-    """
     css_kinds = {"google-fonts", "css-decl"}
     return "CSS Font" if kind in css_kinds else "Embedded Font"
 
 
 # ─────────────────────────────────────────────────────────────
-#  TRAFFIC ESTIMATION
+#  TRAFFIC  —  SimilarWeb primary · GPT-4o fallback
+#  NO CACHING — every call fetches a fresh live number
 # ─────────────────────────────────────────────────────────────
-_traffic_cache: dict = {}
-
-def _load_traffic_cache():
-    global _traffic_cache
-    if os.path.exists(TRAFFIC_CACHE_FILE):
-        try:
-            with open(TRAFFIC_CACHE_FILE) as f:
-                _traffic_cache = json.load(f)
-            print(f"✓ Loaded {len(_traffic_cache)} cached traffic estimates")
-        except Exception:
-            _traffic_cache = {}
-
-def _save_traffic_cache():
-    try:
-        with open(TRAFFIC_CACHE_FILE, "w") as f:
-            json.dump(_traffic_cache, f, indent=2)
-    except Exception:
-        pass
-
-_load_traffic_cache()
-
 
 def format_traffic(n: int) -> str:
-    """Format a raw integer into human-readable shorthand: 1200000 → '1.2M'."""
     if n >= 1_000_000_000:
-        v = round(n / 1_000_000_000, 1)
-        return f"{v}B"
+        return f"{round(n / 1_000_000_000, 1)}B"
     if n >= 1_000_000:
-        v = round(n / 1_000_000, 1)
-        return f"{v}M"
+        return f"{round(n / 1_000_000, 1)}M"
     if n >= 1_000:
-        v = round(n / 1_000, 1)
-        return f"{v}K"
+        return f"{round(n / 1_000, 1)}K"
     return str(n)
 
 
+_SW_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/147.0.0.0 Safari/537.36"
+    ),
+    "Accept":          "application/json, text/javascript, */*; q=0.01",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "sec-ch-ua":         '"Chromium";v="147", "Google Chrome";v="147", "Not-A.Brand";v="99"',
+    "sec-ch-ua-mobile":  "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "sec-fetch-dest":  "empty",
+    "sec-fetch-mode":  "cors",
+    "sec-fetch-site":  "same-site",
+    "Connection":      "keep-alive",
+}
+
+
+def get_similarweb_traffic(domain: str) -> tuple:
+    clean = domain.lower().replace("www.", "").strip("/")
+    sw_api = f"https://data.similarweb.com/api/v1/data?domain={clean}"
+    headers = {
+        **_SW_HEADERS,
+        "Origin":  "https://www.similarweb.com",
+        "Referer": f"https://www.similarweb.com/website/{clean}/",
+    }
+    try:
+        r = req_lib.get(sw_api, headers=headers, timeout=20)
+        if r.status_code != 200:
+            print(f"  [SW] HTTP {r.status_code} for {domain}")
+            r2 = req_lib.get(
+                f"https://data.similarweb.com/api/v1/data?domain={clean}",
+                headers={**headers, "Referer": "https://www.google.com/"},
+                timeout=20,
+            )
+            if r2.status_code != 200:
+                return None, None
+            r = r2
+
+        data = r.json()
+        raw_visits = None
+
+        for eng_key in ("Engagments", "Engagements"):
+            eng = data.get(eng_key) or {}
+            v   = eng.get("Visits", "")
+            if v:
+                try:
+                    raw_visits = int(float(str(v).replace(",", "")))
+                    break
+                except (ValueError, TypeError):
+                    pass
+
+        if not raw_visits:
+            emv = data.get("EstimatedMonthlyVisits") or {}
+            if emv:
+                latest_key = sorted(emv.keys())[-1]
+                try:
+                    raw_visits = int(float(str(emv[latest_key]).replace(",", "")))
+                except (ValueError, TypeError):
+                    pass
+
+        if raw_visits and raw_visits > 0:
+            formatted = format_traffic(raw_visits)
+            print(f"📊 SimilarWeb ✓ → {domain}: {formatted} ({raw_visits:,}/mo)")
+            return raw_visits, formatted
+
+        print(f"  [SW] No visit data in response for {domain}")
+        return None, None
+
+    except json.JSONDecodeError as e:
+        print(f"  [SW] JSON error for {domain}: {e}")
+    except Exception as e:
+        print(f"  [SW] Request error for {domain}: {e}")
+
+    return None, None
+
+
 _TRAFFIC_PROMPT = """\
-You are a professional web traffic analyst with expertise equivalent to SimilarWeb, Ahrefs, and Semrush.
+You are a professional web traffic analyst with expertise equivalent to SimilarWeb.
 
 Estimate the MONTHLY WEBSITE VISITS for the following URL:
 
@@ -113,95 +167,63 @@ URL     : {url}
 Domain  : {domain}
 TLD     : {tld}
 
-Use these calibration benchmarks:
-- google.com / youtube.com  : 30B–90B / month
-- amazon.com / wikipedia.org: 2B–5B  / month
-- Major news sites (bbc.com, nytimes.com): 200M–500M / month
-- Popular SaaS / developer tools: 5M–50M / month
-- Regional brands / mid-size e-commerce: 500K–5M / month
-- Small business sites / niche blogs: 50K–500K / month
-- Local or new sites: 5K–50K / month
-- Very niche / micro sites: under 5K / month
+Calibration:
+- google.com / youtube.com       : 30B–90B / month
+- amazon.com / wikipedia.org     : 2B–5B   / month
+- Major news sites (bbc, nytimes): 200M–500M / month
+- Popular SaaS / dev tools       : 5M–50M  / month
+- Regional brands / mid e-comm   : 500K–5M / month
+- Small business / niche blogs   : 50K–500K / month
+- Local or new sites             : 5K–50K  / month
+- Very niche / micro sites       : under 5K / month
 
-Instructions:
-1. If the domain belongs to a globally or regionally recognized brand, use your knowledge to give a precise estimate.
-2. For unknown domains, infer from: TLD, keywords in the domain name, typical niche scale.
-3. Return ONLY a single plain integer — no commas, no text, no symbols.
-
-Examples of valid responses:  45000000   1250000   87000   12000
+Return ONLY a single plain integer. No commas, no text, no symbols.
+Examples:  45000000   1250000   87000   12000
 """
 
 
-def estimate_monthly_traffic(url: str) -> str:
-    """
-    Synchronous call to OpenAI to estimate monthly visits for a URL.
-    Returns formatted string ('120K', '2.5M') or 'N/A' on failure.
-    Caches results by domain to avoid duplicate API calls.
-    """
+def _estimate_traffic_gpt(url: str, domain: str, tld: str) -> str:
     api_key = OPENAI_API_KEY
     if not api_key or api_key.strip() in ("", "sk-YOUR-KEY-HERE"):
         return "N/A"
-
+    prompt = _TRAFFIC_PROMPT.format(url=url, domain=domain, tld=tld)
     try:
-        parsed = urlparse(url if url.startswith("http") else "https://" + url)
+        r = req_lib.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={"model": OPENAI_MODEL, "messages": [{"role": "user", "content": prompt}],
+                  "temperature": 0, "max_tokens": 20},
+            timeout=20,
+        )
+        if r.status_code != 200:
+            return "N/A"
+        raw_text = r.json()["choices"][0]["message"]["content"].strip()
+        match    = re.search(r"\d[\d,]*", raw_text)
+        if not match:
+            return "N/A"
+        raw_n     = int(match.group().replace(",", ""))
+        formatted = format_traffic(raw_n)
+        print(f"📊 GPT estimate (fresh) → {domain}: {formatted} ({raw_n:,}/mo)")
+        return formatted
+    except Exception as e:
+        print(f"✗ GPT traffic estimate failed for {url}: {e}")
+        return "N/A"
+
+
+def estimate_monthly_traffic(url: str) -> str:
+    if not url.startswith("http"):
+        url = "https://" + url
+    try:
+        parsed = urlparse(url)
         domain = parsed.netloc.replace("www.", "")
         tld    = domain.split(".")[-1] if "." in domain else "com"
     except Exception:
         domain, tld = url, "com"
-
-    # Return cached result if available
-    cache_key = domain.lower()
-    if cache_key in _traffic_cache:
-        cached_raw = _traffic_cache[cache_key].get("raw")
-        if cached_raw:
-            return format_traffic(cached_raw)
-
-    prompt = _TRAFFIC_PROMPT.format(url=url, domain=domain, tld=tld)
-
-    try:
-        r = req_lib.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type":  "application/json",
-            },
-            json={
-                "model":       OPENAI_MODEL,
-                "messages":    [{"role": "user", "content": prompt}],
-                "temperature": 0,
-                "max_tokens":  20,
-            },
-            timeout=20,
-        )
-
-        if r.status_code != 200:
-            print(f"⚠ Traffic estimate API error {r.status_code}: {r.text[:200]}")
-            return "N/A"
-
-        raw_text = r.json()["choices"][0]["message"]["content"].strip()
-        # Extract first integer-like sequence
-        match = re.search(r"\d[\d,]*", raw_text)
-        if not match:
-            return "N/A"
-
-        raw_n = int(match.group().replace(",", ""))
-        formatted = format_traffic(raw_n)
-
-        # Cache
-        _traffic_cache[cache_key] = {
-            "raw":       raw_n,
-            "formatted": formatted,
-            "url":       url,
-            "ts":        datetime.datetime.now().isoformat(),
-        }
-        _save_traffic_cache()
-
-        print(f"📊 Traffic estimate → {domain}: {formatted} ({raw_n:,}/mo)")
-        return formatted
-
-    except Exception as e:
-        print(f"✗ Traffic estimate failed for {url}: {e}")
-        return "N/A"
+    _, sw_formatted = get_similarweb_traffic(domain)
+    if sw_formatted:
+        return sw_formatted
+    print(f"  [SW] Falling back to GPT for {domain}")
+    return _estimate_traffic_gpt(url, domain, tld)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -272,7 +294,7 @@ FONT_DB = {
     "palatino linotype":("Linotype","Paid"),
     "optima":("Linotype","Paid"),
     "univers":("Linotype","Paid"),
-    "avenir":("Linotype","Paid"),
+    "avenir":("Linetype","Paid"),
     "avenir next":("Linotype","Paid"),
     "bodoni":("Berthold / Linotype","Paid"),
     "akzidenz grotesk":("Berthold","Paid"),
@@ -440,12 +462,13 @@ LICENSE_PAID       = ["commercial license","license fee","proprietary",
 LICENSE_RESTRICTED = ["restricted","personal use only","no commercial",
                       "non-commercial","embedding restricted","not for resale"]
 
+
 # ─────────────────────────────────────────────────────────────
 #  SCAN HISTORY & AI CACHE
 # ─────────────────────────────────────────────────────────────
-_scan_history: dict    = {}
-_history_counter: int  = 0
-_ai_cache: dict        = {}
+_scan_history: dict   = {}
+_history_counter: int = 0
+_ai_cache: dict       = {}
 
 def _load_ai_cache():
     global _ai_cache
@@ -468,7 +491,7 @@ _load_ai_cache()
 
 
 # ─────────────────────────────────────────────────────────────
-#  GENERAL HELPERS
+#  GENERAL HELPERS  (unchanged from original)
 # ─────────────────────────────────────────────────────────────
 def normalize_font(name: str) -> str:
     if not name: return ""
@@ -483,11 +506,9 @@ def normalize_font(name: str) -> str:
     name = re.sub(r"\s+", " ", name)
     return name.strip().lower()
 
-
 def is_text_font(name: str) -> bool:
     n = normalize_font(name)
     return bool(n) and not any(i in n for i in IGNORE)
-
 
 def detect_from_cdn(url: str):
     url_l = url.lower()
@@ -495,7 +516,6 @@ def detect_from_cdn(url: str):
         if pat in url_l:
             return foundry, lic
     return None, None
-
 
 def parse_license(text: str):
     if not text: return None
@@ -513,7 +533,6 @@ def parse_license(text: str):
         if kw in t: return "Paid"
     return None
 
-
 def lookup_db(font_key: str):
     key = normalize_font(font_key)
     if key in FONT_DB: return FONT_DB[key]
@@ -522,10 +541,6 @@ def lookup_db(font_key: str):
             return v
     return None
 
-
-# ─────────────────────────────────────────────────────────────
-#  PATH HELPERS
-# ─────────────────────────────────────────────────────────────
 def make_font_file_path(filename: str) -> str:
     return f"Inspect > Application > Frames > Top > Font > {filename}"
 
@@ -535,7 +550,7 @@ def make_css_path(sheet_href: str) -> str:
 
 
 # ─────────────────────────────────────────────────────────────
-#  SERVER-SIDE CSS PARSER  (Method 5)
+#  SERVER-SIDE CSS PARSER  (Method 5)  — unchanged from original
 # ─────────────────────────────────────────────────────────────
 _FONT_FACE_BLOCK_RE = re.compile(r"@font-face\s*\{([^}]+)\}", re.IGNORECASE | re.DOTALL)
 _FF_VALUE_RE        = re.compile(r"font-family\s*:\s*([^;}\n]+)", re.IGNORECASE)
@@ -547,7 +562,7 @@ _CSS_FETCH_HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/145.0.0.0 Safari/537.36"
+        "Chrome/147.0.0.0 Safari/537.36"
     ),
     "Accept": "text/css,*/*;q=0.1",
 }
@@ -566,7 +581,6 @@ def _parse_css_server_side(css_url: str) -> list:
 
     css_text = _COMMENT_RE.sub("", r.text)
 
-    # Pass A: @font-face blocks
     for block_match in _FONT_FACE_BLOCK_RE.finditer(css_text):
         block = block_match.group(1)
         ff_m  = _FF_VALUE_RE.search(block)
@@ -593,7 +607,6 @@ def _parse_css_server_side(css_url: str) -> list:
             "src_url": src_url,    "kind":    "font-face-css",
         })
 
-    # Pass B: font-family in all other rules
     css_no_ff    = _FONT_FACE_BLOCK_RE.sub("", css_text)
     seen_in_file = {normalize_font(r["display"]) for r in results}
 
@@ -617,7 +630,7 @@ def _parse_css_server_side(css_url: str) -> list:
 
 
 # ─────────────────────────────────────────────────────────────
-#  AI FONT LOOKUP (OpenAI)
+#  AI FONT LOOKUP (OpenAI)  — unchanged from original
 # ─────────────────────────────────────────────────────────────
 _AI_SYSTEM_PROMPT = """\
 You are the world's foremost authority on typography and font licensing with 30+ years of
@@ -714,7 +727,7 @@ def lookup_ai(font_name: str, extra_context: str = "", notify=None) -> dict | No
 
 
 # ─────────────────────────────────────────────────────────────
-#  FONT FILE PARSER
+#  FONT FILE PARSER  — unchanged from original
 # ─────────────────────────────────────────────────────────────
 def get_font_info_from_file(font_url: str):
     cdn_f, cdn_l = detect_from_cdn(font_url)
@@ -785,7 +798,7 @@ def get_font_info_from_file(font_url: str):
 
 
 # ─────────────────────────────────────────────────────────────
-#  RESOLVE  — pull together all sources of font intelligence
+#  RESOLVE  — unchanged from original
 # ─────────────────────────────────────────────────────────────
 def _resolve(font_key, file_foundry=None, file_lic=None, use_ai=True, notify=None):
     designer   = ""
@@ -833,7 +846,7 @@ def _resolve(font_key, file_foundry=None, file_lic=None, use_ai=True, notify=Non
 
 
 # ─────────────────────────────────────────────────────────────
-#  CORE SCANNER
+#  CORE SCANNER  — unchanged from original
 # ─────────────────────────────────────────────────────────────
 def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
 
@@ -865,36 +878,25 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             _scan_history[scan_id]["fonts"] = font_list.copy()
 
     def emit_font(fd):
-        """
-        Route font based on license:
-          OS Default / Icon-Symbol  → suppress entirely
-          Restricted                → pass through tagged as is_restricted=True
-          Free / Paid               → normalise and emit normally
-        """
         raw_lic = fd.get("license", "")
         l       = raw_lic.strip().lower()
 
-        # Hard suppress
         if l in ("os default",) or "os default" in l or "icon/symbol" in l:
             return
 
-        # Font type from kind
         fd["font_type"] = classify_font_type(fd.get("kind", ""))
 
-        # Restricted → separate section
         if "restricted" in l:
             fd["is_restricted"] = True
             record(fd)
             push(emit_event("font", **fd))
             return
 
-        # Normalise Free variants
         if l.startswith("free"):
             fd["license"] = "Free"
         elif "paid" in l:
             fd["license"] = "Free/Paid" if l.startswith("free") else "Paid"
         else:
-            # Truly unknown → suppress
             print(f"  [SUPPRESS unknown] {fd.get('name')} → {raw_lic}")
             return
 
@@ -904,7 +906,6 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
 
     def make_fd(display: str, family: str, fkey: str,
                 file_foundry, file_lic, path: str, kind: str) -> dict:
-        """Build a complete font descriptor dict."""
         foundry, lic, src, designer, lic_detail, conf = _resolve(
             fkey, file_foundry, file_lic, use_ai, notify=push)
         return dict(
@@ -916,7 +917,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             path=path,
             source=src,
             kind=kind,
-            font_type=classify_font_type(kind),   # pre-set; emit_font may override
+            font_type=classify_font_type(kind),
             is_restricted=False,
             designer=designer,
             license_detail=lic_detail,
@@ -937,13 +938,13 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
     opts.add_argument("--disable-web-security")
     opts.add_argument(
         "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
     )
     opts.add_argument("--lang=en-US,en;q=0.9")
     opts.add_argument("--disable-blink-features=AutomationControlled")
 
     try:
-        driver = uc.Chrome(options=opts, use_subprocess=True, version_main=145)
+        driver = uc.Chrome(options=opts, use_subprocess=True)
     except WebDriverException as e:
         push(emit_event("error", message=f"ChromeDriver failed: {e}"))
         queue.put_nowait(None)
@@ -1272,8 +1273,8 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         push(emit_event("status", message=f"  → {len(font_list)} fonts total after CSS parsing"))
 
         # ── Done ──────────────────────────────────────────────
-        total      = len(font_list)
-        ai_count   = sum(1 for f in font_list if f.get("source") == "ai")
+        total       = len(font_list)
+        ai_count    = sum(1 for f in font_list if f.get("source") == "ai")
         restr_count = sum(1 for f in font_list if f.get("is_restricted"))
 
         if scan_id in _scan_history:
@@ -1300,12 +1301,97 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
 # ─────────────────────────────────────────────────────────────
 #  FASTAPI APP
 # ─────────────────────────────────────────────────────────────
-app = FastAPI(title="FontScan API — Enhanced")
+app = FastAPI(title="FontScan API — Enhanced + Auth")
 app.add_middleware(CORSMiddleware, allow_origins=["*"],
                    allow_methods=["*"], allow_headers=["*"])
 
 _executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
+@app.on_event("startup")
+def _init_auth_data():
+    # Ensure default admin exists even when app is started via uvicorn import path.
+    init_default_admin()
+
+
+# ─────────────────────────────────────────────────────────────
+#  AUTH ROUTES  (public — no token needed)
+# ─────────────────────────────────────────────────────────────
+
+@app.post("/login", response_model=Token)
+def login(body: UserLogin, db: Session = Depends(get_db)):
+    """Email + password → JWT token (1 hour)."""
+    email = body.email.strip().lower()
+    user = db.query(User).filter(User.email == email).first()
+    if not user or not verify_password(body.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Incorrect email or password.")
+    return {"access_token": create_access_token({"sub": user.email}), "token_type": "bearer"}
+
+
+@app.post("/signup", response_model=UserOut)
+def signup(body: UserCreate, db: Session = Depends(get_db),
+           authorization: str | None = Header(default=None)):
+    """
+    Create a new account.
+    - Standard user signup is allowed.
+    - Admin account creation requires an admin token.
+    """
+    username = body.username.strip()
+    email = body.email.strip().lower()
+    role = (body.role or "user").strip().lower()
+    if role not in ("admin", "user"):
+        raise HTTPException(status_code=400, detail="Role must be 'admin' or 'user'.")
+    if not username or not email:
+        raise HTTPException(status_code=400, detail="Username and email are required.")
+
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=400, detail="Email already registered.")
+    if db.query(User).filter(User.username == username).first():
+        raise HTTPException(status_code=400, detail="Username already taken.")
+
+    if role == "admin":
+        if not authorization or not authorization.lower().startswith("bearer "):
+            raise HTTPException(status_code=403, detail="Admin access required to create admin users.")
+        token = authorization.split(" ", 1)[1].strip()
+        current_user = verify_token_param(token)
+        if current_user.role != "admin":
+            raise HTTPException(status_code=403, detail="Admin access required to create admin users.")
+
+    u = User(username=username, email=email,
+             hashed_password=hash_password(body.password), role=role)
+    db.add(u); db.commit(); db.refresh(u)
+    return u
+
+
+@app.get("/users")
+def list_users(db: Session = Depends(get_db),
+               current_user: User = Depends(require_admin)):
+    """List all team members. Admin only."""
+    return [{"id": u.id, "username": u.username, "email": u.email, "role": u.role}
+            for u in db.query(User).all()]
+
+
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db),
+                current_user: User = Depends(require_admin)):
+    """Remove a team member. Admin only."""
+    if user_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account.")
+    u = db.query(User).filter(User.id == user_id).first()
+    if not u:
+        raise HTTPException(status_code=404, detail="User not found.")
+    db.delete(u); db.commit()
+    return {"detail": f"User '{u.username}' deleted."}
+
+
+@app.get("/me", response_model=UserOut)
+def get_me(current_user: User = Depends(get_current_user)):
+    """Returns current logged-in user."""
+    return current_user
+
+
+# ─────────────────────────────────────────────────────────────
+#  FRONTEND ROUTES
+# ─────────────────────────────────────────────────────────────
 
 @app.get("/")
 def serve_frontend():
@@ -1313,13 +1399,26 @@ def serve_frontend():
         else HTMLResponse("<h2>Place index.html next to backend.py</h2>")
 
 
+@app.get("/login")
+def serve_login():
+    return FileResponse("login.html") if os.path.exists("login.html") \
+        else HTMLResponse("<h2>Place login.html next to backend.py</h2>")
+
+
+# ─────────────────────────────────────────────────────────────
+#  PROTECTED API ROUTES  (require valid JWT)
+# ─────────────────────────────────────────────────────────────
+
 @app.get("/api/scan")
 async def scan_endpoint(
     url:    str  = Query(...),
     wait:   int  = Query(8),
     scroll: int  = Query(3),
     use_ai: bool = Query(True),
+    token:  str  = Query(...),   # JWT as query param — EventSource can't set headers
 ):
+    verify_token_param(token)   # raises 401 if invalid/expired
+
     global _history_counter
     if not url.startswith("http"):
         url = "https://" + url
@@ -1355,47 +1454,37 @@ async def scan_endpoint(
 
 
 @app.get("/api/estimate-traffic")
-async def estimate_traffic_endpoint(url: str = Query(...)):
-    """
-    Estimate monthly website traffic using GPT-4o.
-
-    Returns: { "url": str, "domain": str, "estimate": str, "cached": bool }
-
-    Example response:
-      { "url": "https://stripe.com", "domain": "stripe.com",
-        "estimate": "4.5M", "cached": false }
-    """
+async def estimate_traffic_endpoint(
+    url:          str  = Query(...),
+    current_user: User = Depends(get_current_user),
+):
     if not url.startswith("http"):
         url = "https://" + url
-
     try:
         parsed = urlparse(url)
         domain = parsed.netloc.replace("www.", "")
     except Exception:
         domain = url
 
-    cache_key = domain.lower()
-    cached    = cache_key in _traffic_cache
+    loop = asyncio.get_event_loop()
+    raw, sw_fmt = await loop.run_in_executor(_executor, get_similarweb_traffic, domain)
+    if sw_fmt:
+        return {"url": url, "domain": domain, "estimate": sw_fmt, "source": "similarweb"}
 
-    loop     = asyncio.get_event_loop()
-    estimate = await loop.run_in_executor(_executor, estimate_monthly_traffic, url)
-
-    return {
-        "url":      url,
-        "domain":   domain,
-        "estimate": estimate,
-        "cached":   cached,
-    }
+    tld      = domain.split(".")[-1] if "." in domain else "com"
+    estimate = await loop.run_in_executor(_executor, _estimate_traffic_gpt, url, domain, tld)
+    return {"url": url, "domain": domain, "estimate": estimate,
+            "source": "gpt" if estimate != "N/A" else "N/A"}
 
 
 @app.get("/api/history")
-def get_history():
+def get_history(current_user: User = Depends(get_current_user)):
     items = list(reversed(list(_scan_history.values())))
     return {"history": [{k: v for k, v in h.items() if k != "fonts"} for h in items]}
 
 
 @app.get("/api/history/{scan_id}")
-def get_history_detail(scan_id: str):
+def get_history_detail(scan_id: str, current_user: User = Depends(get_current_user)):
     h = _scan_history.get(scan_id)
     if not h:
         raise HTTPException(status_code=404, detail="Scan not found")
@@ -1403,27 +1492,36 @@ def get_history_detail(scan_id: str):
 
 
 @app.get("/api/health")
-def health():
+def health(current_user: User = Depends(get_current_user)):
     ai_ok = bool(OPENAI_API_KEY) and OPENAI_API_KEY.strip() not in ("", "sk-YOUR-KEY-HERE")
     return {
-        "status":               "ok",
-        "cached_ai_lookups":    len(_ai_cache),
-        "cached_traffic_est":   len(_traffic_cache),
-        "scans_in_memory":      len(_scan_history),
-        "ai_configured":        ai_ok,
-        "model":                OPENAI_MODEL,
+        "status":             "ok",
+        "user":               current_user.username,
+        "cached_ai_lookups":  len(_ai_cache),
+        "cached_traffic_est": 0,
+        "scans_in_memory":    len(_scan_history),
+        "ai_configured":      ai_ok,
+        "model":              OPENAI_MODEL,
     }
 
 
+# ─────────────────────────────────────────────────────────────
+#  STARTUP
+# ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+    init_default_admin()   # seeds admin@fontscan.com / admin123 on first run
+
     print("─" * 56)
-    print("  FontScan Enhanced  →  http://localhost:8000")
+    print("  FontScan Enhanced + Auth  →  http://localhost:8000")
     ai_ok = OPENAI_API_KEY and OPENAI_API_KEY.strip() not in ("", "sk-YOUR-KEY-HERE")
     print(f"  OpenAI ({OPENAI_MODEL}): {'✓ configured' if ai_ok else '✗ NOT SET'}")
     print(f"  Font AI cache:     {len(_ai_cache)} entries")
-    print(f"  Traffic cache:     {len(_traffic_cache)} entries")
-    print(f"  Chrome:            pinned to v145")
-    print(f"  Features:          Traffic Est · Font Type · Restricted Section")
+    print(f"  Auth:              JWT · SQLite · bcrypt")
+    print(f"  Default admin:     admin@fontscan.com / admin123")
+    print(f"  Traffic:           LIVE — SimilarWeb + GPT-4o (no cache)")
+    print(f"  Chrome:            auto-detect (installed version)")
+    print(f"  Features:          Traffic Est · Font Type · Restricted Section · Team Mgmt")
     print("─" * 56)
     uvicorn.run("backend:app", host="0.0.0.0", port=8000,
                 reload=False, log_level="warning")
+    

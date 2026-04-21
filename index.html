@@ -13,21 +13,19 @@
   --ey-yellow:#FFE600;--ey-black:#000;--ey-charcoal:#1A1A24;
   --ey-dark:#23232F;--ey-dark2:#2E2E38;--ey-dark3:#3A3A4A;
   --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.14);
-  --free:#2DB87A;--paid:#FF9B42;--restricted:#E8425A;--os:#60C8F5;
+  --free:#2DB87A;--paid:#FF9B42;--restricted:#E8425A;
   --ai:#C4A8FF;--traffic:#7EC8A4;--embedded:#5BC4E8;--css-font:#F0A04B;
   --text:#F2F2F4;--muted:#6B6A7E;--muted2:#9A99AD;
   --font-ui:'IBM Plex Sans',sans-serif;--font-data:'IBM Plex Mono',monospace;
   --r:8px;--rs:5px;
 }
-html{font-size:14px}
+html{font-size:14px;height:100%;overflow:hidden}
 body{background:var(--ey-charcoal);color:var(--text);font-family:var(--font-ui);
-  min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+  height:100%;display:flex;flex-direction:column;overflow:hidden}
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:linear-gradient(rgba(255,230,0,.016) 1px,transparent 1px),
                    linear-gradient(90deg,rgba(255,230,0,.016) 1px,transparent 1px);
   background-size:40px 40px}
-
-/* ── NAV ── */
 nav{position:sticky;top:0;z-index:100;background:var(--ey-black);
   border-bottom:3px solid var(--ey-yellow);padding:0 20px;height:58px;
   display:flex;align-items:center;gap:14px}
@@ -37,53 +35,107 @@ nav{position:sticky;top:0;z-index:100;background:var(--ey-black);
   text-transform:uppercase;line-height:1.5;white-space:nowrap}
 .nav-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.55);
   letter-spacing:.6px;text-transform:uppercase}
-.scan-bar{flex:1;max-width:560px;display:flex;align-items:center;
+.scan-bar{flex:1;max-width:520px;display:flex;align-items:center;
   background:var(--ey-dark2);border:1px solid rgba(255,255,255,.1);
   border-radius:var(--rs);padding:0 4px 0 11px;gap:7px;
   transition:border-color .2s,box-shadow .2s}
-.scan-bar:focus-within{border-color:var(--ey-yellow);
-  box-shadow:0 0 0 3px rgba(255,230,0,.09)}
+.scan-bar:focus-within{border-color:var(--ey-yellow);box-shadow:0 0 0 3px rgba(255,230,0,.09)}
 .scan-bar input{flex:1;background:none;border:none;outline:none;
   color:var(--text);font-family:var(--font-data);font-size:13px;padding:9px 0}
 .scan-bar input::placeholder{color:var(--muted)}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 15px;
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;
   border-radius:var(--rs);font-family:var(--font-ui);font-size:12px;
   font-weight:600;cursor:pointer;border:none;transition:all .15s;
   letter-spacing:.4px;white-space:nowrap}
 .btn-primary{background:var(--ey-yellow);color:var(--ey-black)}
-.btn-primary:hover{background:#FFF033;transform:translateY(-1px)}
+.btn-primary:hover:not(:disabled){background:#FFF033;transform:translateY(-1px)}
 .btn-ghost{background:transparent;color:var(--muted2);border:1px solid rgba(255,255,255,.1)}
-.btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.btn-ghost:hover:not(:disabled){color:var(--text);border-color:rgba(255,255,255,.2)}
 .btn-danger{background:var(--restricted);color:#fff}
-.btn-danger:hover{background:#cc2b43}
+.btn-danger:hover:not(:disabled){background:#cc2b43}
+.btn-sm{padding:5px 10px;font-size:11px}
 .btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:7px}
-
-/* ── LIVE INDICATORS ── */
 .live-chip{display:none;align-items:center;gap:5px;padding:3px 9px;
-  border-radius:20px;font-size:10px;font-weight:600;font-family:var(--font-data);
-  border:1px solid}
+  border-radius:20px;font-size:10px;font-weight:600;font-family:var(--font-data);border:1px solid}
 .live-chip.active{display:inline-flex}
 .live-chip.ai{background:rgba(196,168,255,.12);color:var(--ai);border-color:rgba(196,168,255,.3)}
 .live-chip.tr{background:rgba(126,200,164,.1);color:var(--traffic);border-color:rgba(126,200,164,.3)}
-.live-dot{width:6px;height:6px;border-radius:50%;animation:dot-pulse 1s ease infinite}
-.live-chip.ai .live-dot{background:var(--ai)}
-.live-chip.tr .live-dot{background:var(--traffic)}
-@keyframes dot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+.live-dot{width:6px;height:6px;border-radius:50%;animation:dp 1s ease infinite}
+.live-chip.ai .live-dot{background:var(--ai)}.live-chip.tr .live-dot{background:var(--traffic)}
+@keyframes dp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
 
-/* ── BODY ── */
-.app-body{display:flex;flex:1;position:relative;z-index:1;min-height:0}
+.app-body{display:flex;flex:1;position:relative;z-index:1;min-height:0;overflow:hidden}
 
 /* ── SIDEBAR ── */
-.sidebar{width:252px;flex-shrink:0;background:var(--ey-dark);
+.sidebar{width:268px;flex-shrink:0;background:var(--ey-dark);
   border-right:1px solid var(--border);display:flex;flex-direction:column;
   overflow-y:auto;position:sticky;top:58px;height:calc(100vh - 58px)}
-.sb-sec{padding:15px;border-bottom:1px solid var(--border)}
-.sb-sec:last-child{border-bottom:none;flex:1;overflow-y:auto}
-.sb-title{font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:11px;display:flex;align-items:center;gap:7px}
-.sb-title::before{content:'';width:3px;height:9px;background:var(--ey-yellow);
+.sb-sec{padding:14px;border-bottom:1px solid var(--border)}
+.sb-sec.flex1{flex:1;overflow-y:auto}
+.sb-title{font-size:9px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px;display:flex;align-items:center;
+  justify-content:space-between}
+.sb-title-l{display:flex;align-items:center;gap:6px}
+.sb-title-l::before{content:'';width:3px;height:9px;background:var(--ey-yellow);
   border-radius:2px;flex-shrink:0}
+
+/* mode tabs */
+.mode-tabs{display:flex;background:var(--ey-dark3);border-radius:var(--rs);
+  padding:3px;gap:2px;margin-bottom:12px}
+.mode-tab{flex:1;padding:6px 8px;border-radius:4px;font-size:11px;font-weight:600;
+  text-align:center;cursor:pointer;color:var(--muted2);transition:all .15s;
+  border:none;background:none;font-family:var(--font-ui)}
+.mode-tab.active{background:var(--ey-yellow);color:var(--ey-black)}
+
+/* single panel */
+.single-panel{display:none;flex-direction:column;gap:8px}
+.single-panel.vis{display:flex}
+.side-input{width:100%;background:var(--ey-dark2);border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--rs);color:var(--text);font-family:var(--font-data);font-size:12px;
+  padding:8px 11px;outline:none;transition:border-color .2s}
+.side-input:focus{border-color:var(--ey-yellow)}
+.side-input::placeholder{color:var(--muted)}
+
+/* bulk panel */
+.bulk-panel{display:none;flex-direction:column;gap:9px}
+.bulk-panel.vis{display:flex}
+.q-textarea{width:100%;background:var(--ey-dark2);border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--rs);color:var(--text);font-family:var(--font-data);font-size:11px;
+  padding:9px 10px;resize:none;outline:none;line-height:1.65;transition:border-color .2s}
+.q-textarea:focus{border-color:var(--ey-yellow)}
+.q-textarea::placeholder{color:var(--muted);font-size:10px}
+.q-actions{display:flex;gap:6px}
+.q-list{display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto}
+.qi{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:var(--rs);
+  background:var(--ey-dark2);border:1px solid var(--border);font-size:11px;
+  font-family:var(--font-data);transition:border-color .2s}
+.qi.active{border-color:var(--ey-yellow);background:rgba(255,230,0,.04)}
+.qi.done{border-color:rgba(45,184,122,.3);opacity:.8}
+.qi.error{border-color:rgba(232,66,90,.3)}
+.qi-ico{width:15px;height:15px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:9px;flex-shrink:0}
+.qi-ico.pending{background:var(--ey-dark3);color:var(--muted)}
+.qi-ico.active{background:var(--ey-yellow);color:var(--ey-black);
+  animation:qp .9s ease infinite}
+.qi-ico.done{background:rgba(45,184,122,.2);color:var(--free)}
+.qi-ico.error{background:rgba(232,66,90,.2);color:var(--restricted)}
+@keyframes qp{0%,100%{box-shadow:0 0 0 2px rgba(255,230,0,.4)}50%{box-shadow:0 0 0 5px rgba(255,230,0,.08)}}
+.qi-url{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted2)}
+.qi-url.active{color:var(--ey-yellow)}.qi-url.done{color:var(--free)}
+.qi-tr{font-size:10px;color:var(--traffic);flex-shrink:0}
+.qi-cnt{font-size:10px;color:var(--muted);flex-shrink:0}
+.qi-rm{background:none;border:none;color:var(--muted);cursor:pointer;
+  padding:1px 4px;border-radius:3px;font-size:11px;flex-shrink:0;line-height:1}
+.qi-rm:hover{color:var(--restricted)}
+.q-prog{height:3px;background:var(--ey-dark3);border-radius:2px;overflow:hidden}
+.q-prog-fill{height:100%;background:var(--ey-yellow);border-radius:2px;transition:width .4s ease}
+.q-sum{display:flex;gap:8px;font-size:10px;color:var(--muted);
+  font-family:var(--font-data);flex-wrap:wrap;align-items:center}
+.q-sum .qv{font-weight:700;color:var(--ey-yellow)}
+.q-btns{display:flex;gap:6px}
+
+/* settings */
 .field{margin-bottom:9px}
 .field-lbl{font-size:11px;color:var(--muted2);margin-bottom:4px;
   display:flex;justify-content:space-between}
@@ -98,13 +150,13 @@ input[type=range]{width:100%;accent-color:var(--ey-yellow);cursor:pointer}
 .tog-thumb{position:absolute;top:3px;left:3px;width:12px;height:12px;
   background:var(--ey-black);border-radius:50%;transition:transform .2s}
 .tog input:checked~.tog-thumb{transform:translateX(14px)}
-.ai-status{font-size:10px;font-family:var(--font-data);padding:2px 7px;border-radius:4px;
-  display:inline-flex;align-items:center;gap:3px}
+.ai-status{font-size:10px;font-family:var(--font-data);padding:2px 7px;
+  border-radius:4px;display:inline-flex;align-items:center;gap:3px}
 .ai-status.ok{background:rgba(45,184,122,.1);color:var(--free)}
 .ai-status.off{background:rgba(232,66,90,.1);color:var(--restricted)}
 .ai-status.pending{background:rgba(107,106,126,.1);color:var(--muted2)}
 
-/* ── HISTORY ITEMS ── */
+/* history */
 .hi{padding:9px;border-radius:var(--rs);cursor:pointer;transition:background .12s;
   border:1px solid transparent;margin-bottom:5px}
 .hi:hover{background:var(--ey-dark2);border-color:var(--border)}
@@ -115,28 +167,39 @@ input[type=range]{width:100%;accent-color:var(--ey-yellow);cursor:pointer}
 .hi-n{color:var(--ey-yellow);font-weight:600}
 .hi-empty{font-size:11px;color:var(--muted);font-style:italic}
 
-/* ── STATS ── */
-.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;
-  background:var(--border);border-bottom:1px solid var(--border)}
-.stat{background:var(--ey-dark);padding:11px 13px;display:flex;
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;
+  background:var(--border);border-bottom:1px solid var(--border);flex-shrink:0}
+.stat{background:var(--ey-dark);padding:10px 12px;display:flex;
   flex-direction:column;gap:2px;position:relative;overflow:hidden}
 .stat::after{content:'';position:absolute;bottom:0;left:0;right:0;
-  height:2px;background:var(--ey-yellow);opacity:.18}
-.stat-val{font-size:20px;font-weight:700;font-family:var(--font-data);
+  height:2px;background:var(--ey-yellow);opacity:.15}
+.stat-val{font-size:18px;font-weight:700;font-family:var(--font-data);
   color:var(--text);letter-spacing:-1px}
-.stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
+.stat-lbl{font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
 
-/* ── MAIN AREA ── */
-.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
-.toolbar{display:flex;align-items:center;gap:9px;padding:9px 14px;
-  border-bottom:1px solid var(--border);background:var(--ey-dark);flex-wrap:wrap}
+/* main */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;
+  overflow:hidden;position:relative}
+/* scrollable middle — everything between toolbar and log scrolls here */
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;position:relative}
+.toolbar{display:flex;align-items:center;gap:8px;padding:8px 13px;
+  border-bottom:2px solid var(--border);background:var(--ey-dark);
+  flex-shrink:0;flex-wrap:nowrap;overflow:hidden;min-height:42px;position:relative;z-index:20}
 .search-box{display:flex;align-items:center;gap:7px;background:var(--ey-dark2);
-  border:1px solid var(--border);border-radius:var(--rs);padding:0 9px;
-  flex:1;max-width:230px;transition:border-color .2s}
+  border:1px solid var(--border);border-radius:var(--rs);padding:0 9px;transition:border-color .2s}
 .search-box:focus-within{border-color:var(--ey-yellow)}
 .search-box input{background:none;border:none;outline:none;color:var(--text);
-  font-family:var(--font-data);font-size:12px;padding:6px 0;width:100%}
+  font-family:var(--font-data);font-size:12px;padding:6px 0;width:170px}
 .search-box input::placeholder{color:var(--muted)}
+.site-fw{display:flex;align-items:center;gap:6px}
+.site-flbl{font-size:10px;color:var(--muted);white-space:nowrap}
+#siteFilter{background:var(--ey-dark2);border:1px solid var(--border);
+  border-radius:var(--rs);color:var(--text);font-family:var(--font-data);
+  font-size:11px;padding:5px 8px;outline:none;cursor:pointer;
+  transition:border-color .2s;max-width:170px}
+#siteFilter:focus{border-color:var(--ey-yellow)}
+#siteFilter option{background:var(--ey-dark2)}
 .pills{display:flex;gap:5px;flex-wrap:wrap}
 .pill{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;
   cursor:pointer;border:1px solid;transition:all .15s}
@@ -149,55 +212,50 @@ input[type=range]{width:100%;accent-color:var(--ey-yellow);cursor:pointer}
 .spacer{flex:1}
 #countLbl{font-size:11px;color:var(--muted);font-family:var(--font-data)}
 
-/* ── SECTION HEADERS ── */
-.sec-hdr{display:flex;align-items:center;gap:9px;padding:8px 14px;
+.sec-hdr{display:flex;align-items:center;gap:9px;padding:7px 13px;
   background:var(--ey-dark2);border-bottom:1px solid var(--border);
   cursor:pointer;user-select:none}
 .sec-hdr:hover{background:var(--ey-dark3)}
 .sec-hdr-title{font-size:9.5px;font-weight:700;letter-spacing:1px;
   text-transform:uppercase;color:var(--muted2)}
-.sec-hdr-count{font-size:10px;font-family:var(--font-data);
-  color:var(--ey-yellow);font-weight:700}
+.sec-hdr-count{font-size:10px;font-family:var(--font-data);color:var(--ey-yellow);font-weight:700}
 .sec-hdr-chev{margin-left:auto;color:var(--muted);font-size:10px;transition:transform .2s}
 .sec-hdr.collapsed .sec-hdr-chev{transform:rotate(-90deg)}
-
-/* ── RESTRICTED SECTION ── */
 .res-sec{border-top:2px solid rgba(232,66,90,.22)}
 .res-sec .sec-hdr{background:rgba(232,66,90,.04)}
 .res-sec .sec-hdr:hover{background:rgba(232,66,90,.08)}
 .res-sec .sec-hdr-title{color:var(--restricted)}
-.res-note{padding:8px 14px;font-size:10px;color:var(--restricted);
+.res-note{padding:7px 13px;font-size:10px;color:var(--restricted);
   font-family:var(--font-data);background:rgba(232,66,90,.04);
   border-bottom:1px solid rgba(232,66,90,.1)}
 
-/* ── TABLE ── */
 .tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-family:var(--font-data);font-size:12px;min-width:880px}
-thead th{background:var(--ey-dark);padding:8px 11px;text-align:left;
+table{width:100%;border-collapse:collapse;font-family:var(--font-data);font-size:12px;min-width:980px}
+thead th{background:var(--ey-dark);padding:8px 10px;text-align:left;
   font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
   color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;
-  position:sticky;top:0;z-index:10;cursor:pointer;user-select:none;transition:color .15s}
+  position:sticky;top:0;z-index:15;cursor:pointer;user-select:none;transition:color .15s}
 thead th:hover{color:var(--ey-yellow)}
-thead th.nosort{cursor:default}
-thead th.nosort:hover{color:var(--muted)}
+thead th.nosort{cursor:default}thead th.nosort:hover{color:var(--muted)}
 thead tr th:first-child{border-left:3px solid var(--ey-yellow)}
 .res-sec thead tr th:first-child{border-left-color:var(--restricted)}
 .res-sec thead th{background:rgba(232,66,90,.04)}
-tbody tr{border-bottom:1px solid var(--border);transition:background .12s;
-  animation:ri .2s ease both}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s;animation:ri .2s ease both}
 tbody tr:hover{background:rgba(255,230,0,.022)}
 tbody tr.sel{background:rgba(255,230,0,.055)!important}
 @keyframes ri{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
-tbody td{padding:8px 11px;vertical-align:middle;color:var(--muted2);
+tbody td{padding:7px 10px;vertical-align:middle;color:var(--muted2);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-tbody td.nm{color:var(--text);font-weight:500;max-width:160px}
-tbody td.fam{max-width:140px}
-tbody td.path{font-size:10px;max-width:240px}
+tbody td.nm{color:var(--text);font-weight:500;max-width:145px}
+tbody td.fam{max-width:125px}
+tbody td.sc{max-width:120px}
+tbody td.path{font-size:10px;max-width:200px}
 tbody td.path .seg{color:var(--muted)}
 tbody td.path .fn{color:var(--ey-yellow);opacity:.8}
-tbody td.tv{text-align:right;min-width:110px}
-
-/* ── BADGES ── */
+tbody td.tv{text-align:right;min-width:106px}
+.site-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;
+  font-weight:600;background:rgba(255,230,0,.1);color:var(--ey-yellow);
+  max-width:115px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
 .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;
   border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.4px;white-space:nowrap}
 .badge .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
@@ -205,63 +263,45 @@ tbody td.tv{text-align:right;min-width:110px}
 .badge.paid{background:rgba(255,155,66,.11);color:var(--paid)}.badge.paid .dot{background:var(--paid)}
 .badge.restricted{background:rgba(232,66,90,.11);color:var(--restricted)}.badge.restricted .dot{background:var(--restricted)}
 .badge.check{background:rgba(255,255,255,.05);color:var(--muted2)}.badge.check .dot{background:var(--muted)}
-
-/* ── FONT TYPE TAG ── */
-.ftag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;
-  border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.ftag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;
+  font-size:9px;font-weight:700;letter-spacing:.5px;white-space:nowrap;gap:3px}
 .ftag.emb{background:rgba(91,196,232,.12);color:var(--embedded)}
-.ftag.emb::before{content:'⬛';font-size:7px;opacity:.7}
 .ftag.css{background:rgba(240,160,75,.12);color:var(--css-font)}
-.ftag.css::before{content:'◻';font-size:7px;opacity:.7}
-
-/* ── TRAFFIC VALUE ── */
 .tv-val{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;
   border-radius:4px;font-size:11px;font-weight:700;font-family:var(--font-data)}
 .tv-val.live{background:rgba(126,200,164,.1);color:var(--traffic)}
-.tv-val.loading{color:var(--muted);background:rgba(255,255,255,.04);
-  animation:tp 1.3s ease infinite}
+.tv-val.loading{color:var(--muted);background:rgba(255,255,255,.04);animation:tp 1.3s ease infinite}
 .tv-val.na{color:var(--muted);background:transparent;font-weight:400;font-size:10px}
 @keyframes tp{0%,100%{opacity:.5}50%{opacity:1}}
 
-/* ── EMPTY STATE ── */
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:280px;gap:12px;color:var(--muted);font-size:13px}
+  min-height:260px;gap:12px;color:var(--muted);font-size:13px}
 .empty strong{color:var(--muted2);font-size:15px}
-.empty svg{opacity:.08}
-
-/* ── PROGRESS ── */
-.prog{height:2px;background:var(--ey-dark3);overflow:hidden}
+.prog{height:2px;background:var(--ey-dark3);overflow:hidden;flex-shrink:0}
 .prog-fill{height:100%;background:linear-gradient(90deg,transparent,var(--ey-yellow),transparent);
   animation:ind 1.4s ease infinite;width:40%}
 @keyframes ind{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
-
-/* ── LOG ── */
-.log{background:rgba(0,0,0,.5);border-top:1px solid var(--border);padding:7px 14px;
+.log{background:rgba(0,0,0,.5);border-top:1px solid var(--border);padding:6px 13px;
   font-family:var(--font-data);font-size:10px;color:var(--muted);
-  max-height:62px;overflow-y:auto;white-space:nowrap}
+  height:58px;overflow-y:auto;white-space:nowrap;flex-shrink:0}
 .log-e{animation:ri .18s ease both}
 .log-e.info{color:var(--muted2)}.log-e.font{color:var(--free)}
 .log-e.error{color:var(--restricted)}.log-e.done{color:var(--ey-yellow);font-weight:700}
-.log-e.tr{color:var(--traffic)}
-
-/* ── DETAIL BAR ── */
-.dbar{background:var(--ey-dark2);border-top:2px solid rgba(255,230,0,.15);
-  padding:10px 18px;display:none;gap:16px;flex-wrap:wrap}
+.log-e.tr{color:var(--traffic)}.log-e.queue{color:var(--ai)}
+.dbar{background:var(--ey-dark2);border-top:2px solid rgba(255,230,0,.18);
+  padding:9px 16px;display:none;gap:15px;flex-wrap:wrap;flex-shrink:0}
 .dbar.on{display:flex}
-.dkv{display:flex;flex-direction:column;gap:2px;min-width:80px}
+.dkv{display:flex;flex-direction:column;gap:2px;min-width:75px}
 .dk{font-size:9px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted)}
 .dv{color:var(--text);font-family:var(--font-data);font-size:12px}
-
-/* ── MODAL ── */
-.modal-ov{display:none;position:fixed;inset:0;z-index:200;
-  background:rgba(0,0,0,.8);backdrop-filter:blur(10px);
-  align-items:center;justify-content:center}
+.modal-ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);
+  backdrop-filter:blur(10px);align-items:center;justify-content:center}
 .modal-ov.open{display:flex}
 .modal{background:var(--ey-dark);border:1px solid var(--border2);
   border-top:3px solid var(--ey-yellow);border-radius:var(--r);
-  width:min(1020px,96vw);max-height:82vh;display:flex;flex-direction:column;
+  width:min(1040px,96vw);max-height:82vh;display:flex;flex-direction:column;
   overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.7)}
-.modal-hdr{display:flex;align-items:flex-start;gap:11px;padding:16px 18px;
+.modal-hdr{display:flex;align-items:flex-start;gap:11px;padding:15px 17px;
   border-bottom:1px solid var(--border)}
 .modal-title{font-size:15px;font-weight:600;flex:1;color:var(--text)}
 .modal-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
@@ -270,28 +310,134 @@ tbody td.tv{text-align:right;min-width:110px}
 .mc-free{color:var(--free)!important}.mc-paid{color:var(--paid)!important}
 .mc-res{color:var(--restricted)!important}
 .modal-body{overflow-y:auto;flex:1}
-.mtbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-size:12px;min-width:860px}
+.mtbl{width:100%;border-collapse:collapse;font-family:var(--font-data);font-size:12px;min-width:900px}
 .mtbl th{background:var(--ey-dark2);padding:8px 11px;text-align:left;font-size:9px;
   text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
   border-bottom:1px solid var(--border);font-weight:700;position:sticky;top:0;z-index:5}
-.mtbl td{padding:8px 11px;border-bottom:1px solid var(--border);
-  color:var(--muted2);vertical-align:middle}
-.modal-foot{padding:11px 18px;border-top:1px solid var(--border);
-  display:flex;gap:9px;align-items:center}
+.mtbl td{padding:8px 11px;border-bottom:1px solid var(--border);color:var(--muted2);vertical-align:middle}
+.modal-foot{padding:10px 17px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center}
 .modal-foot-note{font-size:11px;color:var(--muted);flex:1}
-
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--ey-dark3);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(255,230,0,.22)}
+
+/* ══════════════════════════════════════
+   SCAN LINE OVERLAY
+   Sweeps top→bottom over the scroll area
+   while a scan is running
+   ══════════════════════════════════════ */
+.scan-overlay{
+  position:absolute;
+  /* sits between toolbar bottom and log top */
+  top:0;left:0;right:0;bottom:0;
+  pointer-events:none;
+  z-index:40;
+  overflow:hidden;
+  display:none;
+}
+.scan-overlay.active{ display:block; }
+
+/* ── the sweeping line itself ── */
+.scan-line{
+  position:absolute;
+  left:0;right:0;
+  top:-6px;
+  height:3px;
+  background:linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,230,0,.15) 10%,
+    rgba(255,230,0,.9)  40%,
+    #FFE600             50%,
+    rgba(255,230,0,.9)  60%,
+    rgba(255,230,0,.15) 90%,
+    transparent 100%);
+  box-shadow:
+    0 0 6px  2px rgba(255,230,0,.8),
+    0 0 18px 4px rgba(255,230,0,.5),
+    0 0 40px 8px rgba(255,230,0,.25);
+  animation:scanSweep 2.2s cubic-bezier(.4,0,.6,1) infinite;
+  border-radius:2px;
+}
+
+/* glow trail beneath the line */
+.scan-line::after{
+  content:'';
+  position:absolute;
+  left:0;right:0;
+  top:3px;
+  height:120px;
+  background:linear-gradient(to bottom,
+    rgba(255,230,0,.10) 0%,
+    rgba(255,230,0,.04) 40%,
+    transparent 100%);
+  pointer-events:none;
+}
+
+/* CRT edge flicker on the sides */
+.scan-overlay::before,
+.scan-overlay::after{
+  content:'';
+  position:absolute;
+  top:0;bottom:0;
+  width:1px;
+  background:linear-gradient(to bottom,
+    transparent 0%,
+    rgba(255,230,0,.06) 30%,
+    rgba(255,230,0,.18) 50%,
+    rgba(255,230,0,.06) 70%,
+    transparent 100%);
+  animation:edgeFlicker 2.2s cubic-bezier(.4,0,.6,1) infinite;
+  opacity:0;
+}
+.scan-overlay::before{ left:0; }
+.scan-overlay::after { right:0; animation-delay:.1s; }
+
+@keyframes scanSweep{
+  0%   { top:-6px;   opacity:0; }
+  4%   { opacity:1; }
+  96%  { opacity:1; }
+  100% { top:100%;   opacity:0; }
+}
+@keyframes edgeFlicker{
+  0%,4%,96%,100%{ opacity:0; }
+  20%,80%       { opacity:1; }
+}
+
+/* dots grid that the scan line "reveals" */
+.scan-overlay .scan-grid{
+  position:absolute;
+  inset:0;
+  background-image:
+    radial-gradient(circle, rgba(255,230,0,.04) 1px, transparent 1px);
+  background-size:24px 24px;
+  animation:gridFade 2.2s cubic-bezier(.4,0,.6,1) infinite;
+}
+@keyframes gridFade{
+  0%,100%{ opacity:0; }
+  20%,80%{ opacity:1; }
+}
+
+/* ── toolbar search box gets a yellow border while scanning ── */
+.scanning .toolbar{ border-bottom-color:rgba(255,230,0,.35); }
+.scanning .toolbar::after{
+  content:'SCANNING';
+  font-family:var(--font-data);font-size:9px;font-weight:700;
+  letter-spacing:1.5px;color:rgba(255,230,0,.6);
+  animation:scanBlink .9s ease infinite;
+}
+@keyframes scanBlink{0%,100%{opacity:.4}50%{opacity:1}}
+
+/* ── stats cards pulse while scanning ── */
+.scanning .stat-val{ animation:statPulse 2s ease infinite; }
+@keyframes statPulse{0%,100%{opacity:1}50%{opacity:.7}}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <a class="nav-logo" href="#">
-    <svg width="46" height="46" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
       <rect width="100" height="100" fill="#000"/>
       <polygon points="8,42 88,12 88,28" fill="#FFE600"/>
       <text x="50" y="90" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
@@ -300,213 +446,307 @@ tbody td.tv{text-align:right;min-width:110px}
     <div class="ey-tag">Shape the future<br>with confidence</div>
   </a>
   <span class="nav-title">FontScan</span>
-
-  <div class="scan-bar">
+  <!-- Nav bar only used in single mode -->
+  <div class="scan-bar" id="navBar">
     <svg width="13" height="13" viewBox="0 0 14 14" fill="none" style="flex-shrink:0">
       <circle cx="6" cy="6" r="4.5" stroke="#6B6A7E" stroke-width="1.3"/>
       <path d="M10 10l2.5 2.5" stroke="#6B6A7E" stroke-width="1.3" stroke-linecap="round"/>
     </svg>
-    <input id="urlInput" type="text" placeholder="Enter website URL to scan fonts…"
-           autocomplete="off" spellcheck="false"/>
-    <button class="btn btn-primary" id="scanBtn" onclick="startScan()">
+    <input id="navUrl" type="text" placeholder="Enter website URL…" autocomplete="off" spellcheck="false"/>
+    <button class="btn btn-primary" id="scanBtn" onclick="startSingleScan()">
       <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
         <circle cx="6" cy="6" r="4" stroke="#000" stroke-width="1.3"/>
         <circle cx="6" cy="6" r="1.5" fill="#000"/>
       </svg>Scan
     </button>
-    <button class="btn btn-danger" id="stopBtn" onclick="stopScan()" style="display:none">Stop</button>
+    <button class="btn btn-danger btn-sm" id="stopBtn" onclick="stopAll()" style="display:none">■ Stop</button>
   </div>
-
   <div class="nav-right">
-    <span class="live-chip tr" id="trChip"><span class="live-dot"></span>Traffic…</span>
+    <span class="live-chip tr" id="trChip"><span class="live-dot"></span>SimilarWeb…</span>
     <span class="live-chip ai" id="aiChip"><span class="live-dot"></span>GPT-4o…</span>
-    <button class="btn btn-ghost" onclick="exportCSV()">↓ CSV</button>
-    <button class="btn btn-ghost" onclick="exportExcel()">↓ Excel</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV()">&#8595; CSV</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportExcel()">&#8595; Excel</button>
+    <span id="userChip" style="display:none;align-items:center;gap:5px;padding:3px 10px;background:var(--ey-dark2);border:1px solid var(--border);border-radius:var(--rs);font-size:11px;color:var(--muted2);font-family:var(--font-data);white-space:nowrap"></span>
+    <button id="teamBtn" class="btn btn-ghost btn-sm" onclick="openTeamModal()" style="display:none" title="Manage team">&#128101; Team</button>
+    <button id="logoutBtn" class="btn btn-ghost btn-sm" onclick="doLogout()" style="display:none;border-color:rgba(232,66,90,.3);color:#E8425A">&#9099; Sign Out</button>
   </div>
 </nav>
 
-<!-- APP BODY -->
+<!-- ═══ TEAM MANAGEMENT MODAL ═══ -->
+<div class="modal-ov" id="teamModal" onclick="if(event.target===this)closeTeamModal()">
+  <div class="modal" style="max-width:540px;width:540px">
+    <div class="modal-hdr">
+      <div style="flex:1">
+        <div class="modal-title">&#128101; Team Management</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">Create and manage team member accounts</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="closeTeamModal()">&#10005;</button>
+    </div>
+    <div style="padding:16px 17px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px"><span style="width:3px;height:9px;background:var(--ey-yellow);border-radius:2px;display:inline-block"></span>Add New Member</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><div style="font-size:10px;color:var(--muted2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Username</div><input id="newUsername" class="side-input" type="text" placeholder="john_doe" style="width:100%"/></div>
+        <div><div style="font-size:10px;color:var(--muted2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Email</div><input id="newEmail" class="side-input" type="email" placeholder="john@company.com" style="width:100%"/></div>
+        <div><div style="font-size:10px;color:var(--muted2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Password</div><input id="newPassword" class="side-input" type="password" placeholder="Secure password" style="width:100%"/></div>
+        <div><div style="font-size:10px;color:var(--muted2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Role</div><select id="newRole" class="side-input" style="width:100%;cursor:pointer"><option value="user">User</option><option value="admin">Admin</option></select></div>
+      </div>
+      <div id="teamFormErr" style="display:none;font-size:11px;color:var(--restricted);padding:7px 10px;background:rgba(232,66,90,.08);border:1px solid rgba(232,66,90,.2);border-radius:var(--rs)"></div>
+      <div id="teamFormOk" style="display:none;font-size:11px;color:var(--free);padding:7px 10px;background:rgba(45,184,122,.08);border:1px solid rgba(45,184,122,.2);border-radius:var(--rs)"></div>
+      <button class="btn btn-primary" id="addUserBtn" onclick="addTeamMember()" style="align-self:flex-start;padding:7px 18px">+ Add Member</button>
+    </div>
+    <div style="padding:14px 17px;max-height:240px;overflow-y:auto">
+      <div style="font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px"><span style="width:3px;height:9px;background:var(--ey-yellow);border-radius:2px;display:inline-block"></span>Current Members</div>
+      <div id="teamUserList" style="display:flex;flex-direction:column;gap:5px"><div style="font-size:11px;color:var(--muted);font-style:italic">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
 <div class="app-body">
+<aside class="sidebar">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sb-sec">
-      <div class="sb-title">Scan Settings</div>
-      <div class="field">
-        <div class="field-lbl">Page wait <span id="waitVal">8s</span></div>
-        <input type="range" id="waitSlider" min="2" max="30" value="8"
-               oninput="document.getElementById('waitVal').textContent=this.value+'s'">
-      </div>
-      <div class="field">
-        <div class="field-lbl">Scroll steps <span id="scrollVal">3</span></div>
-        <input type="range" id="scrollSlider" min="0" max="10" value="3"
-               oninput="document.getElementById('scrollVal').textContent=this.value">
-      </div>
+  <!-- MODE TABS -->
+  <div class="sb-sec">
+    <div class="sb-title"><span class="sb-title-l">Scan Mode</span></div>
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tabSingle" onclick="setMode('single')">Single</button>
+      <button class="mode-tab"        id="tabBulk"   onclick="setMode('bulk')">Bulk Queue</button>
     </div>
 
-    <div class="sb-sec">
-      <div class="sb-title">AI Lookup
-        <span class="ai-status pending" id="aiStat">…</span>
-      </div>
-      <div class="tog-row">
-        <span class="tog-lbl">Use OpenAI (GPT-4o)</span>
-        <label class="tog">
-          <input type="checkbox" id="aiTog" checked>
-          <div class="tog-track"></div>
-          <div class="tog-thumb"></div>
-        </label>
-      </div>
-      <div style="font-size:10px;color:var(--muted);line-height:1.65">
-        Key set in <code style="color:var(--ey-yellow)">backend.py</code>.<br>
-        GPT-4o resolves foundry, license + estimates monthly traffic.
-      </div>
-    </div>
-
-    <div class="sb-sec" style="flex:1;overflow-y:auto">
-      <div class="sb-title">Recent Scans
-        <button onclick="loadHistory()" style="background:none;border:none;cursor:pointer;
-          color:var(--muted);font-size:11px">⟳</button>
-      </div>
-      <div id="histList"><div class="hi-empty">No scans yet</div></div>
-    </div>
-
-    <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:7px">
-      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="exportCSV()">CSV</button>
-      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="exportExcel()">Excel</button>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <div class="main">
-
-    <!-- STATS -->
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-val" id="sTotal">—</div>
-        <div class="stat-lbl">Total Fonts</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--free)" id="sFree">—</div>
-        <div class="stat-lbl">Free</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--paid)" id="sPaid">—</div>
-        <div class="stat-lbl">Paid</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--restricted)" id="sRestr">—</div>
-        <div class="stat-lbl">Restricted</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--ai)" id="sAI">—</div>
-        <div class="stat-lbl">AI Resolved</div>
-      </div>
-      <div class="stat">
-        <div class="stat-val" style="color:var(--traffic)" id="sTraffic">—</div>
-        <div class="stat-lbl">Monthly Visits</div>
-      </div>
-    </div>
-
-    <!-- PROGRESS -->
-    <div class="prog" id="progBar" style="display:none"><div class="prog-fill"></div></div>
-
-    <!-- TOOLBAR -->
-    <div class="toolbar">
-      <div class="search-box">
+    <!-- SINGLE PANEL -->
+    <div class="single-panel vis" id="singlePanel">
+      <input class="side-input" id="sideUrl" type="text"
+             placeholder="https://example.com" autocomplete="off" spellcheck="false"/>
+      <button class="btn btn-primary" id="sideStartBtn" onclick="startSingleScan()"
+              style="width:100%;justify-content:center">
         <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-          <circle cx="5.5" cy="5.5" r="3.5" stroke="#6B6A7E" stroke-width="1.2"/>
-          <path d="M8.5 8.5l2 2" stroke="#6B6A7E" stroke-width="1.2" stroke-linecap="round"/>
-        </svg>
-        <input type="text" id="filterInput" placeholder="Filter fonts…" oninput="renderTable()"/>
-      </div>
-      <div class="pills">
-        <span class="pill all active" onclick="setPill('all',this)">All</span>
-        <span class="pill free"       onclick="setPill('free',this)">Free</span>
-        <span class="pill paid"       onclick="setPill('paid',this)">Paid</span>
-      </div>
-      <div class="spacer"></div>
-      <span id="countLbl"></span>
+          <circle cx="6" cy="6" r="4" stroke="#000" stroke-width="1.3"/>
+          <circle cx="6" cy="6" r="1.5" fill="#000"/>
+        </svg>Scan Website
+      </button>
     </div>
 
-    <!-- ══ ALL FONTS TABLE ══ -->
-    <div class="sec-hdr" id="allHdr" onclick="toggleSec('all')">
-      <span class="sec-hdr-title">All Fonts — Free &amp; Paid</span>
-      <span class="sec-hdr-count" id="allCnt"></span>
+    <!-- BULK PANEL -->
+    <div class="bulk-panel" id="bulkPanel">
+      <textarea class="q-textarea" id="bulkTA" rows="5"
+        placeholder="One URL per line:&#10;https://stripe.com&#10;https://notion.so&#10;https://linear.app&#10;&#10;Ctrl+Enter to add"></textarea>
+      <div class="q-actions">
+        <button class="btn btn-primary btn-sm" onclick="addToQueue()"
+                style="flex:1;justify-content:center">+ Add to Queue</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearQueue()">Clear</button>
+      </div>
+      <!-- queue items -->
+      <div class="q-list" id="qList" style="display:none"></div>
+      <!-- progress bar -->
+      <div class="q-prog" id="qProg" style="display:none">
+        <div class="q-prog-fill" id="qProgFill" style="width:0%"></div>
+      </div>
+      <!-- summary -->
+      <div class="q-sum" id="qSum" style="display:none"></div>
+      <!-- start/stop buttons -->
+      <div class="q-btns" id="qBtns" style="display:none">
+        <button class="btn btn-primary btn-sm" id="startQBtn"
+                onclick="startQueue()" style="flex:1;justify-content:center">
+          ▶ Start Queue
+        </button>
+        <button class="btn btn-danger btn-sm" id="stopQBtn"
+                onclick="stopAll()" style="display:none;flex:1;justify-content:center">
+          ■ Stop
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="sb-sec">
+    <div class="sb-title"><span class="sb-title-l">Settings</span>
+      <span class="ai-status pending" id="aiStat">…</span>
+    </div>
+    <div class="field">
+      <div class="field-lbl">Page wait <span id="waitVal">8s</span></div>
+      <input type="range" id="waitSlider" min="2" max="30" value="8"
+             oninput="document.getElementById('waitVal').textContent=this.value+'s'">
+    </div>
+    <div class="field">
+      <div class="field-lbl">Scroll steps <span id="scrollVal">3</span></div>
+      <input type="range" id="scrollSlider" min="0" max="10" value="3"
+             oninput="document.getElementById('scrollVal').textContent=this.value">
+    </div>
+    <div class="tog-row">
+      <span class="tog-lbl">Use OpenAI (GPT-4o)</span>
+      <label class="tog">
+        <input type="checkbox" id="aiTog" checked>
+        <div class="tog-track"></div><div class="tog-thumb"></div>
+      </label>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="sb-sec flex1">
+    <div class="sb-title">
+      <span class="sb-title-l">Recent Scans</span>
+      <button onclick="loadHistory()" style="background:none;border:none;
+        cursor:pointer;color:var(--muted);font-size:11px">⟳</button>
+    </div>
+    <div id="histList"><div class="hi-empty">No scans yet</div></div>
+  </div>
+
+  <div style="padding:9px 13px;border-top:1px solid var(--border);display:flex;gap:6px">
+    <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center" onclick="exportCSV()">CSV</button>
+    <button class="btn btn-ghost btn-sm" style="flex:1;justify-content:center" onclick="exportExcel()">Excel</button>
+    <button class="btn btn-ghost btn-sm" onclick="clearAllResults()" title="Clear all results">🗑</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- STATS — 7 cards -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val" style="color:var(--ai)" id="sSites">—</div>
+      <div class="stat-lbl">Sites Scanned</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="sTotal">—</div>
+      <div class="stat-lbl">Total Fonts</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--free)" id="sFree">—</div>
+      <div class="stat-lbl">Free</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--paid)" id="sPaid">—</div>
+      <div class="stat-lbl">Paid</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--restricted)" id="sRestr">—</div>
+      <div class="stat-lbl">Restricted</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--ai)" id="sAI">—</div>
+      <div class="stat-lbl">AI Resolved</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--traffic)" id="sTraffic">—</div>
+      <div class="stat-lbl">Traffic Est.</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="prog" id="progBar" style="display:none"><div class="prog-fill"></div></div>
+
+  <!-- TOOLBAR — always visible, never scrolls -->
+  <div class="toolbar" id="toolbar">
+    <div class="search-box">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+        <circle cx="5.5" cy="5.5" r="3.5" stroke="#6B6A7E" stroke-width="1.2"/>
+        <path d="M8.5 8.5l2 2" stroke="#6B6A7E" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <input type="text" id="filterInput" placeholder="Filter fonts…" oninput="renderTable()"/>
+    </div>
+    <div class="site-fw" id="siteFilterWrap" style="display:none">
+      <span class="site-flbl">Site:</span>
+      <select id="siteFilter" onchange="renderTable()">
+        <option value="all">All Sites</option>
+      </select>
+    </div>
+    <div class="pills" style="flex-shrink:0">
+      <span class="pill all active" onclick="setPill('all',this)">All</span>
+      <span class="pill free"       onclick="setPill('free',this)">Free</span>
+      <span class="pill paid"       onclick="setPill('paid',this)">Paid</span>
+    </div>
+    <div class="spacer"></div>
+    <span id="countLbl"></span>
+  </div>
+
+  <!-- ▼ SCROLL AREA — only this region scrolls ▼ -->
+  <div class="scroll-area" id="scrollArea">
+
+  <!-- SCAN LINE OVERLAY — shown while scanning is active -->
+  <div class="scan-overlay" id="scanOverlay">
+    <div class="scan-grid"></div>
+    <div class="scan-line"></div>
+  </div>
+
+  <!-- ALL FONTS TABLE -->
+  <div class="sec-hdr" id="allHdr" onclick="toggleSec('all')">
+    <span class="sec-hdr-title">All Fonts — Free &amp; Paid</span>
+    <span class="sec-hdr-count" id="allCnt"></span>
+    <span class="sec-hdr-chev">▼</span>
+  </div>
+  <div id="allBody">
+    <div class="empty" id="emptyState">
+      <svg width="46" height="46" viewBox="0 0 46 46" fill="none" style="opacity:.08">
+        <rect width="46" height="46" fill="#2E2E38"/>
+        <polygon points="4,46 14,46 42,0 32,0" fill="#FFE600"/>
+      </svg>
+      <strong>No fonts scanned yet</strong>
+      Choose a mode on the left and click Scan
+    </div>
+    <div class="tbl-wrap">
+      <table id="resTbl" style="display:none">
+        <thead>
+          <tr>
+            <th onclick="sortBy('_domain')" style="min-width:110px">Website ↕</th>
+            <th onclick="sortBy('name')"     style="min-width:140px">Font Name ↕</th>
+            <th onclick="sortBy('foundry')"  style="min-width:130px">Foundry ↕</th>
+            <th onclick="sortBy('license')"  style="width:104px">License ↕</th>
+            <th class="nosort"              style="min-width:195px">Source Path</th>
+            <th onclick="sortBy('font_type')" style="width:112px">Font Type ↕</th>
+            <th class="nosort"              style="width:108px;text-align:right">Monthly Visits</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RESTRICTED TABLE -->
+  <div class="res-sec" id="resSection" style="display:none">
+    <div class="sec-hdr" id="resHdr" onclick="toggleSec('res')">
+      <span class="sec-hdr-title">🔒 Restricted Fonts</span>
+      <span class="sec-hdr-count" id="resCnt"></span>
       <span class="sec-hdr-chev">▼</span>
     </div>
-    <div id="allBody">
-      <div class="empty" id="emptyState">
-        <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
-          <rect width="46" height="46" fill="#2E2E38"/>
-          <polygon points="4,46 14,46 42,0 32,0" fill="#FFE600"/>
-        </svg>
-        <strong>No fonts scanned yet</strong>
-        Enter a URL above and click Scan
-      </div>
+    <div id="resBody">
+      <div class="res-note">⚠ Restricted fonts require a license for web embedding. Not shown in All Fonts.</div>
       <div class="tbl-wrap">
-        <table id="resTbl" style="display:none">
+        <table>
           <thead>
             <tr>
-              <th onclick="sortBy('name')"      style="min-width:148px">Font Name ↕</th>
-              <th onclick="sortBy('family')"    style="min-width:130px">Font Family ↕</th>
-              <th onclick="sortBy('license')"   style="width:108px">License ↕</th>
-              <th class="nosort"               style="min-width:220px">Source Path</th>
-              <th onclick="sortBy('font_type')" style="width:118px">Font Type ↕</th>
-              <th class="nosort"               style="width:115px;text-align:right">Monthly Visits</th>
+              <th style="min-width:110px">Website</th>
+              <th style="min-width:140px">Font Name</th>
+              <th style="min-width:130px">Foundry</th>
+              <th style="width:124px">License</th>
+              <th style="min-width:195px">Source Path</th>
+              <th style="width:112px">Font Type</th>
+              <th style="width:108px;text-align:right">Monthly Visits</th>
             </tr>
           </thead>
-          <tbody id="tbody"></tbody>
+          <tbody id="resTbody"></tbody>
         </table>
       </div>
     </div>
+  </div>
 
-    <!-- ══ RESTRICTED FONTS TABLE ══ -->
-    <div class="res-sec" id="resSection" style="display:none">
-      <div class="sec-hdr" id="resHdr" onclick="toggleSec('res')">
-        <span class="sec-hdr-title">🔒 Restricted Fonts</span>
-        <span class="sec-hdr-count" id="resCnt"></span>
-        <span class="sec-hdr-chev">▼</span>
-      </div>
-      <div id="resBody">
-        <div class="res-note">
-          ⚠ These fonts may require a license for web embedding. Not shown in All Fonts section.
-        </div>
-        <div class="tbl-wrap">
-          <table id="resTbl">
-            <thead>
-              <tr>
-                <th style="min-width:148px">Font Name</th>
-                <th style="min-width:130px">Font Family</th>
-                <th style="width:130px">License</th>
-                <th style="min-width:220px">Source Path</th>
-                <th style="width:118px">Font Type</th>
-                <th style="width:115px;text-align:right">Monthly Visits</th>
-              </tr>
-            </thead>
-            <tbody id="resTbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+  </div><!-- /scroll-area ▲ -->
 
-    <!-- LOG -->
-    <div class="log" id="logPanel"></div>
+  <!-- LOG — pinned at bottom, never scrolls away -->
+  <div class="log" id="logPanel"></div>
 
-    <!-- DETAIL BAR -->
-    <div class="dbar" id="dbar">
-      <div class="dkv"><div class="dk">Font Name</div><div class="dv" id="dName">—</div></div>
-      <div class="dkv"><div class="dk">Family</div><div class="dv" id="dFam">—</div></div>
-      <div class="dkv"><div class="dk">Foundry</div><div class="dv" id="dFoundry">—</div></div>
-      <div class="dkv"><div class="dk">Designer</div><div class="dv" id="dDesigner">—</div></div>
-      <div class="dkv"><div class="dk">License</div><div class="dv" id="dLic">—</div></div>
-      <div class="dkv"><div class="dk">Font Type</div><div class="dv" id="dFType">—</div></div>
-      <div class="dkv"><div class="dk">Monthly Visits</div><div class="dv" id="dTraffic" style="color:var(--traffic)">—</div></div>
-      <div class="dkv" style="flex:1"><div class="dk">License Note</div>
-        <div class="dv" id="dNote" style="font-size:10px;color:var(--muted2)">—</div></div>
-      <div class="dkv"><div class="dk">AI Source</div><div class="dv" id="dSrc">—</div></div>
-    </div>
-
-  </div><!-- /main -->
+  <!-- DETAIL BAR — pinned at bottom, never scrolls away -->
+  <div class="dbar" id="dbar">
+    <div class="dkv"><div class="dk">Font</div><div class="dv" id="dName">—</div></div>
+    <div class="dkv"><div class="dk">Family</div><div class="dv" id="dFam">—</div></div>
+    <div class="dkv"><div class="dk">Site</div><div class="dv" id="dSite" style="color:var(--ey-yellow)">—</div></div>
+    <div class="dkv"><div class="dk">Foundry</div><div class="dv" id="dFoundry">—</div></div>
+    <div class="dkv"><div class="dk">License</div><div class="dv" id="dLic">—</div></div>
+    <div class="dkv"><div class="dk">Font Type</div><div class="dv" id="dFType">—</div></div>
+    <div class="dkv"><div class="dk">Monthly Visits (SW)</div>
+      <div class="dv" id="dTraffic" style="color:var(--traffic)">—</div></div>
+    <div class="dkv" style="flex:1"><div class="dk">License Note</div>
+      <div class="dv" id="dNote" style="font-size:10px;color:var(--muted2)">—</div></div>
+  </div>
+</div><!-- /main -->
 </div><!-- /app-body -->
 
 <!-- HISTORY MODAL -->
@@ -518,18 +758,19 @@ tbody td.tv{text-align:right;min-width:110px}
         <div class="modal-meta" id="mMeta"></div>
         <div style="font-size:10px;color:var(--muted);margin-top:5px;font-family:var(--font-data)" id="mUrl"></div>
       </div>
-      <button class="btn btn-ghost" onclick="closeModal()">✕</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
       <table class="mtbl">
         <thead>
           <tr>
-            <th style="min-width:148px">Font Name</th>
-            <th style="min-width:130px">Font Family</th>
-            <th style="width:108px">License</th>
-            <th style="min-width:220px">Source Path</th>
-            <th style="width:118px">Font Type</th>
-            <th style="width:115px;text-align:right">Monthly Visits</th>
+            <th style="min-width:110px">Website</th>
+            <th style="min-width:140px">Font Name</th>
+            <th style="min-width:130px">Foundry</th>
+            <th style="width:104px">License</th>
+            <th style="min-width:195px">Source Path</th>
+            <th style="width:112px">Font Type</th>
+            <th style="width:108px;text-align:right">Monthly Visits</th>
           </tr>
         </thead>
         <tbody id="mTbody"></tbody>
@@ -537,19 +778,19 @@ tbody td.tv{text-align:right;min-width:110px}
     </div>
     <div class="modal-foot">
       <span class="modal-foot-note" id="mNote"></span>
-      <button class="btn btn-ghost" onclick="exportModalCSV()">↓ CSV</button>
-      <button class="btn btn-ghost" onclick="exportModalXLSX()">↓ Excel</button>
-      <button class="btn btn-primary" onclick="loadIntoMain()">Load into view →</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportModalCSV()">↓ CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportModalXLSX()">↓ Excel</button>
+      <button class="btn btn-primary btn-sm" onclick="loadIntoMain()">Load into view →</button>
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════
 //  STATE
-// ═══════════════════════════════════════════════════════════
-let allFonts   = [];   // free + paid
-let restrFonts = [];   // restricted only
+// ═══════════════════════════════════════
+let allFonts   = [];
+let restrFonts = [];
 let pill       = 'all';
 let sortKey    = null;
 let sortAsc    = true;
@@ -557,513 +798,637 @@ let scanning   = false;
 let sse        = null;
 let mFonts     = [];
 let mScanId    = null;
-let traffic    = '—';  // current scan traffic estimate
-window.curUrl  = '';
-window.mUrl    = '';
+let scanMode   = 'single';
 
-// ═══════════════════════════════════════════════════════════
-//  HEALTH CHECK
-// ═══════════════════════════════════════════════════════════
+const trafficMap = {};      // domain → formatted traffic string
+let queue        = [];      // [{url, status, count, traffic}]
+let queueRunning = false;
+
+// ═══════════════════════════════════════
+//  MODE SWITCH
+// ═══════════════════════════════════════
+function setMode(m) {
+  scanMode = m;
+  document.getElementById('tabSingle').classList.toggle('active', m==='single');
+  document.getElementById('tabBulk').classList.toggle('active',   m==='bulk');
+  document.getElementById('singlePanel').classList.toggle('vis',  m==='single');
+  document.getElementById('bulkPanel').classList.toggle('vis',    m==='bulk');
+  document.getElementById('navBar').style.display = m==='single' ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════
+//  AUTH HELPERS
+// ═══════════════════════════════════════
+function getToken(){ return localStorage.getItem('fs_token'); }
+
+function authFetch(url, opts={}){
+  const t = getToken();
+  opts.headers = {...(opts.headers||{}), ...(t ? {'Authorization':'Bearer '+t} : {})};
+  return fetch(url, opts).then(r=>{
+    if(r.status===401){ doLogout(); throw new Error('Session expired. Please sign in again.'); }
+    return r;
+  });
+}
+
+function doLogout(){
+  localStorage.removeItem('fs_token');
+  localStorage.removeItem('fs_user');
+  window.location.replace('/login');
+}
+
+function initAuth(){
+  const token = getToken();
+  if(!token){ window.location.replace('/login'); return; }
+  try{
+    const p = JSON.parse(atob(token.split('.')[1]));
+    if(p.exp*1000 < Date.now()){ doLogout(); return; }
+  }catch(e){ doLogout(); return; }
+
+  try{
+    const u = JSON.parse(localStorage.getItem('fs_user')||'{}');
+    if(u.username){
+      const chip = document.getElementById('userChip');
+      chip.innerHTML = '<span style="color:var(--ey-yellow)">●</span> '+u.username
+        +(u.role==='admin'?' <span style="font-size:9px;color:var(--ai)">[admin]</span>':'');
+      chip.style.display='inline-flex';
+    }
+    if(u.role==='admin') document.getElementById('teamBtn').style.display='inline-flex';
+  }catch(e){}
+  document.getElementById('logoutBtn').style.display='inline-flex';
+}
+
+// ═══════════════════════════════════════
+//  TEAM MANAGEMENT
+// ═══════════════════════════════════════
+function openTeamModal(){
+  document.getElementById('teamModal').classList.add('open');
+  loadTeamUsers();
+}
+function closeTeamModal(){ document.getElementById('teamModal').classList.remove('open'); }
+
+async function loadTeamUsers(){
+  const list = document.getElementById('teamUserList');
+  list.innerHTML='<div style="font-size:11px;color:var(--muted);font-style:italic">Loading…</div>';
+  try{
+    const users = await authFetch('/users').then(r=>r.json());
+    const me    = JSON.parse(localStorage.getItem('fs_user')||'{}');
+    if(!users.length){ list.innerHTML='<div style="font-size:11px;color:var(--muted)">No users found.</div>'; return; }
+    list.innerHTML = users.map(u=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--ey-dark2);border:1px solid var(--border);border-radius:var(--rs)">
+        <div style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:${u.role==='admin'?'var(--ey-yellow)':'var(--free)'}"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:var(--text);font-weight:500">${esc(u.username)}</div>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--font-data)">${esc(u.email)}</div>
+        </div>
+        <span style="font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;background:${u.role==='admin'?'rgba(255,230,0,.12)':'rgba(45,184,122,.1)'};color:${u.role==='admin'?'var(--ey-yellow)':'var(--free)'}">${u.role.toUpperCase()}</span>
+        ${u.id!==me.id?`<button onclick="deleteTeamMember(${u.id},'${esc(u.username)}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 5px;border-radius:3px;line-height:1" title="Remove">&#10005;</button>`:'<span style="width:24px"></span>'}
+      </div>`).join('');
+  }catch(e){
+    list.innerHTML='<div style="font-size:11px;color:var(--restricted)">Failed to load. Check console.</div>';
+  }
+}
+
+async function addTeamMember(){
+  const username = document.getElementById('newUsername').value.trim();
+  const email    = document.getElementById('newEmail').value.trim();
+  const password = document.getElementById('newPassword').value;
+  const role     = document.getElementById('newRole').value;
+  const errEl    = document.getElementById('teamFormErr');
+  const okEl     = document.getElementById('teamFormOk');
+  const btn      = document.getElementById('addUserBtn');
+  errEl.style.display='none'; okEl.style.display='none';
+  if(!username||!email||!password){ errEl.textContent='All fields are required.'; errEl.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Adding…';
+  try{
+    const res  = await authFetch('/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,email,password,role})});
+    const data = await res.json();
+    if(!res.ok){ errEl.textContent=data.detail||'Failed to create user.'; errEl.style.display='block'; return; }
+    okEl.textContent='✓ '+data.username+' added successfully.'; okEl.style.display='block';
+    document.getElementById('newUsername').value='';
+    document.getElementById('newEmail').value='';
+    document.getElementById('newPassword').value='';
+    loadTeamUsers();
+  }catch(e){ errEl.textContent='Error: '+e.message; errEl.style.display='block'; }
+  finally{ btn.disabled=false; btn.textContent='+ Add Member'; }
+}
+
+async function deleteTeamMember(id, username){
+  if(!confirm('Remove "'+username+'" from the team? They will no longer be able to log in.')) return;
+  try{
+    const res = await authFetch('/users/'+id,{method:'DELETE'});
+    if(!res.ok){ const d=await res.json(); alert(d.detail||'Failed to delete.'); return; }
+    loadTeamUsers();
+  }catch(e){ alert('Error: '+e.message); }
+}
+
+// ═══════════════════════════════════════
+//  HEALTH
+// ═══════════════════════════════════════
 async function checkHealth() {
   const el = document.getElementById('aiStat');
   try {
-    const d = await fetch('/api/health').then(r=>r.json());
-    el.textContent = `✓ ${d.cached_ai_lookups} fonts / 📊${d.cached_traffic_est||0} traffic`;
-    el.className = 'ai-status ok';
-  } catch {
-    el.textContent = 'offline';
-    el.className = 'ai-status off';
-  }
+    const d = await authFetch('/api/health').then(r=>r.json());
+    el.textContent = `✓ ${d.cached_ai_lookups}f / 📊${d.cached_traffic_est||0}t`;
+    el.className   = 'ai-status ok';
+  } catch { el.textContent='offline'; el.className='ai-status off'; }
 }
+
+initAuth();
 checkHealth();
 
-// ═══════════════════════════════════════════════════════════
-//  TRAFFIC ESTIMATION  (called in parallel with scan)
-// ═══════════════════════════════════════════════════════════
-async function doTrafficEstimate(url) {
-  const chip = document.getElementById('trChip');
-  chip.classList.add('active');
-  document.getElementById('sTraffic').textContent = '…';
-  log(`📊 Estimating monthly traffic for ${url}…`, 'tr');
-
-  try {
-    const d = await fetch(`/api/estimate-traffic?url=${encodeURIComponent(url)}`).then(r=>r.json());
-    traffic = d.estimate || 'N/A';
-    document.getElementById('sTraffic').textContent = traffic;
-    document.getElementById('dTraffic').textContent  = traffic;
-    const note = d.cached ? ' (cached)' : '';
-    log(`📊 Traffic → ${d.domain}: ${traffic}${note}`, 'tr');
-    refreshTrafficCells();
-  } catch(e) {
-    traffic = 'N/A';
-    document.getElementById('sTraffic').textContent = 'N/A';
-    log(`📊 Traffic unavailable: ${e.message}`, 'error');
-    refreshTrafficCells();
-  } finally {
-    chip.classList.remove('active');
-    checkHealth();
-  }
+// ═══════════════════════════════════════
+//  QUEUE MANAGEMENT
+// ═══════════════════════════════════════
+function addToQueue() {
+  const raw = document.getElementById('bulkTA').value.trim();
+  if (!raw) return;
+  let added = 0;
+  raw.split('\n').map(l=>l.trim()).filter(l=>l.length>3).forEach(u=>{
+    if (!u.startsWith('http')) u = 'https://'+u;
+    if (!queue.find(q=>q.url===u && q.status==='pending')) {
+      queue.push({url:u, status:'pending', count:0, traffic:'—'});
+      added++;
+    }
+  });
+  if (added) { document.getElementById('bulkTA').value=''; renderQueue(); log(`➕ ${added} URL${added!==1?'s':''} added (${queue.length} total)`,'queue'); }
 }
 
-function refreshTrafficCells() {
-  // Update every traffic cell in both tables
-  document.querySelectorAll('.tv').forEach(td => {
-    td.innerHTML = tvHTML(traffic);
+function removeFromQueue(i) {
+  if (queue[i]?.status==='pending') { queue.splice(i,1); renderQueue(); }
+}
+
+function clearQueue() {
+  queue = queue.filter(q=>q.status==='active');
+  renderQueue();
+  log('Queue cleared','queue');
+}
+
+function renderQueue() {
+  const list = document.getElementById('qList');
+  const btns = document.getElementById('qBtns');
+  const prog = document.getElementById('qProg');
+  const sum  = document.getElementById('qSum');
+  if (!queue.length) { list.style.display=btns.style.display=prog.style.display=sum.style.display='none'; return; }
+
+  list.style.display='flex'; btns.style.display='flex'; prog.style.display='block'; sum.style.display='flex';
+
+  const ICO = {pending:{c:'pending',s:'○'}, active:{c:'active',s:'●'}, done:{c:'done',s:'✓'}, error:{c:'error',s:'✗'}};
+  list.innerHTML = queue.map((q,i)=>{
+    const dom = extractDomain(q.url);
+    const ico = ICO[q.status]||ICO.pending;
+    const rm  = q.status==='pending' ? `<button class="qi-rm" onclick="removeFromQueue(${i})">✕</button>` : '';
+    const tr  = q.traffic&&q.traffic!=='—' ? `<span class="qi-tr">📈${q.traffic}</span>` : '';
+    const cnt = q.count ? `<span class="qi-cnt">${q.count}f</span>` : '';
+    return `<div class="qi ${q.status}">
+      <div class="qi-ico ${ico.c}">${ico.s}</div>
+      <span class="qi-url ${q.status}" title="${q.url}">${dom}</span>
+      ${tr}${cnt}${rm}
+    </div>`;
+  }).join('');
+
+  const done = queue.filter(q=>q.status==='done'||q.status==='error').length;
+  const pct  = queue.length ? Math.round(done/queue.length*100) : 0;
+  document.getElementById('qProgFill').style.width = pct+'%';
+
+  const pending = queue.filter(q=>q.status==='pending').length;
+  const doneN   = queue.filter(q=>q.status==='done').length;
+  const errN    = queue.filter(q=>q.status==='error').length;
+  sum.innerHTML = `<span>Queue:<span class="qv">${queue.length}</span></span>
+    <span>Done:<span class="qv" style="color:var(--free)">${doneN}</span></span>
+    ${errN?`<span>Err:<span class="qv" style="color:var(--restricted)">${errN}</span></span>`:''}
+    <span>Left:<span class="qv">${pending}</span></span>
+    <span>${pct}%</span>`;
+
+  document.getElementById('startQBtn').style.display = queueRunning ? 'none'        : 'inline-flex';
+  document.getElementById('stopQBtn').style.display  = queueRunning ? 'inline-flex' : 'none';
+}
+
+// ═══════════════════════════════════════
+//  QUEUE RUNNER
+// ═══════════════════════════════════════
+async function startQueue() {
+  if (!queue.filter(q=>q.status==='pending').length) { log('No pending URLs in queue.','queue'); return; }
+  queueRunning = true;
+  renderQueue();
+  log(`▶ Bulk scan started — ${queue.filter(q=>q.status==='pending').length} websites queued`,'queue');
+  await runNextInQueue();
+}
+
+async function runNextInQueue() {
+  if (!queueRunning) return;
+  const idx = queue.findIndex(q=>q.status==='pending');
+  if (idx===-1) {
+    queueRunning=false; renderQueue();
+    log(`✓ Bulk complete — ${queue.filter(q=>q.status==='done').length} sites, ${allFonts.length+restrFonts.length} fonts`,'done');
+    checkHealth(); loadHistory();
+    document.getElementById('progBar').style.display='none';
+    return;
+  }
+  queue[idx].status='active'; renderQueue();
+  const url = queue[idx].url;
+  log(`▶ [${idx+1}/${queue.length}] ${url}`,'queue');
+  document.getElementById('progBar').style.display='block';
+  doTrafficEstimate(url, idx);
+  await runScan(url, idx);
+}
+
+// Promise resolves when SSE stream ends
+function runScan(url, qIdx) {
+  return new Promise(resolve=>{
+    const wait   = document.getElementById('waitSlider').value;
+    const scroll = document.getElementById('scrollSlider').value;
+    const useAi  = document.getElementById('aiTog').checked;
+
+    scanning=true;
+    setButtons(true);
+
+    const token=getToken();
+    sse = new EventSource(`/api/scan?${new URLSearchParams({url,wait,scroll,use_ai:useAi,token})}`);
+
+    sse.onmessage = e=>{
+      const d = JSON.parse(e.data);
+      if (d.type==='status') { log(d.message,'info'); }
+      else if (d.type==='font') {
+        d._url    = d.site_url||url;
+        d._domain = extractDomain(d._url);
+        d._traffic= trafficMap[d._domain]||'—';
+        if (d.is_restricted) { restrFonts.push(d); appendResRow(d); }
+        else                 { allFonts.push(d);   appendRow(d);    }
+        if (qIdx>=0) queue[qIdx].count++;
+        updateStats();
+        log(`✦ ${d.name}  [${d.foundry}]  ${d.license}`,'font');
+      }
+      else if (d.type==='ai_call')  { document.getElementById('aiChip').classList.add('active'); }
+      else if (d.type==='ai_done')  { document.getElementById('aiChip').classList.remove('active'); updateStats(); }
+      else if (d.type==='ai_error') { document.getElementById('aiChip').classList.remove('active'); }
+      else if (d.type==='done') {
+        document.getElementById('aiChip').classList.remove('active');
+        log(`✓ ${extractDomain(url)}: ${d.total} fonts (${d.ai_resolved||0} AI, ${d.restricted||0} restricted)`,'done');
+        if (qIdx>=0) { queue[qIdx].status='done'; queue[qIdx].count=d.total; renderQueue(); }
+        scanning=false; setButtons(false); sse.close();
+        updateSiteFilter(); loadHistory();
+        setTimeout(()=>runNextInQueue().then(resolve), 700);
+      }
+      else if (d.type==='error') {
+        log(`✗ ${extractDomain(url)}: ${d.message}`,'error');
+        if (qIdx>=0) { queue[qIdx].status='error'; renderQueue(); }
+        scanning=false; setButtons(false); sse.close();
+        setTimeout(()=>runNextInQueue().then(resolve), 400);
+      }
+    };
+    sse.onerror=()=>{
+      if (scanning) { log(`✗ Connection lost for ${extractDomain(url)}`,'error'); }
+      if (qIdx>=0) { queue[qIdx].status='error'; renderQueue(); }
+      scanning=false; setButtons(false); sse.close();
+      setTimeout(()=>runNextInQueue().then(resolve), 400);
+    };
   });
 }
 
-// ═══════════════════════════════════════════════════════════
-//  SCAN
-// ═══════════════════════════════════════════════════════════
-function startScan() {
-  let url = document.getElementById('urlInput').value.trim();
+function setButtons(on) {
+  document.getElementById('scanBtn').disabled        = on;
+  document.getElementById('sideStartBtn').disabled   = on;
+  document.getElementById('stopBtn').style.display   = on ? 'inline-flex' : 'none';
+  // Scan overlay + body class
+  const overlay = document.getElementById('scanOverlay');
+  const main    = document.querySelector('.main');
+  if (on) {
+    overlay.classList.add('active');
+    main.classList.add('scanning');
+  } else {
+    overlay.classList.remove('active');
+    main.classList.remove('scanning');
+    document.getElementById('progBar').style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════
+//  SINGLE SCAN — resets table on every new scan
+//  Bulk mode accumulates across all queued sites
+// ═══════════════════════════════════════
+function startSingleScan() {
+  let url = (document.getElementById('navUrl').value||document.getElementById('sideUrl').value).trim();
   if (!url) return;
-  if (!url.startsWith('http')) url = 'https://' + url;
-  document.getElementById('urlInput').value = url;
+  if (!url.startsWith('http')) url='https://'+url;
+  document.getElementById('navUrl').value  = url;
+  document.getElementById('sideUrl').value = url;
 
-  const wait   = document.getElementById('waitSlider').value;
-  const scroll = document.getElementById('scrollSlider').value;
-  const useAi  = document.getElementById('aiTog').checked;
-
-  // Reset
+  // Wipe previous single-scan results from the table.
+  // Previous scan data is already saved in backend history — nothing is lost.
   allFonts   = [];
   restrFonts = [];
-  traffic    = '—';
-  window.curUrl = url;
-
-  document.getElementById('tbody').innerHTML     = '';
-  document.getElementById('resTbody').innerHTML  = '';
-  document.getElementById('resTbl').style.display    = 'none';
+  Object.keys(trafficMap).forEach(k => delete trafficMap[k]);
+  document.getElementById('tbody').innerHTML    = '';
+  document.getElementById('resTbody').innerHTML = '';
+  document.getElementById('resTbl').style.display     = 'none';
   document.getElementById('emptyState').style.display = 'flex';
   document.getElementById('resSection').style.display = 'none';
   document.getElementById('dbar').classList.remove('on');
-  document.getElementById('aiChip').classList.remove('active');
+  document.getElementById('siteFilterWrap').style.display = 'none';
+  document.getElementById('siteFilter').innerHTML = '<option value="all">All Sites</option>';
   document.getElementById('sTraffic').textContent = '—';
-  document.getElementById('dTraffic').textContent  = '—';
+  updateStats(); updateAllCnt();
 
-  setScanning(true);
-  updateStats();
-  clearLog();
-
-  // Traffic in parallel
-  doTrafficEstimate(url);
-
-  // Font scan SSE
-  const p = new URLSearchParams({url, wait, scroll, use_ai: useAi});
-  sse = new EventSource('/api/scan?' + p);
-
-  sse.onmessage = e => {
-    const d = JSON.parse(e.data);
-    if (d.type === 'status') {
-      log(d.message, 'info');
-    } else if (d.type === 'font') {
-      d._url = d.site_url || window.curUrl || '';
-      if (d.is_restricted) {
-        restrFonts.push(d);
-        appendResRow(d);
-      } else {
-        allFonts.push(d);
-        appendRow(d);
-      }
-      updateStats();
-      log(`✦ ${d.name}  [${d.foundry}]  ${d.license}  — ${d.font_type||''}`, 'font');
-    } else if (d.type === 'ai_call') {
-      document.getElementById('aiChip').classList.add('active');
-      log(`🤖 GPT-4o querying: "${d.font}"`, 'info');
-    } else if (d.type === 'ai_done') {
-      document.getElementById('aiChip').classList.remove('active');
-      updateStats();
-      log(`🤖 Resolved: "${d.font}" → ${d.foundry} | ${d.license}`, 'info');
-    } else if (d.type === 'ai_error') {
-      document.getElementById('aiChip').classList.remove('active');
-      log(`⚠ GPT-4o error for "${d.font}"`, 'error');
-    } else if (d.type === 'done') {
-      document.getElementById('aiChip').classList.remove('active');
-      log(`✓ Done — ${d.total} fonts (${d.ai_resolved||0} AI, ${d.restricted||0} restricted)`, 'done');
-      setScanning(false);
-      sse.close();
-      loadHistory();
-      checkHealth();
-    } else if (d.type === 'error') {
-      log(`✗ ${d.message}`, 'error');
-      setScanning(false);
-      sse.close();
-    }
-  };
-  sse.onerror = () => { if (scanning) { log('Connection lost', 'error'); setScanning(false); } };
+  log(`▶ Scanning: ${url}`, 'queue');
+  doTrafficEstimate(url, -1);
+  runScan(url, -1);
 }
 
-function stopScan() {
-  if (sse) { sse.close(); sse = null; }
-  setScanning(false);
-  log('Scan stopped.', 'info');
+function stopAll() {
+  if (sse) { sse.close(); sse=null; }
+  queueRunning=false; scanning=false;
+  queue.forEach(q=>{ if(q.status==='active') q.status='error'; });
+  renderQueue(); setButtons(false);
+  document.getElementById('progBar').style.display='none';
+  document.getElementById('scanOverlay').classList.remove('active');
+  document.querySelector('.main').classList.remove('scanning');
+  document.getElementById('aiChip').classList.remove('active');
+  document.getElementById('trChip').classList.remove('active');
+  log('■ Stopped.','error');
 }
 
-function setScanning(v) {
-  scanning = v;
-  document.getElementById('scanBtn').disabled        = v;
-  document.getElementById('stopBtn').style.display   = v ? 'inline-flex' : 'none';
-  document.getElementById('progBar').style.display   = v ? 'block' : 'none';
-}
-
-document.getElementById('urlInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') startScan();
+// Sync both URL inputs
+['navUrl','sideUrl'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',e=>{
+    ['navUrl','sideUrl'].forEach(x=>{ if(x!==id) document.getElementById(x).value=e.target.value; });
+  });
+  document.getElementById(id).addEventListener('keydown',e=>{ if(e.key==='Enter') startSingleScan(); });
+});
+document.getElementById('bulkTA').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();addToQueue();}
 });
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════
+//  TRAFFIC ESTIMATION
+// ═══════════════════════════════════════
+async function doTrafficEstimate(url, qIdx) {
+  const chip   = document.getElementById('trChip');
+  const domain = extractDomain(url);
+  chip.classList.add('active');
+  try {
+    const d   = await authFetch(`/api/estimate-traffic?url=${encodeURIComponent(url)}`).then(r=>r.json());
+    const est = d.estimate||'N/A';
+    const src = d.source === 'similarweb' ? '📊 SimilarWeb' : (d.source === 'gpt' ? '🤖 GPT est.' : '📊');
+    trafficMap[domain] = est;
+    // Patch traffic cells
+    document.querySelectorAll(`[data-dom="${CSS.escape(domain)}"]`).forEach(td=>{ td.innerHTML=tvHTML(est); });
+    if (qIdx>=0&&queue[qIdx]) { queue[qIdx].traffic=est; renderQueue(); }
+    // Update stat card (show last / count)
+    const vals = Object.values(trafficMap).filter(v=>v&&v!=='N/A'&&v!=='—');
+    document.getElementById('sTraffic').textContent = vals.length===1?vals[0]:`${vals.length} sites`;
+    log(`${src} ${domain}: ${est}`, 'tr');
+  } catch(e) {
+    trafficMap[domain]='N/A';
+    log(`📊 Traffic error for ${domain}`,'error');
+  } finally { chip.classList.remove('active'); }
+}
+
+// ═══════════════════════════════════════
 //  HELPERS
-// ═══════════════════════════════════════════════════════════
-function licClass(lic) {
-  const l = (lic||'').toLowerCase();
-  if (l.includes('free'))       return 'free';
-  if (l.includes('paid'))       return 'paid';
-  if (l.includes('restricted')) return 'restricted';
-  return 'check';
+// ═══════════════════════════════════════
+function extractDomain(url) {
+  try { return new URL(url.startsWith('http')?url:'https://'+url).hostname.replace(/^www\./,''); }
+  catch { return url; }
 }
-
-function ftClass(ft) {
-  return (ft||'').toLowerCase().includes('css') ? 'css' : 'emb';
+function licClass(l){ const v=(l||'').toLowerCase(); if(v.includes('free'))return'free'; if(v.includes('paid'))return'paid'; if(v.includes('restricted'))return'restricted'; return'check'; }
+function ftClass(ft){ return (ft||'').toLowerCase().includes('css')?'css':'emb'; }
+function ftLabel(ft){ return (ft||'').toLowerCase().includes('css')?'CSS Font':'Embedded Font'; }
+function tvHTML(v){ if(!v||v==='—'||v==='N/A')return'<span class="tv-val na">N/A</span>'; if(v==='…')return'<span class="tv-val loading">…</span>'; return`<span class="tv-val live">📈 ${esc(v)}</span>`; }
+function fmtPath(path){
+  if(!path)return'—';
+  path=path.replace(/â†'/g,'→').replace(/&#8594;/g,'→').replace(/\s*[-=]>\s*/g,' → ').replace(/\s*→\s*/g,' → ').trim();
+  const parts=path.split(' → '), last=parts.pop();
+  return parts.map(s=>`<span class="seg">${esc(s)} → </span>`).join('')+`<span class="fn">${esc(last)}</span>`;
 }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function ftLabel(ft) {
-  return (ft||'').toLowerCase().includes('css') ? 'CSS Font' : 'Embedded Font';
-}
-
-function tvHTML(v) {
-  if (!v || v === '—' || v === 'N/A')
-    return '<span class="tv-val na">N/A</span>';
-  if (v === '…')
-    return '<span class="tv-val loading">estimating…</span>';
-  return `<span class="tv-val live">📈 ${esc(v)}</span>`;
-}
-
-function fmtPath(path) {
-  if (!path) return '—';
-  path = path.replace(/â†'/g,'→').replace(/&#8594;/g,'→')
-             .replace(/\s*[-=]>\s*/g,' → ').replace(/\s*→\s*/g,' → ').trim();
-  const parts = path.split(' → ');
-  const last  = parts.pop();
-  return parts.map(s=>`<span class="seg">${esc(s)} → </span>`).join('') +
-         `<span class="fn">${esc(last)}</span>`;
-}
-
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════
 //  ROW BUILDERS
-// ═══════════════════════════════════════════════════════════
-function makeRow(font, onClick) {
-  const tr  = document.createElement('tr');
-  const lc  = licClass(font.license);
-  const ftc = ftClass(font.font_type);
-  const ftl = ftLabel(font.font_type);
-
-  tr.innerHTML = `
+// ═══════════════════════════════════════
+function makeRow(font, cb) {
+  const tr=document.createElement('tr');
+  const lc=licClass(font.license), ftc=ftClass(font.font_type), ftl=ftLabel(font.font_type);
+  const dom=font._domain||extractDomain(font._url||font.site_url||'');
+  const tv=trafficMap[dom]||'—';
+  tr.innerHTML=`
+    <td class="sc"><a href="${esc(font._url||font.site_url||'')}" target="_blank"
+      style="text-decoration:none"><span class="site-badge">${esc(dom)}</span></a></td>
     <td class="nm">${esc(font.name)}</td>
-    <td class="fam">${esc(font.family||font.name)}</td>
+    <td class="fam">${esc(font.foundry||'—')}</td>
     <td><span class="badge ${lc}"><span class="dot"></span>${esc(font.license)}</span></td>
     <td class="path">${fmtPath(font.path)}</td>
     <td><span class="ftag ${ftc}">${esc(ftl)}</span></td>
-    <td class="tv">${tvHTML(traffic)}</td>`;
-
-  tr.addEventListener('click', () => onClick(tr, font));
+    <td class="tv" data-dom="${esc(dom)}">${tvHTML(tv)}</td>`;
+  tr.addEventListener('click',()=>cb(tr,font));
   return tr;
 }
-
 function makeResRow(font) {
-  const tr  = document.createElement('tr');
-  const ftc = ftClass(font.font_type);
-  const ftl = ftLabel(font.font_type);
-
-  tr.innerHTML = `
+  const tr=document.createElement('tr');
+  const ftc=ftClass(font.font_type),ftl=ftLabel(font.font_type);
+  const dom=font._domain||extractDomain(font._url||font.site_url||'');
+  const tv=trafficMap[dom]||'—';
+  tr.innerHTML=`
+    <td class="sc"><span class="site-badge" style="background:rgba(232,66,90,.1);color:var(--restricted)">${esc(dom)}</span></td>
     <td class="nm">${esc(font.name)}</td>
-    <td class="fam">${esc(font.family||font.name)}</td>
+    <td class="fam">${esc(font.foundry||'—')}</td>
     <td><span class="badge restricted"><span class="dot"></span>${esc(font.license)}</span></td>
     <td class="path">${fmtPath(font.path)}</td>
     <td><span class="ftag ${ftc}">${esc(ftl)}</span></td>
-    <td class="tv">${tvHTML(traffic)}</td>`;
-
-  tr.addEventListener('click', () => selectRow(tr, font));
+    <td class="tv" data-dom="${esc(dom)}">${tvHTML(tv)}</td>`;
+  tr.addEventListener('click',()=>selectRow(tr,font));
   return tr;
 }
 
-// ═══════════════════════════════════════════════════════════
-//  APPEND ROWS LIVE
-// ═══════════════════════════════════════════════════════════
-function appendRow(font) {
-  document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('resTbl').style.display     = 'table';
-  document.getElementById('tbody').appendChild(makeRow(font, selectRow));
+// ═══════════════════════════════════════
+//  APPEND / RENDER
+// ═══════════════════════════════════════
+function appendRow(font){
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('resTbl').style.display='table';
+  const row = makeRow(font,selectRow);
+  document.getElementById('tbody').appendChild(row);
+  // Scroll the new row into view inside the scroll-area
+  row.scrollIntoView({block:'nearest', behavior:'smooth'});
   updateAllCnt();
 }
-
-function appendResRow(font) {
-  document.getElementById('resSection').style.display = 'block';
-  document.getElementById('resTbody').appendChild(makeResRow(font));
+function appendResRow(font){
+  document.getElementById('resSection').style.display='block';
+  const row = makeResRow(font);
+  document.getElementById('resTbody').appendChild(row);
+  row.scrollIntoView({block:'nearest', behavior:'smooth'});
   updateResCnt();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  RENDER (filter / sort)
-// ═══════════════════════════════════════════════════════════
-function renderTable() {
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-
-  const q = document.getElementById('filterInput').value.toLowerCase();
-  let rows = [...allFonts];
-  if (pill !== 'all') rows = rows.filter(f => licClass(f.license) === pill);
-  if (q) rows = rows.filter(f => JSON.stringify(f).toLowerCase().includes(q));
-  if (sortKey) {
-    rows.sort((a,b) => {
-      const av=(a[sortKey]||'').toLowerCase(), bv=(b[sortKey]||'').toLowerCase();
-      return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
-    });
-  }
-
-  if (rows.length) {
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('resTbl').style.display     = 'table';
-    rows.forEach(f => tbody.appendChild(makeRow(f, selectRow)));
-  } else {
-    document.getElementById('resTbl').style.display     = 'none';
-    document.getElementById('emptyState').style.display = 'flex';
-  }
+function renderTable(){
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  const q=document.getElementById('filterInput').value.toLowerCase();
+  const sf=document.getElementById('siteFilter').value;
+  let rows=[...allFonts];
+  if(pill!=='all') rows=rows.filter(f=>licClass(f.license)===pill);
+  if(sf!=='all')   rows=rows.filter(f=>(f._domain||extractDomain(f._url||''))===sf);
+  if(q)            rows=rows.filter(f=>JSON.stringify(f).toLowerCase().includes(q));
+  if(sortKey)      rows.sort((a,b)=>{ const av=(a[sortKey]||'').toLowerCase(),bv=(b[sortKey]||'').toLowerCase(); return sortAsc?av.localeCompare(bv):bv.localeCompare(av); });
+  if(rows.length){ document.getElementById('emptyState').style.display='none'; document.getElementById('resTbl').style.display='table'; rows.forEach(f=>tbody.appendChild(makeRow(f,selectRow))); }
+  else { document.getElementById('resTbl').style.display='none'; document.getElementById('emptyState').style.display='flex'; }
   updateAllCnt();
 }
 
-// ═══════════════════════════════════════════════════════════
-//  STATS & COUNTS
-// ═══════════════════════════════════════════════════════════
-function updateStats() {
-  const total  = allFonts.length + restrFonts.length;
-  const free   = allFonts.filter(f=>licClass(f.license)==='free').length;
-  const paid   = allFonts.filter(f=>licClass(f.license)==='paid').length;
-  const restr  = restrFonts.length;
-  const ai     = [...allFonts,...restrFonts].filter(f=>f.source==='ai').length;
-  const d      = '—';
-  document.getElementById('sTotal').textContent  = (scanning||total) ? total : d;
-  document.getElementById('sFree').textContent   = (scanning||total) ? free  : d;
-  document.getElementById('sPaid').textContent   = (scanning||total) ? paid  : d;
-  document.getElementById('sRestr').textContent  = (scanning||total) ? restr : d;
-  document.getElementById('sAI').textContent     = (scanning||total) ? ai    : d;
+// ═══════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════
+function updateStats(){
+  const total=allFonts.length+restrFonts.length;
+  const free=allFonts.filter(f=>licClass(f.license)==='free').length;
+  const paid=allFonts.filter(f=>licClass(f.license)==='paid').length;
+  const restr=restrFonts.length;
+  const ai=[...allFonts,...restrFonts].filter(f=>f.source==='ai').length;
+  const sites=new Set([...allFonts,...restrFonts].map(f=>f._domain||extractDomain(f._url||f.site_url||''))).size;
+  const d='—';
+  document.getElementById('sSites').textContent=(scanning||total)?sites:d;
+  document.getElementById('sTotal').textContent=(scanning||total)?total:d;
+  document.getElementById('sFree').textContent=(scanning||total)?free:d;
+  document.getElementById('sPaid').textContent=(scanning||total)?paid:d;
+  document.getElementById('sRestr').textContent=(scanning||total)?restr:d;
+  document.getElementById('sAI').textContent=(scanning||total)?ai:d;
+}
+function updateAllCnt(){ const n=document.getElementById('tbody').children.length; document.getElementById('allCnt').textContent=n?`${n} fonts`:''; document.getElementById('countLbl').textContent=n?`${n} font${n!==1?'s':''} shown`:''; }
+function updateResCnt(){ const n=restrFonts.length; document.getElementById('resCnt').textContent=n?`${n} fonts`:''; }
+
+function updateSiteFilter(){
+  const doms=[...new Set([...allFonts,...restrFonts].map(f=>f._domain||extractDomain(f._url||f.site_url||'')))];
+  const sel=document.getElementById('siteFilter');
+  const wrap=document.getElementById('siteFilterWrap');
+  wrap.style.display=doms.length>1?'flex':'none';
+  if(doms.length<2)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">All Sites</option>'+doms.map(d=>`<option value="${esc(d)}" ${d===cur?'selected':''}>${esc(d)}</option>`).join('');
 }
 
-function updateAllCnt() {
-  const n = document.getElementById('tbody').children.length;
-  document.getElementById('allCnt').textContent  = n ? `${n} fonts` : '';
-  document.getElementById('countLbl').textContent = n ? `${n} font${n!==1?'s':''} shown` : '';
-}
+function toggleSec(w){ const[b,h]=w==='all'?[document.getElementById('allBody'),document.getElementById('allHdr')]:[document.getElementById('resBody'),document.getElementById('resHdr')]; const hidden=b.style.display==='none'; b.style.display=hidden?'':'none'; h.classList.toggle('collapsed',!hidden); }
+function setPill(t,el){ pill=t; document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active')); el.classList.add('active'); renderTable(); }
+function sortBy(k){ if(sortKey===k)sortAsc=!sortAsc;else{sortKey=k;sortAsc=true;} renderTable(); }
 
-function updateResCnt() {
-  const n = restrFonts.length;
-  document.getElementById('resCnt').textContent = n ? `${n} fonts` : '';
-}
-
-// ═══════════════════════════════════════════════════════════
-//  SECTION COLLAPSE
-// ═══════════════════════════════════════════════════════════
-function toggleSec(which) {
-  const [body, hdr] = which === 'all'
-    ? [document.getElementById('allBody'), document.getElementById('allHdr')]
-    : [document.getElementById('resBody'),  document.getElementById('resHdr')];
-  const hidden = body.style.display === 'none';
-  body.style.display = hidden ? '' : 'none';
-  hdr.classList.toggle('collapsed', !hidden);
-}
-
-// ═══════════════════════════════════════════════════════════
-//  SORT & FILTER
-// ═══════════════════════════════════════════════════════════
-function setPill(type, el) {
-  pill = type;
-  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  renderTable();
-}
-
-function sortBy(key) {
-  if (sortKey === key) sortAsc = !sortAsc;
-  else { sortKey = key; sortAsc = true; }
-  renderTable();
-}
-
-// ═══════════════════════════════════════════════════════════
-//  ROW SELECTION
-// ═══════════════════════════════════════════════════════════
-function selectRow(tr, font) {
+function selectRow(tr,font){
   document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('sel'));
   tr.classList.add('sel');
-  document.getElementById('dName').textContent    = font.name;
-  document.getElementById('dFam').textContent     = font.family||font.name;
-  document.getElementById('dFoundry').textContent = font.foundry||'—';
-  document.getElementById('dDesigner').textContent= font.designer||'—';
-  document.getElementById('dLic').textContent     = font.license;
-  document.getElementById('dFType').textContent   = font.font_type||'—';
-  document.getElementById('dTraffic').textContent = traffic !== '—' ? traffic : '…';
-  document.getElementById('dNote').textContent    = font.license_detail||'—';
-  document.getElementById('dSrc').textContent     = font.source||'—';
+  const dom=font._domain||extractDomain(font._url||font.site_url||'');
+  document.getElementById('dName').textContent=font.name;
+  document.getElementById('dFam').textContent=font.family||font.name;
+  document.getElementById('dSite').textContent=dom;
+  document.getElementById('dFoundry').textContent=font.foundry||'—';
+  document.getElementById('dLic').textContent=font.license;
+  document.getElementById('dFType').textContent=font.font_type||'—';
+  document.getElementById('dTraffic').textContent=trafficMap[dom]||'—';
+  document.getElementById('dNote').textContent=font.license_detail||'—';
   document.getElementById('dbar').classList.add('on');
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════
 //  LOG
-// ═══════════════════════════════════════════════════════════
-function log(msg, cls='info') {
-  const lp = document.getElementById('logPanel');
-  const d  = document.createElement('div');
-  d.className   = `log-e ${cls}`;
-  d.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-  lp.appendChild(d);
-  lp.scrollTop = lp.scrollHeight;
-}
-function clearLog() { document.getElementById('logPanel').innerHTML=''; }
+// ═══════════════════════════════════════
+function log(msg,cls='info'){ const lp=document.getElementById('logPanel'); const d=document.createElement('div'); d.className=`log-e ${cls}`; d.textContent=`[${new Date().toLocaleTimeString()}] ${msg}`; lp.appendChild(d); lp.scrollTop=lp.scrollHeight; }
 
-// ═══════════════════════════════════════════════════════════
+function clearAllResults(){
+  if(scanning){log('Stop the scan first.','error');return;}
+  allFonts=[];restrFonts=[];
+  Object.keys(trafficMap).forEach(k=>delete trafficMap[k]);
+  document.getElementById('tbody').innerHTML='';
+  document.getElementById('resTbody').innerHTML='';
+  document.getElementById('resTbl').style.display='none';
+  document.getElementById('emptyState').style.display='flex';
+  document.getElementById('resSection').style.display='none';
+  document.getElementById('dbar').classList.remove('on');
+  document.getElementById('siteFilterWrap').style.display='none';
+  document.getElementById('siteFilter').innerHTML='<option value="all">All Sites</option>';
+  document.getElementById('sTraffic').textContent='—';
+  updateStats();updateAllCnt();
+  log('Results cleared.','info');
+}
+
+// ═══════════════════════════════════════
 //  HISTORY
-// ═══════════════════════════════════════════════════════════
-async function loadHistory() {
-  try {
-    const d  = await fetch('/api/history').then(r=>r.json());
-    const el = document.getElementById('histList');
-    if (!d.history.length) {
-      el.innerHTML = '<div class="hi-empty">No scans yet</div>';
-      return;
-    }
-    el.innerHTML = d.history.map(h=>`
+// ═══════════════════════════════════════
+async function loadHistory(){
+  try{
+    const d=await authFetch('/api/history').then(r=>r.json());
+    const el=document.getElementById('histList');
+    if(!d.history.length){el.innerHTML='<div class="hi-empty">No scans yet</div>';return;}
+    el.innerHTML=d.history.map(h=>`
       <div class="hi" onclick="openModal('${h.scan_id}')">
         <div class="hi-dom">${esc(h.domain)}</div>
-        <div class="hi-meta">
-          <span>${esc(h.ts)}</span>
+        <div class="hi-meta"><span>${esc(h.ts)}</span>
           <span class="hi-n">${h.total||0} fonts</span>
-          ${h.restricted_count?`<span style="color:var(--restricted)">${h.restricted_count} restricted</span>`:''}
+          ${h.restricted_count?`<span style="color:var(--restricted)">${h.restricted_count}r</span>`:''}
           ${!h.done?'<span style="color:var(--paid)">scanning…</span>':''}
         </div>
       </div>`).join('');
-  } catch{}
+  }catch{}
 }
 
-async function openModal(scanId) {
-  try {
-    const r = await fetch(`/api/history/${scanId}`);
-    if (!r.ok) { alert('Scan not found.'); return; }
-    const d = await r.json();
-
-    mScanId = scanId;
-    mFonts  = d.fonts||[];
-    window.mUrl = d.url||'';
-    mFonts.forEach(f => { f._url = f.site_url||window.mUrl||''; });
-
-    document.getElementById('mTitle').textContent = d.domain;
-    document.getElementById('mUrl').textContent   = d.url;
-
-    const free  = mFonts.filter(f=>licClass(f.license)==='free').length;
-    const paid  = mFonts.filter(f=>licClass(f.license)==='paid').length;
-    const restr = mFonts.filter(f=>f.is_restricted).length;
-
-    document.getElementById('mMeta').innerHTML =
-      `<span>${esc(d.ts)}</span><span>${mFonts.length} fonts</span>` +
-      `<span class="mc-free">${free} free</span>` +
-      `<span class="mc-paid">${paid} paid</span>` +
-      (restr?`<span class="mc-res">${restr} restricted</span>`:'');
-
-    document.getElementById('mNote').textContent =
-      `${mFonts.filter(f=>f.source==='ai').length} fonts identified by GPT-4o`;
-
-    const tb = document.getElementById('mTbody');
-    tb.innerHTML = '';
-    mFonts.forEach(f => {
-      const lc  = f.is_restricted ? 'restricted' : licClass(f.license);
-      const ftc = ftClass(f.font_type);
-      const ftl = ftLabel(f.font_type);
-      const tr  = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="font-weight:500;color:var(--text)">${esc(f.name)}</td>
-        <td>${esc(f.family||f.name)}</td>
+async function openModal(sid){
+  try{
+    const r=await authFetch(`/api/history/${sid}`);
+    if(!r.ok){alert('Scan not found.');return;}
+    const d=await r.json();
+    mScanId=sid; mFonts=d.fonts||[];
+    mFonts.forEach(f=>{f._url=f.site_url||d.url||''; f._domain=extractDomain(f._url);});
+    document.getElementById('mTitle').textContent=d.domain;
+    document.getElementById('mUrl').textContent=d.url;
+    const free=mFonts.filter(f=>licClass(f.license)==='free').length;
+    const paid=mFonts.filter(f=>licClass(f.license)==='paid').length;
+    const restr=mFonts.filter(f=>f.is_restricted).length;
+    document.getElementById('mMeta').innerHTML=`<span>${esc(d.ts)}</span><span>${mFonts.length} fonts</span><span class="mc-free">${free} free</span><span class="mc-paid">${paid} paid</span>${restr?`<span class="mc-res">${restr} restricted</span>`:''}`;
+    document.getElementById('mNote').textContent=`${mFonts.filter(f=>f.source==='ai').length} fonts by GPT-4o`;
+    const tb=document.getElementById('mTbody'); tb.innerHTML='';
+    mFonts.forEach(f=>{
+      const lc=f.is_restricted?'restricted':licClass(f.license);
+      const ftc=ftClass(f.font_type),ftl=ftLabel(f.font_type);
+      const dom=f._domain||extractDomain(f._url||'');
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><span class="site-badge" style="font-size:10px">${esc(dom)}</span></td>
+        <td style="font-weight:500;color:var(--text)">${esc(f.name)}</td><td>${esc(f.foundry||'—')}</td>
         <td><span class="badge ${lc}"><span class="dot"></span>${esc(f.license)}</span></td>
-        <td style="font-size:10px;color:var(--muted2);max-width:220px;
-            overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-          ${esc((f.path||'').replace(/â†'/g,'→').replace(/&#8594;/g,'→').trim())}</td>
+        <td style="font-size:10px;color:var(--muted2);max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((f.path||'').replace(/â†'/g,'→').replace(/&#8594;/g,'→').trim())}</td>
         <td><span class="ftag ${ftc}">${esc(ftl)}</span></td>
-        <td style="text-align:right;font-family:var(--font-data);font-size:11px;color:var(--traffic)">
-          ${esc(f._traffic||'—')}</td>`;
+        <td style="text-align:right;font-family:var(--font-data);font-size:11px;color:var(--traffic)">${esc(trafficMap[dom]||'—')}</td>`;
       tb.appendChild(tr);
     });
-
     document.getElementById('histModal').classList.add('open');
-  } catch(e) { alert(`Error: ${e.message}`); }
+  }catch(e){alert(`Error: ${e.message}`);}
+}
+function closeModal(){ document.getElementById('histModal').classList.remove('open'); }
+
+function loadIntoMain(){
+  const na=mFonts.filter(f=>!f.is_restricted), nr=mFonts.filter(f=>f.is_restricted);
+  allFonts=[...allFonts,...na]; restrFonts=[...restrFonts,...nr];
+  allFonts.forEach(f=>{f._domain=f._domain||extractDomain(f._url||f.site_url||'');});
+  restrFonts.forEach(f=>{f._domain=f._domain||extractDomain(f._url||f.site_url||'');});
+  renderTable(); updateStats(); closeModal();
+  const rtb=document.getElementById('resTbody'); rtb.innerHTML='';
+  restrFonts.forEach(f=>rtb.appendChild(makeResRow(f)));
+  document.getElementById('resSection').style.display=restrFonts.length?'block':'none';
+  updateResCnt(); updateSiteFilter();
+  log(`Loaded ${na.length+nr.length} fonts from history`,'done');
 }
 
-function closeModal() { document.getElementById('histModal').classList.remove('open'); }
-
-function loadIntoMain() {
-  allFonts   = mFonts.filter(f=>!f.is_restricted);
-  restrFonts = mFonts.filter(f=> f.is_restricted);
-  allFonts.forEach(f => { f._url = f._url||f.site_url||window.mUrl||''; });
-  window.curUrl = window.mUrl||'';
-  traffic = '—';
-  document.getElementById('sTraffic').textContent = '—';
-
-  renderTable();
-  updateStats();
-  closeModal();
-
-  // Re-render restricted
-  const rtb = document.getElementById('resTbody');
-  rtb.innerHTML = '';
-  restrFonts.forEach(f => rtb.appendChild(makeResRow(f)));
-  document.getElementById('resSection').style.display = restrFonts.length ? 'block' : 'none';
-  updateResCnt();
-
-  log(`Loaded history — ${allFonts.length} fonts + ${restrFonts.length} restricted`, 'done');
-}
-
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════
 //  EXPORT
-// ═══════════════════════════════════════════════════════════
-const COLS = ['Font Name','Font Family','License','Source Path','Font Type','Monthly Visits (AI)'];
-
-function fontToRow(f) {
-  const path = (f.path||'').replace(/â†'/g,'→').replace(/&#8594;/g,'→')
-                            .replace(/\s*→\s*/g,' → ').trim();
-  return [
-    f.name||'', f.family||f.name||'', f.license||'',
-    path, f.font_type||'',
-    f._traffic||traffic||'—'
-  ];
+// ═══════════════════════════════════════
+const COLS=['Website','Font Name','Foundry','License','Source Path','Font Type','Monthly Visits (SimilarWeb)'];
+function fontToRow(f){
+  const dom=f._domain||extractDomain(f._url||f.site_url||'');
+  const path=(f.path||'').replace(/â†'/g,'→').replace(/&#8594;/g,'→').replace(/\s*→\s*/g,' → ').trim();
+  return[f._url||f.site_url||dom, f.name||'', f.foundry||'—', f.license||'', path, f.font_type||'', trafficMap[dom]||'—'];
 }
+function dlCSV(rows,fn){ const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n'); const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),download:fn}); document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+function dlXLSX(rows,fn){ if(typeof XLSX==='undefined'){alert('SheetJS not loaded.');return;} const ws=XLSX.utils.aoa_to_sheet(rows); ws['!cols']=rows[0].map((_,ci)=>{const max=rows.reduce((m,r)=>Math.max(m,String(r[ci]||'').length),0);return{wch:Math.min(Math.max(max+2,12),80)};}); ws['!freeze']={xSplit:0,ySplit:1}; const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Font Scan'); XLSX.writeFile(wb,fn); }
+function exportCSV(){ const a=[...allFonts,...restrFonts];if(!a.length)return;dlCSV([COLS,...a.map(fontToRow)],`fontscan_${Date.now()}.csv`); }
+function exportExcel(){ const a=[...allFonts,...restrFonts];if(!a.length)return;dlXLSX([COLS,...a.map(fontToRow)],`fontscan_${Date.now()}.xlsx`); }
+function exportModalCSV(){ if(!mFonts.length)return;dlCSV([COLS,...mFonts.map(fontToRow)],`history_${mScanId}.csv`); }
+function exportModalXLSX(){ if(!mFonts.length)return;dlXLSX([COLS,...mFonts.map(fontToRow)],`history_${mScanId}.xlsx`); }
 
-function dlCSV(rows, fn) {
-  const csv = '\uFEFF' + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
-  const a   = Object.assign(document.createElement('a'),{
-    href: URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),
-    download: fn
-  });
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-}
-
-function dlXLSX(rows, fn) {
-  if (typeof XLSX==='undefined'){alert('SheetJS not loaded.');return;}
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = rows[0].map((_,ci)=>{
-    const max=rows.reduce((m,r)=>Math.max(m,String(r[ci]||'').length),0);
-    return {wch:Math.min(Math.max(max+2,12),80)};
-  });
-  ws['!freeze'] = {xSplit:0,ySplit:1};
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Font Scan');
-  XLSX.writeFile(wb,fn);
-}
-
-function exportCSV()      { const a=[...allFonts,...restrFonts]; if(!a.length)return; dlCSV([COLS,...a.map(fontToRow)],`fontscan_${Date.now()}.csv`); }
-function exportExcel()    { const a=[...allFonts,...restrFonts]; if(!a.length)return; dlXLSX([COLS,...a.map(fontToRow)],`fontscan_${Date.now()}.xlsx`); }
-function exportModalCSV() { if(!mFonts.length)return; dlCSV([COLS,...mFonts.map(fontToRow)],`history_${mScanId}.csv`); }
-function exportModalXLSX(){ if(!mFonts.length)return; dlXLSX([COLS,...mFonts.map(fontToRow)],`history_${mScanId}.xlsx`); }
-
-// ─── Init ────────────────────────────────────────────────────
+setMode('single');
 loadHistory();
 </script>
 </body>

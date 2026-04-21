@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sign In — FontScan · EY Font Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ey-yellow:#FFE600;--ey-black:#000;--ey-charcoal:#1A1A24;
+  --ey-dark:#23232F;--ey-dark2:#2E2E38;--ey-dark3:#3A3A4A;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.14);
+  --restricted:#E8425A;--free:#2DB87A;
+  --text:#F2F2F4;--muted:#6B6A7E;--muted2:#9A99AD;
+  --font-ui:'IBM Plex Sans',sans-serif;--font-data:'IBM Plex Mono',monospace;
+  --r:8px;--rs:5px;
+}
+html{font-size:14px;height:100%}
+body{background:var(--ey-charcoal);color:var(--text);font-family:var(--font-ui);min-height:100%;display:flex;flex-direction:column;}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,230,0,.016) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,230,0,.016) 1px,transparent 1px);
+  background-size:40px 40px}
+nav{position:sticky;top:0;z-index:100;background:var(--ey-black);
+  border-bottom:3px solid var(--ey-yellow);padding:0 20px;height:58px;
+  display:flex;align-items:center;gap:14px}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0;
+  border-right:1px solid rgba(255,255,255,.12);padding-right:18px}
+.ey-tag{font-size:6.5px;color:rgba(255,255,255,.45);letter-spacing:.3px;text-transform:uppercase;line-height:1.5;white-space:nowrap}
+.nav-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.6px;text-transform:uppercase}
+.page{flex:1;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;padding:48px 20px;}
+.card{width:100%;max-width:400px;background:var(--ey-dark);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;}
+.card-header{padding:24px 28px 20px;border-bottom:1px solid var(--border);}
+.card-label{font-size:9px;font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.card-label::before{content:'';width:3px;height:9px;background:var(--ey-yellow);border-radius:2px;flex-shrink:0}
+.card-title{font-size:20px;font-weight:600;color:var(--text);letter-spacing:-.2px;margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--muted2);line-height:1.5;}
+.card-body{padding:24px 28px 28px;display:flex;flex-direction:column;gap:16px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field-label{font-size:11px;font-weight:600;color:var(--muted2);letter-spacing:.4px;text-transform:uppercase;}
+.field-input{width:100%;background:var(--ey-dark2);border:1px solid rgba(255,255,255,.1);border-radius:var(--rs);color:var(--text);font-family:var(--font-data);font-size:13px;padding:10px 13px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.field-input:focus{border-color:var(--ey-yellow);box-shadow:0 0 0 3px rgba(255,230,0,.09);}
+.field-input::placeholder{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;border-radius:var(--rs);font-family:var(--font-ui);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;letter-spacing:.4px;white-space:nowrap;width:100%;}
+.btn-primary{background:var(--ey-yellow);color:var(--ey-black);}
+.btn-primary:hover:not(:disabled){background:#FFF033;transform:translateY(-1px);}
+.btn-link{background:transparent;color:var(--muted2);border:1px solid rgba(255,255,255,.12);}
+.btn-link:hover:not(:disabled){color:var(--text);border-color:rgba(255,255,255,.25);}
+.btn:disabled{opacity:.45;cursor:not-allowed;pointer-events:none;}
+.error-box{display:none;align-items:center;gap:9px;padding:10px 13px;background:rgba(232,66,90,.1);border:1px solid rgba(232,66,90,.3);border-radius:var(--rs);font-size:12px;color:var(--restricted);line-height:1.4;}
+.error-box.vis{display:flex;}
+.ok-box{display:none;align-items:center;gap:9px;padding:10px 13px;background:rgba(45,184,122,.1);border:1px solid rgba(45,184,122,.3);border-radius:var(--rs);font-size:12px;color:var(--free);line-height:1.4;}
+.ok-box.vis{display:flex;}
+.field.hidden{display:none;}
+.spinner{display:none;width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid rgba(0,0,0,.2);border-top-color:var(--ey-black);animation:spin .6s linear infinite;}
+.spinner.vis{display:block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.card-footer{padding:14px 28px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center;line-height:1.6;}
+.card-footer strong{color:var(--muted2);font-weight:500;}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="/">
+    <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+      <rect width="100" height="100" fill="#000"/>
+      <polygon points="8,42 88,12 88,28" fill="#FFE600"/>
+      <text x="50" y="90" text-anchor="middle" font-family="Arial Black,Arial,sans-serif"
+            font-weight="900" font-size="40" fill="#fff" letter-spacing="-1">EY</text>
+    </svg>
+    <div class="ey-tag">Shape the future<br>with confidence</div>
+  </a>
+  <span class="nav-title">FontScan</span>
+</nav>
+
+<div class="page">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-label">Authentication required</div>
+      <div class="card-title" id="cardTitle">Sign In</div>
+      <div class="card-sub">Access restricted to authorised EY team members only.</div>
+    </div>
+    <div class="card-body">
+      <div class="error-box" id="errorBox">
+        <span style="font-size:15px;flex-shrink:0">&#9888;</span>
+        <span id="errorMsg">Incorrect email or password.</span>
+      </div>
+      <div class="ok-box" id="okBox">
+        <span style="font-size:15px;flex-shrink:0">&#10003;</span>
+        <span id="okMsg">Account created successfully.</span>
+      </div>
+      <div class="field hidden" id="usernameField">
+        <label class="field-label" for="usernameInput">Username</label>
+        <input class="field-input" type="text" id="usernameInput" placeholder="Choose a username" autocomplete="username"/>
+      </div>
+      <div class="field">
+        <label class="field-label" for="emailInput">Email address</label>
+        <input class="field-input" type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" autofocus/>
+      </div>
+      <div class="field">
+        <label class="field-label" for="passInput">Password</label>
+        <input class="field-input" type="password" id="passInput" placeholder="Enter your password" autocomplete="current-password"/>
+      </div>
+      <div class="field hidden" id="confirmField">
+        <label class="field-label" for="confirmInput">Confirm password</label>
+        <input class="field-input" type="password" id="confirmInput" placeholder="Re-enter password" autocomplete="new-password"/>
+      </div>
+      <button class="btn btn-primary" id="loginBtn" onclick="submitAuth()">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnLabel">Sign In</span>
+      </button>
+      <button class="btn btn-link" id="toggleBtn" onclick="toggleMode()">Create new account</button>
+    </div>
+    <div class="card-footer">
+      Need access? Ask your <strong>FontScan administrator</strong> to create an account.
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const token = localStorage.getItem('fs_token');
+  if(!token) return;
+  try{
+    const p = JSON.parse(atob(token.split('.')[1]));
+    if(p.exp*1000 > Date.now()){ window.location.replace('/'); }
+    else{ localStorage.removeItem('fs_token'); localStorage.removeItem('fs_user'); }
+  }catch(e){ localStorage.removeItem('fs_token'); localStorage.removeItem('fs_user'); }
+})();
+
+const emailInput = document.getElementById('emailInput');
+const passInput  = document.getElementById('passInput');
+const usernameInput = document.getElementById('usernameInput');
+const confirmInput  = document.getElementById('confirmInput');
+const usernameField = document.getElementById('usernameField');
+const confirmField  = document.getElementById('confirmField');
+const toggleBtn     = document.getElementById('toggleBtn');
+const cardTitle     = document.getElementById('cardTitle');
+const loginBtn   = document.getElementById('loginBtn');
+const spinner    = document.getElementById('spinner');
+const btnLabel   = document.getElementById('btnLabel');
+const errorBox   = document.getElementById('errorBox');
+const errorMsg   = document.getElementById('errorMsg');
+const okBox      = document.getElementById('okBox');
+const okMsg      = document.getElementById('okMsg');
+let authMode = 'login';
+
+[usernameInput, emailInput, passInput, confirmInput].forEach(el=>{
+  el.addEventListener('keydown', e=>{ if(e.key==='Enter') submitAuth(); });
+});
+
+function showError(msg){ errorMsg.textContent=msg; errorBox.classList.add('vis'); }
+function hideError(){ errorBox.classList.remove('vis'); }
+function showOk(msg){ okMsg.textContent=msg; okBox.classList.add('vis'); }
+function hideOk(){ okBox.classList.remove('vis'); }
+function setLoading(v){
+  loginBtn.disabled=v;
+  toggleBtn.disabled=v;
+  spinner.classList.toggle('vis',v);
+  if(v){
+    btnLabel.textContent = authMode === 'signup' ? 'Creating account…' : 'Signing in…';
+  } else {
+    btnLabel.textContent = authMode === 'signup' ? 'Create Account' : 'Sign In';
+  }
+}
+
+function toggleMode(){
+  hideError();
+  hideOk();
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  const signupOn = authMode === 'signup';
+  usernameField.classList.toggle('hidden', !signupOn);
+  confirmField.classList.toggle('hidden', !signupOn);
+  cardTitle.textContent = signupOn ? 'Create Account' : 'Sign In';
+  btnLabel.textContent = signupOn ? 'Create Account' : 'Sign In';
+  toggleBtn.textContent = signupOn ? 'Back to sign in' : 'Create new account';
+  passInput.setAttribute('autocomplete', signupOn ? 'new-password' : 'current-password');
+  if(signupOn){
+    usernameInput.focus();
+  } else {
+    emailInput.focus();
+  }
+}
+
+async function loginAfterSignup(email, password){
+  const res  = await fetch('/login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email, password}),
+  });
+  const data = await res.json();
+  if(!res.ok){
+    throw new Error(data.detail || 'Account created, but auto-login failed. Please sign in manually.');
+  }
+  localStorage.setItem('fs_token', data.access_token);
+  const meRes = await fetch('/me',{ headers:{'Authorization':'Bearer '+data.access_token} });
+  if(meRes.ok){ localStorage.setItem('fs_user', JSON.stringify(await meRes.json())); }
+  window.location.replace('/');
+}
+
+async function submitAuth(){
+  hideError();
+  hideOk();
+  const email    = emailInput.value.trim();
+  const password = passInput.value;
+  if(!email)    { showError('Please enter your email address.'); emailInput.focus(); return; }
+  if(!password) { showError('Please enter your password.');      passInput.focus();  return; }
+  const isSignup = authMode === 'signup';
+  const username = usernameInput.value.trim();
+  const confirm  = confirmInput.value;
+  if(isSignup){
+    if(!username){ showError('Please enter a username.'); usernameInput.focus(); return; }
+    if(password.length < 6){ showError('Password should be at least 6 characters.'); passInput.focus(); return; }
+    if(password !== confirm){ showError('Passwords do not match.'); confirmInput.focus(); return; }
+  }
+
+  setLoading(true);
+  try{
+    if(isSignup){
+      const signRes = await fetch('/signup',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({username, email, password, role:'user'}),
+      });
+      const signData = await signRes.json();
+      if(!signRes.ok){
+        showError(signData.detail || 'Could not create account.');
+        return;
+      }
+      showOk('Account created. Signing you in…');
+      await loginAfterSignup(email, password);
+      return;
+    }
+
+    await loginAfterSignup(email, password);
+  }catch(err){
+    showError(err.message || 'Connection error. Make sure the server is running.');
+  }finally{
+    setLoading(false);
+  }
+}
+</script>
+</body>
+</html>
