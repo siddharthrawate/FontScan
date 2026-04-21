@@ -1,4 +1,6 @@
 fastapi
 uvicorn
-python-dotenv
-requests
+selenium
+python-multipart
+passlib
+python-jose
