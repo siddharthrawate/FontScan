@@ -452,7 +452,9 @@ tbody td.tv{text-align:right;min-width:106px}
       <circle cx="6" cy="6" r="4.5" stroke="#6B6A7E" stroke-width="1.3"/>
       <path d="M10 10l2.5 2.5" stroke="#6B6A7E" stroke-width="1.3" stroke-linecap="round"/>
     </svg>
-    <input id="navUrl" type="text" placeholder="Enter website URL…" autocomplete="off" spellcheck="false"/>
+    <input id="navUrl" type="url" name="website_url_nav" placeholder="Enter website URL"
+           autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"
+           inputmode="url" data-lpignore="true" data-1p-ignore="true"/>
     <button class="btn btn-primary" id="scanBtn" onclick="startSingleScan()">
       <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
         <circle cx="6" cy="6" r="4" stroke="#000" stroke-width="1.3"/>
@@ -514,8 +516,9 @@ tbody td.tv{text-align:right;min-width:106px}
 
     <!-- SINGLE PANEL -->
     <div class="single-panel vis" id="singlePanel">
-      <input class="side-input" id="sideUrl" type="text"
-             placeholder="https://example.com" autocomplete="off" spellcheck="false"/>
+      <input class="side-input" id="sideUrl" type="url" name="website_url_side"
+             placeholder="Enter website URL" autocomplete="new-password" autocapitalize="off"
+             autocorrect="off" spellcheck="false" inputmode="url" data-lpignore="true" data-1p-ignore="true"/>
       <button class="btn btn-primary" id="sideStartBtn" onclick="startSingleScan()"
               style="width:100%;justify-content:center">
         <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
