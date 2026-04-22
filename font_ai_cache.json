@@ -7658,5 +7658,15 @@
     "category": "Variable",
     "confidence": "medium",
     "source": "ai"
+  },
+  "lato!important": {
+    "foundry": "\u0141ukasz Dziedzic",
+    "designer": "\u0141ukasz Dziedzic",
+    "license": "Free (OFL)",
+    "license_detail": "Lato is available under the Open Font License (OFL), which allows for both personal and commercial use.",
+    "year": 2010,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
   }
 }
