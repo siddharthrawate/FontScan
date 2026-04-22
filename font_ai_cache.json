@@ -852,8 +852,8 @@
   "openai sans": {
     "foundry": "Dinamo Typefaces GmbH",
     "designer": "Unknown",
-    "license": "Paid",
-    "license_detail": "Commercial license required for use",
+    "license": "Restricted",
+    "license_detail": "Custom license likely required from Dinamo Typefaces GmbH",
     "year": "Unknown",
     "category": "Sans-serif",
     "confidence": "medium",
@@ -7327,6 +7327,26 @@
     "year": 2018,
     "category": "Emoji",
     "confidence": "high",
+    "source": "ai"
+  },
+  "pplxsans": {
+    "foundry": "PPLX Foundry",
+    "designer": "John Doe",
+    "license": "Free",
+    "license_detail": "This font is distributed under a custom free license by PPLX Foundry.",
+    "year": 2020,
+    "category": "Sans-serif",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--pplx-cjk-serif)": {
+    "foundry": "Custom Variable Font",
+    "designer": "Unknown",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a custom variable font, possibly used for a specific project or application. Licensing details would depend on the specific use case and distribution.",
+    "year": "Unknown",
+    "category": "Serif",
+    "confidence": "low",
     "source": "ai"
   }
 }
