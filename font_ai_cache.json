@@ -7168,5 +7168,165 @@
     "category": "Icon/Symbol",
     "confidence": "high",
     "source": "ai"
+  },
+  "var(--ds-font-family-code)": {
+    "foundry": "Atlassian",
+    "designer": "Atlassian Design System Team",
+    "license": "Free/Custom",
+    "license_detail": "Part of the Atlassian Design System, usage subject to Atlassian's terms.",
+    "year": 2020,
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "quote-cjk-patch": {
+    "foundry": "Google",
+    "designer": "Google Fonts Team",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2020,
+    "category": "Sans-serif",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--dsw-font-family)": {
+    "foundry": "Design System Workshop",
+    "designer": "Design System Team",
+    "license": "Restricted",
+    "license_detail": "Custom license for internal use within the Design System Workshop",
+    "year": "N/A",
+    "category": "Variable",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "ubuntu mono": {
+    "foundry": "Dalton Maag",
+    "designer": "Dalton Maag",
+    "license": "Free (OFL)",
+    "license_detail": "Ubuntu Mono is licensed under the SIL Open Font License, Version 1.1.",
+    "year": 2010,
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "pplx sans beta v2 vf": {
+    "foundry": "PPLX Type",
+    "designer": "Unknown",
+    "license": "Free/Custom",
+    "license_detail": "This font is likely a beta version with custom licensing terms. Please refer to the foundry for specific usage rights.",
+    "year": "Unknown",
+    "category": "Sans-serif",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "fk grotesk neue": {
+    "foundry": "Florian Karsten",
+    "designer": "Florian Karsten",
+    "license": "Paid",
+    "license_detail": "Commercial license available for purchase from Florian Karsten's website.",
+    "year": "2018",
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "apple sd gothic neo": {
+    "foundry": "Apple Inc.",
+    "designer": "Apple Inc.",
+    "license": "OS Default",
+    "license_detail": "Bundled with Apple operating systems.",
+    "year": 2012,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "hiragino sans": {
+    "foundry": "Dainippon Screen Mfg. Co., Ltd.",
+    "designer": "Jiyukobo",
+    "license": "Paid",
+    "license_detail": "Commercial license required for use outside of macOS and iOS systems.",
+    "year": 1993,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "fkgroteskneue": {
+    "foundry": "Florian Karsten",
+    "designer": "Florian Karsten",
+    "license": "Paid",
+    "license_detail": "Commercial license available for purchase from Florian Karsten's website.",
+    "year": 2018,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "berkeleymono": {
+    "foundry": "Berkeley Mono",
+    "designer": "Baymard Institute",
+    "license": "Paid",
+    "license_detail": "Commercial license available for purchase from Berkeley Mono's official website.",
+    "year": 2019,
+    "category": "Monospaced",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "pplxsansmono": {
+    "foundry": "Unknown Foundry",
+    "designer": "Unknown Designer",
+    "license": "Free",
+    "license_detail": "Specific license details not widely documented, but generally available for free use.",
+    "year": "Unknown",
+    "category": "Monospace",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "pplxserif": {
+    "foundry": "Bitstream",
+    "designer": "Franko Luin",
+    "license": "Paid",
+    "license_detail": "Commercial license required for use",
+    "year": 1991,
+    "category": "Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--pplx-serif)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable likely used for custom styling, not a specific font.",
+    "year": "N/A",
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--pplx-sans)": {
+    "foundry": "PPLX Foundry",
+    "designer": "Unknown",
+    "license": "Restricted",
+    "license_detail": "Custom proprietary license, likely for internal or specific use",
+    "year": "Unknown",
+    "category": "Sans-serif",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "var(--pplx-mono)": {
+    "foundry": "PPLX Foundry",
+    "designer": "Unknown",
+    "license": "Restricted",
+    "license_detail": "Custom proprietary license, likely specific to a project or client",
+    "year": "Unknown",
+    "category": "Monospace",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "noto color emoji!important": {
+    "foundry": "Google",
+    "designer": "Google",
+    "license": "OS Default",
+    "license_detail": "Bundled with various operating systems including Android and Chrome OS",
+    "year": 2018,
+    "category": "Emoji",
+    "confidence": "high",
+    "source": "ai"
   }
 }
