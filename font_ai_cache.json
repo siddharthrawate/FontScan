@@ -5451,12 +5451,12 @@
   },
   "daimlercs-": {
     "foundry": "URW++ Design and Development GmbH",
-    "designer": "URW++ Design Team",
+    "designer": "Unknown",
     "license": "Paid",
     "license_detail": "Commercial license required for use",
-    "year": "2016",
-    "category": "Sans Serif",
-    "confidence": "high",
+    "year": "Unknown",
+    "category": "Sans-serif",
+    "confidence": "medium",
     "source": "ai"
   },
   "daimlercacarab-": {
@@ -5475,7 +5475,7 @@
     "license": "Paid",
     "license_detail": "Commercial license required for use",
     "year": "Unknown",
-    "category": "Sans Serif",
+    "category": "Sans-serif",
     "confidence": "medium",
     "source": "ai"
   },
@@ -5503,25 +5503,25 @@
     "foundry": "URW Type Foundry",
     "designer": "Marcus Sterz",
     "license": "Paid",
-    "license_detail": "Commercial license available for purchase",
-    "year": "2013",
+    "license_detail": "Commercial license required for use",
+    "year": 2013,
     "category": "Serif",
     "confidence": "high",
     "source": "ai"
   },
   "mb corpo a screen1 cond web": {
     "foundry": "URW Type Foundry",
-    "designer": "Erik Spiekermann",
+    "designer": "Marcus Sterz",
     "license": "Paid",
     "license_detail": "Commercial license required for use",
-    "year": 2011,
-    "category": "Sans-serif",
+    "year": 2013,
+    "category": "Sans Serif",
     "confidence": "high",
     "source": "ai"
   },
   "mb corpo a screen2 cond web": {
     "foundry": "URW Type Foundry",
-    "designer": "Erik Spiekermann",
+    "designer": "Marcus Sterz",
     "license": "Paid",
     "license_detail": "Commercial license required for use",
     "year": 2013,
@@ -7347,6 +7347,316 @@
     "year": "Unknown",
     "category": "Serif",
     "confidence": "low",
+    "source": "ai"
+  },
+  "fabricmdl2icons": {
+    "foundry": "Microsoft",
+    "designer": "Microsoft",
+    "license": "Icon/Symbol \u2014 skip",
+    "license_detail": "This is a symbol font used primarily for Microsoft's Fluent UI system.",
+    "year": "2015",
+    "category": "Icon/Symbol",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "sans-serif)": {
+    "foundry": "Generic",
+    "designer": "Various",
+    "license": "OS Default",
+    "license_detail": "Typically bundled with operating systems as a generic font family.",
+    "year": "N/A",
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "geneva": {
+    "foundry": "Apple Inc.",
+    "designer": "Susan Kare",
+    "license": "OS Default",
+    "license_detail": "Bundled with macOS",
+    "year": 1984,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "segoe ui web (west european)": {
+    "foundry": "Microsoft",
+    "designer": "Steve Matteson",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2004,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "segoe ui web (arabic)": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Steve Matteson",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2004,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "segoe ui web (cyrillic)": {
+    "foundry": "Microsoft",
+    "designer": "Steve Matteson",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows and Microsoft Office products",
+    "year": 2004,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "segoe ui web (east european)": {
+    "foundry": "Microsoft",
+    "designer": "Steve Matteson",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2004,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "segoe ui web (greek)": {
+    "foundry": "Microsoft",
+    "designer": "Steve Matteson",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2004,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "segoe ui web (hebrew)": {
+    "foundry": "Microsoft",
+    "designer": "Steve Matteson",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2004,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "nirmala ui": {
+    "foundry": "Microsoft",
+    "designer": "Tiro Typeworks",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows",
+    "year": 2012,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "yu gothic ui": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Unknown",
+    "license": "OS Default",
+    "license_detail": "Bundled with Windows operating systems",
+    "year": 2012,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "meiryo ui": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Eiichi Kono, Matthew Carter",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows",
+    "year": 2004,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "malgun gothic": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Sandoll Communications",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows",
+    "year": 2007,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "gulim": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Microsoft Typography",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows",
+    "year": 1998,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "leelawadee ui web": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Unknown",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2012,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "lao ui": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Microsoft Typography",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2000,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "dokchampa": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Unknown",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows",
+    "year": 2007,
+    "category": "Sans Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "kmer ui": {
+    "foundry": "Microsoft",
+    "designer": "Unknown",
+    "license": "OS Default",
+    "license_detail": "Bundled with Windows operating systems",
+    "year": "2015",
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "segoe ui web (vietnamese)": {
+    "foundry": "Microsoft",
+    "designer": "Steve Matteson",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2004,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "simsun": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Unknown",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows",
+    "year": 1997,
+    "category": "Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "microsoft jhenghei ui": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Unknown",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2009,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "pmingliu": {
+    "foundry": "Monotype",
+    "designer": "Unknown",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows",
+    "year": 1997,
+    "category": "Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "selawik web": {
+    "foundry": "Microsoft Corporation",
+    "designer": "Aaron Bell",
+    "license": "OS Default",
+    "license_detail": "Bundled with Windows operating systems",
+    "year": 2015,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--wb-typography-font-family-amg-overheading-serif-lg)": {
+    "foundry": "Webflow",
+    "designer": "Webflow Team",
+    "license": "Restricted",
+    "license_detail": "Custom license for Webflow users",
+    "year": 2023,
+    "category": "Web",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--wb-typography-font-family-amg-overheading-serif-md)": {
+    "foundry": "Webflow",
+    "designer": "Webflow Team",
+    "license": "Restricted",
+    "license_detail": "Custom license for Webflow users",
+    "year": 2023,
+    "category": "Serif",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--wb-typography-font-family-amg-heading-sans-serif)": {
+    "foundry": "Webflow",
+    "designer": "Webflow Team",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a custom variable font used within Webflow projects, likely under Webflow's own licensing terms.",
+    "year": "N/A",
+    "category": "Sans-serif",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--wb-typography-font-family-amg-copy)": {
+    "foundry": "Webflow",
+    "designer": "Webflow Team",
+    "license": "Restricted",
+    "license_detail": "Custom license for Webflow projects",
+    "year": 2023,
+    "category": "Variable",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--wb-typography-font-family-maybach-overheading-sans-serif-lg)": {
+    "foundry": "Webflow",
+    "designer": "Webflow Team",
+    "license": "Restricted",
+    "license_detail": "Custom license for Webflow projects",
+    "year": 2023,
+    "category": "Sans-serif",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--wb-typography-font-family-maybach-overheading-sans-serif-md)": {
+    "foundry": "Webflow",
+    "designer": "Webflow Team",
+    "license": "Free/Custom",
+    "license_detail": "Custom license specific to Webflow projects",
+    "year": 2023,
+    "category": "Sans-serif",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--wb-typography-font-family-maybach-heading-serif)": {
+    "foundry": "Webflow",
+    "designer": "Webflow Team",
+    "license": "Free/Custom",
+    "license_detail": "Custom license specific to Webflow projects",
+    "year": 2023,
+    "category": "Serif",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--wb-typography-font-family-maybach-copy)": {
+    "foundry": "Webflow",
+    "designer": "Webflow Team",
+    "license": "Free/Custom",
+    "license_detail": "This is a custom variable font used within Webflow projects.",
+    "year": "N/A",
+    "category": "Variable",
+    "confidence": "medium",
     "source": "ai"
   }
 }
