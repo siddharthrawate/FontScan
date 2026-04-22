@@ -963,17 +963,17 @@
     "foundry": "ASUS Design Center",
     "designer": "ASUS Design Team",
     "license": "Restricted",
-    "license_detail": "This font is likely restricted for use with ASUS products and not available for general distribution.",
+    "license_detail": "Typically bundled with ASUS products and not available for separate licensing.",
     "year": "2016",
     "category": "Sans-serif",
     "confidence": "high",
     "source": "ai"
   },
   "trade gothic": {
-    "foundry": "Monotype",
+    "foundry": "Monotype GmbH",
     "designer": "Jackson Burke",
     "license": "Paid",
-    "license_detail": "Trade Gothic is a commercial typeface available for purchase through Monotype.",
+    "license_detail": "Commercial license required for use",
     "year": 1948,
     "category": "Sans-serif",
     "confidence": "high",
@@ -1000,7 +1000,7 @@
     "source": "ai"
   },
   "tradegothicltprobold": {
-    "foundry": "Monotype",
+    "foundry": "Monotype GmbH",
     "designer": "Jackson Burke",
     "license": "Paid",
     "license_detail": "Available for purchase through Monotype and other font retailers.",
@@ -1013,10 +1013,10 @@
     "foundry": "ASUS Design Center",
     "designer": "ASUS Design Team",
     "license": "Restricted",
-    "license_detail": "Custom license likely specific to ASUS products",
-    "year": "2018",
+    "license_detail": "Likely proprietary license for ASUS products",
+    "year": "Unknown",
     "category": "Sans-serif",
-    "confidence": "high",
+    "confidence": "medium",
     "source": "ai"
   },
   "segoeui": {
