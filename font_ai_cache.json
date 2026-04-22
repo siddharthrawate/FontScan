@@ -7828,5 +7828,65 @@
     "category": "Pixel",
     "confidence": "medium",
     "source": "ai"
+  },
+  "riviera nights": {
+    "foundry": "Swiss Typefaces",
+    "designer": "Ian Party",
+    "license": "Paid",
+    "license_detail": "Commercial license available through Swiss Typefaces",
+    "year": 2015,
+    "category": "Display",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "trajan": {
+    "foundry": "Adobe",
+    "designer": "Carol Twombly",
+    "license": "Paid",
+    "license_detail": "Available through Adobe Fonts/Typekit",
+    "year": 1989,
+    "category": "Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "monotype corsiva": {
+    "foundry": "Monotype",
+    "designer": "Patricia Saunders",
+    "license": "Paid",
+    "license_detail": "Monotype Corsiva is a commercial font available for purchase and licensing through Monotype.",
+    "year": 1995,
+    "category": "Script",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "jost": {
+    "foundry": "indestructible type",
+    "designer": "Owen Earl",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2019,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "object-fit: cover": {
+    "foundry": "The League of Moveable Type",
+    "designer": "Bethany Heck",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2017,
+    "category": "Display",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "object-fit: contain": {
+    "foundry": "The League of Moveable Type",
+    "designer": "David Jonathan Ross",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2018,
+    "category": "Display",
+    "confidence": "high",
+    "source": "ai"
   }
 }
