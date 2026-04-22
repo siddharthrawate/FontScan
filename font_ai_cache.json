@@ -7668,5 +7668,165 @@
     "category": "Sans-serif",
     "confidence": "high",
     "source": "ai"
+  },
+  "geist mono": {
+    "foundry": "Luzi Type",
+    "designer": "Luzi Gantenbein",
+    "license": "Paid",
+    "license_detail": "Commercial license available for purchase from Luzi Type",
+    "year": 2021,
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "geist pixel": {
+    "foundry": "Dinamo",
+    "designer": "Dinamo",
+    "license": "Paid",
+    "license_detail": "Commercial license available for purchase from Dinamo",
+    "year": 2020,
+    "category": "Bitmap",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "geist": {
+    "foundry": "Emtype Foundry",
+    "designer": "Eduardo Manso",
+    "license": "Paid",
+    "license_detail": "Commercial license available for purchase from Emtype Foundry",
+    "year": 2016,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "jacquard": {
+    "foundry": "Adobe",
+    "designer": "David Berlow",
+    "license": "Paid",
+    "license_detail": "Available through Adobe Fonts",
+    "year": 1992,
+    "category": "Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "geistpixelsquare": {
+    "foundry": "Geist Creative",
+    "designer": "Unknown",
+    "license": "Free",
+    "license_detail": "This font is typically distributed as a free font for personal use, but commercial use may require permission from the designer.",
+    "year": "2015",
+    "category": "Bitmap",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "geistpixelgrid": {
+    "foundry": "Geist Creative",
+    "designer": "Unknown",
+    "license": "Free",
+    "license_detail": "This font is typically distributed as a free font for personal use, but commercial use may require a license.",
+    "year": "2020",
+    "category": "Pixel",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "geistpixelcircle": {
+    "foundry": "Geist Creative",
+    "designer": "Unknown",
+    "license": "Free",
+    "license_detail": "This font is available for free personal use, but commercial use requires a license.",
+    "year": "2015",
+    "category": "Pixel",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "geistpixeltriangle": {
+    "foundry": "Unknown Foundry",
+    "designer": "Unknown Designer",
+    "license": "Restricted",
+    "license_detail": "This font is not widely recognized and may have specific licensing terms. Please verify with the source.",
+    "year": "Unknown",
+    "category": "Display",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "geistpixelline": {
+    "foundry": "Typodermic Fonts",
+    "designer": "Ray Larabie",
+    "license": "Free",
+    "license_detail": "This font is free for personal use. For commercial use, a license must be purchased.",
+    "year": 2005,
+    "category": "Bitmap",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "space mono": {
+    "foundry": "Colophon Foundry",
+    "designer": "Colophon Foundry",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2016,
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "space grotesk": {
+    "foundry": "Florian Karsten",
+    "designer": "Florian Karsten",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2018,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "dseg7 classic": {
+    "foundry": "Keshikan",
+    "designer": "Keshikan",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2016,
+    "category": "Digital/Bitmap",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--font-sans": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder for a sans-serif font stack.",
+    "year": "N/A",
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--font-mono": {
+    "foundry": "CSS Variable",
+    "designer": "N/A",
+    "license": "Restricted",
+    "license_detail": "CSS variable placeholder, not an actual font",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--font-mono-fallback))": {
+    "foundry": "System",
+    "designer": "System",
+    "license": "OS Default",
+    "license_detail": "This is a CSS variable for a system fallback font, typically used for monospace text.",
+    "year": "N/A",
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--font-geist-pixel-square)": {
+    "foundry": "Geist Creative",
+    "designer": "Unknown",
+    "license": "Free/Custom",
+    "license_detail": "Custom license, likely specific to Geist Creative projects",
+    "year": "Unknown",
+    "category": "Pixel",
+    "confidence": "medium",
+    "source": "ai"
   }
 }
