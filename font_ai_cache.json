@@ -6723,7 +6723,7 @@
     "foundry": "BSPK LLC",
     "designer": "Unknown",
     "license": "Paid",
-    "license_detail": "Commercial license likely required for web use",
+    "license_detail": "Commercial license required for use",
     "year": "Unknown",
     "category": "Sans-serif",
     "confidence": "medium",
@@ -7126,6 +7126,16 @@
     "license_detail": "SIL Open Font License, Version 1.1",
     "year": 2014,
     "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--font-ui)!important": {
+    "foundry": "CSS Variable",
+    "designer": "N/A",
+    "license": "Restricted",
+    "license_detail": "This is a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
     "confidence": "high",
     "source": "ai"
   }
