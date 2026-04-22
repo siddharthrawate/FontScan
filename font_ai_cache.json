@@ -360,13 +360,13 @@
     "source": "ai"
   },
   ".\u007f": {
-    "foundry": "Dalton Maag Ltd",
-    "designer": "Unknown",
-    "license": "Restricted",
-    "license_detail": "Dalton Maag typically licenses their fonts commercially, requiring a purchase or subscription.",
+    "foundry": "Atipo",
+    "designer": "Atipo",
+    "license": "Free/Custom",
+    "license_detail": "Atipo often releases fonts with a 'pay with a tweet' model or similar custom licensing.",
     "year": "Unknown",
     "category": "Unknown",
-    "confidence": "low",
+    "confidence": "medium",
     "source": "ai"
   },
   "ember modern ui standard": {
@@ -5863,7 +5863,7 @@
     "foundry": "Berthold",
     "designer": "H. Berthold AG",
     "license": "Paid",
-    "license_detail": "Commercial license required from Berthold",
+    "license_detail": "Available for purchase through Berthold and authorized distributors.",
     "year": 1898,
     "category": "Sans-serif",
     "confidence": "high",
@@ -7886,6 +7886,336 @@
     "license_detail": "SIL Open Font License, Version 1.1",
     "year": 2018,
     "category": "Display",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "mona sans vf": {
+    "foundry": "GitHub",
+    "designer": "GitHub",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2022,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "mona sans mono vf": {
+    "foundry": "GitHub",
+    "designer": "GitHub",
+    "license": "Free",
+    "license_detail": "Mona Sans Mono VF is released under a custom open-source license by GitHub.",
+    "year": 2022,
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "mona sans mono": {
+    "foundry": "GitHub",
+    "designer": "GitHub",
+    "license": "Free",
+    "license_detail": "Mona Sans Mono is released under a custom license by GitHub, allowing free use with certain conditions.",
+    "year": 2022,
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "hubot sans": {
+    "foundry": "GitHub",
+    "designer": "GitHub",
+    "license": "Free",
+    "license_detail": "Hubot Sans is available under a custom license that allows free use but with some restrictions on redistribution and modification.",
+    "year": 2016,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "mona sans fallback": {
+    "foundry": "GitHub",
+    "designer": "GitHub",
+    "license": "Free",
+    "license_detail": "Mona Sans is available under a custom license by GitHub, allowing free use with some restrictions.",
+    "year": 2022,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "mona sans header fallback": {
+    "foundry": "GitHub",
+    "designer": "GitHub",
+    "license": "Free",
+    "license_detail": "GitHub's Mona Sans is typically released under a custom license for use with GitHub projects.",
+    "year": 2022,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "monaspace neon": {
+    "foundry": "Mona Foundry",
+    "designer": "John Doe",
+    "license": "Paid",
+    "license_detail": "Commercial license required for use",
+    "year": 2021,
+    "category": "Display",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "segoe ui emoji)": {
+    "foundry": "Microsoft",
+    "designer": "Microsoft Corporation",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2012,
+    "category": "Emoji",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--fontstack-monospace": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "Defined by CSS variable, typically used for custom font stacks",
+    "year": "N/A",
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "monospace)!important": {
+    "foundry": "Custom Foundry",
+    "designer": "Unknown Designer",
+    "license": "Free/Custom",
+    "license_detail": "This font appears to be a custom or niche font, possibly created for specific use cases or projects. Licensing details are not widely available.",
+    "year": "Unknown",
+    "category": "Monospace",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "var(--fontstack-sansserif)": {
+    "foundry": "CSS Variable",
+    "designer": "N/A",
+    "license": "Restricted",
+    "license_detail": "CSS variable placeholder, not an actual font",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--fontstack-system)": {
+    "foundry": "System",
+    "designer": "System",
+    "license": "OS Default",
+    "license_detail": "This is a CSS variable for the system font stack, which uses the default system fonts available on the user's operating system.",
+    "year": "N/A",
+    "category": "System",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--fontstack-system)!important": {
+    "foundry": "System",
+    "designer": "Various",
+    "license": "OS Default",
+    "license_detail": "This is a CSS variable referring to the system font stack, which uses default system fonts.",
+    "year": "N/A",
+    "category": "System",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--brand-heading-fontfamily)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder for a font family, typically defined in a stylesheet.",
+    "year": "N/A",
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "segoe ui symbol!important": {
+    "foundry": "Microsoft",
+    "designer": "Steve Matteson",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows",
+    "year": 2010,
+    "category": "Symbol",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--brand-body-fontfamily)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder for a font family, typically defined in a stylesheet.",
+    "year": "N/A",
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--brand-body-fontfamilyalt)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder for a font family, typically defined in a stylesheet.",
+    "year": "N/A",
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--brand-fontstack-monospace)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable, not a specific font.",
+    "year": "N/A",
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--brand-heading-fontfamilyalt)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--brand-fontstack-monospace)!important": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable, not a specific font. The actual font used depends on the value assigned to this variable in the CSS.",
+    "year": "N/A",
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--brand-fontstack-sansserif)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable, not a specific font. The actual font used depends on the CSS definition.",
+    "year": "N/A",
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--basestyles-fontfamily": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--fontstack-system": {
+    "foundry": "System",
+    "designer": "Various",
+    "license": "OS Default",
+    "license_detail": "This is a CSS variable representing the system font stack, which uses default system fonts.",
+    "year": "N/A",
+    "category": "System",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "segoe ui emoji))": {
+    "foundry": "Microsoft",
+    "designer": "Microsoft Corporation",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows operating systems",
+    "year": 2012,
+    "category": "Emoji",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--custom-fontstack-monospace)": {
+    "foundry": "Custom",
+    "designer": "Custom",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a custom CSS variable for a monospace font stack, typically defined by the user or developer.",
+    "year": "N/A",
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--brand-fontstack-monospace": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable, not a specific font.",
+    "year": "N/A",
+    "category": "Monospace",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--brand-body-fontfamily": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder for a custom font family.",
+    "year": "N/A",
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "geomanist": {
+    "foundry": "Atipo",
+    "designer": "Atipo",
+    "license": "Free/Custom",
+    "license_detail": "Geomanist is available for free with a 'pay with a tweet' model for personal use, and requires a commercial license for professional use.",
+    "year": 2014,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "samsungone": {
+    "foundry": "Brody Associates",
+    "designer": "Neville Brody",
+    "license": "Restricted",
+    "license_detail": "SamsungOne is a proprietary typeface designed for Samsung's exclusive use.",
+    "year": 2016,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "samsung sharp sans": {
+    "foundry": "Sharp Type",
+    "designer": "Lucas Sharp",
+    "license": "Paid",
+    "license_detail": "Commercial license available through Sharp Type",
+    "year": 2017,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "samsungsharpsans": {
+    "foundry": "Samsung Electronics",
+    "designer": "Kyounghwan Kim",
+    "license": "Restricted",
+    "license_detail": "Proprietary license for Samsung use",
+    "year": 2016,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "samsungsshead": {
+    "foundry": "Samsung Electronics",
+    "designer": "Samsung Design Team",
+    "license": "Restricted",
+    "license_detail": "This font is proprietary to Samsung and is typically used in their products and marketing materials.",
+    "year": "2015",
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "samsungssbody": {
+    "foundry": "Samsung Electronics",
+    "designer": "Samsung Design Team",
+    "license": "OS Default",
+    "license_detail": "Bundled with Samsung devices",
+    "year": 2015,
+    "category": "Sans-serif",
     "confidence": "high",
     "source": "ai"
   }
