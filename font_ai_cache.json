@@ -7138,5 +7138,35 @@
     "category": "N/A",
     "confidence": "high",
     "source": "ai"
+  },
+  "icofont": {
+    "foundry": "Fontello",
+    "designer": "Fontello Team",
+    "license": "Icon/Symbol \u2014 skip",
+    "license_detail": "Icon/Symbol fonts are typically used for icons and symbols, and licensing can vary. Fontello provides a platform for creating custom icon fonts.",
+    "year": "2012",
+    "category": "Icon/Symbol",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "bebas neue": {
+    "foundry": "Dharma Type",
+    "designer": "Ryoichi Tsunekawa",
+    "license": "Free",
+    "license_detail": "Bebas Neue is available under the SIL Open Font License (OFL).",
+    "year": 2010,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "icofont!important": {
+    "foundry": "IcoFont",
+    "designer": "IcoFont Team",
+    "license": "Icon/Symbol \u2014 skip",
+    "license_detail": "IcoFont is a collection of icons and symbols, typically used for web design and development.",
+    "year": 2015,
+    "category": "Icon/Symbol",
+    "confidence": "high",
+    "source": "ai"
   }
 }
