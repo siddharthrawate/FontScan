@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: fontscan
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter          # upgrade to 'standard' if you need more RAM for Chrome
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false        # you'll enter this value in the Render dashboard
+
+    # Persistent disk so SQLite survives redeploys
+    disk:
+      name: fontscan-data
+      mountPath: /app
+      sizeGB: 1
