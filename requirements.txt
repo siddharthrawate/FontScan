@@ -4,3 +4,4 @@ selenium
 python-multipart
 passlib
 python-jose
+requests
