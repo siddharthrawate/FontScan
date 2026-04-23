@@ -950,12 +950,13 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
     opts.add_argument("--lang=en-US,en;q=0.9")
     opts.add_argument("--disable-blink-features=AutomationControlled")
 
-    chrome_bin = os.getenv("CHROME_BIN")
-    if chrome_bin:
-        opts.binary_location = str(chrome_bin)
+    chrome_kwargs = {"options": opts, "use_subprocess": True}
+    chrome_bin = os.getenv("CHROME_BIN", "").strip()
+    if chrome_bin and os.path.isfile(chrome_bin):
+        chrome_kwargs["browser_executable_path"] = chrome_bin
 
     try:
-        driver = uc.Chrome(options=opts, use_subprocess=True)
+        driver = uc.Chrome(**chrome_kwargs)
     except Exception as e:
         push(emit_event("error", message=f"Chrome start failed: {type(e).__name__}: {e}"))
         queue.put_nowait(None)
