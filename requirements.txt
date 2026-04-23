@@ -1,3 +1,4 @@
+setuptools
 fastapi
 uvicorn[standard]
 python-dotenv
@@ -11,3 +12,4 @@ fonttools
 undetected-chromedriver
 selenium
 selenium-stealth
+ 
