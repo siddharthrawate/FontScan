@@ -927,17 +927,10 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
     push(emit_event("status", message="Starting stealth browser…"))
 
     opts = uc.ChromeOptions()
-    opts.add_argument("--headless=new")
+    opts.add_argument("--headless")
     opts.add_argument("--no-sandbox")
-    opts.add_argument("--disable-setuid-sandbox")
     opts.add_argument("--disable-gpu")
     opts.add_argument("--disable-dev-shm-usage")
-    opts.add_argument("--no-first-run")
-    opts.add_argument("--no-default-browser-check")
-    opts.add_argument("--disable-extensions")
-    opts.add_argument("--disable-popup-blocking")
-    opts.add_argument("--disable-background-networking")
-    opts.add_argument("--disable-features=Translate,BackForwardCache")
     opts.add_argument("--window-size=1440,900")
     opts.add_argument("--log-level=3")
     opts.add_argument("--silent")
@@ -950,15 +943,10 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
     opts.add_argument("--lang=en-US,en;q=0.9")
     opts.add_argument("--disable-blink-features=AutomationControlled")
 
-    chrome_kwargs = {"options": opts, "use_subprocess": True}
-    chrome_bin = os.getenv("CHROME_BIN", "").strip()
-    if chrome_bin and os.path.isfile(chrome_bin):
-        chrome_kwargs["browser_executable_path"] = chrome_bin
-
     try:
-        driver = uc.Chrome(**chrome_kwargs)
-    except Exception as e:
-        push(emit_event("error", message=f"Chrome start failed: {type(e).__name__}: {e}"))
+        driver = uc.Chrome(options=opts, use_subprocess=True)
+    except WebDriverException as e:
+        push(emit_event("error", message=f"ChromeDriver failed: {e}"))
         queue.put_nowait(None)
         return
 
@@ -1514,16 +1502,6 @@ def health(current_user: User = Depends(get_current_user)):
         "scans_in_memory":    len(_scan_history),
         "ai_configured":      ai_ok,
         "model":              OPENAI_MODEL,
-    }
-
-
-@app.get("/healthz")
-def healthz():
-    ai_ok = bool(OPENAI_API_KEY) and OPENAI_API_KEY.strip() not in ("", "sk-YOUR-KEY-HERE")
-    return {
-        "status": "ok",
-        "ai_configured": ai_ok,
-        "cached_ai_lookups": len(_ai_cache),
     }
 
 
