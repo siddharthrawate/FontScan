@@ -24,6 +24,7 @@ COPY . .
 
 # Render sets PORT env var; default to 8000
 ENV PORT=8000
+ENV CHROME_BIN=/usr/bin/google-chrome
 
 EXPOSE 8000
 

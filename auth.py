@@ -2,6 +2,7 @@
 auth.py  —  JWT Authentication Module for FontScan
 """
 
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -16,12 +17,12 @@ from sqlalchemy.orm import sessionmaker, Session
 from pydantic import BaseModel
 
 # ── Config ───────────────────────────────────────────────────
-SECRET_KEY                  = "fontscan-ey-secret-change-in-production-2024"
+SECRET_KEY                  = os.getenv("SECRET_KEY", "fontscan-ey-secret-change-in-production-2024")
 ALGORITHM                   = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60          # 1 hour
 
 # ── Database ─────────────────────────────────────────────────
-DATABASE_URL = "sqlite:///./fontscan_users.db"
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./fontscan_users.db")
 engine       = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base         = declarative_base()
