@@ -42,7 +42,7 @@ from auth import (
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL   = "gpt-4o"
-AI_CACHE_FILE  = os.getenv("AI_CACHE_FILE", "font_ai_cache.json")
+AI_CACHE_FILE  = "font_ai_cache.json"
 
 
 # ─────────────────────────────────────────────────────────────
@@ -927,7 +927,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
     push(emit_event("status", message="Starting stealth browser…"))
 
     opts = uc.ChromeOptions()
-    opts.add_argument("--headless")
+    opts.add_argument("--headless=new")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-gpu")
     opts.add_argument("--disable-dev-shm-usage")
@@ -944,7 +944,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
     opts.add_argument("--disable-blink-features=AutomationControlled")
 
     try:
-        driver = uc.Chrome(options=opts, use_subprocess=True)
+        driver = uc.Chrome(options=opts)
     except WebDriverException as e:
         push(emit_event("error", message=f"ChromeDriver failed: {e}"))
         queue.put_nowait(None)
@@ -1524,4 +1524,3 @@ if __name__ == "__main__":
     print("─" * 56)
     uvicorn.run("backend:app", host="0.0.0.0", port=8000,
                 reload=False, log_level="warning")
-    
