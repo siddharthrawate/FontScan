@@ -24,7 +24,14 @@ from sqlalchemy.orm import Session
 import uvicorn
 from dotenv import load_dotenv
 
-import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+try:
+    from webdriver_manager.chrome import ChromeDriverManager
+    _USE_WDM = True
+except ImportError:
+    _USE_WDM = False
 from selenium_stealth import stealth
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -926,7 +933,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
 
     push(emit_event("status", message="Starting stealth browser…"))
 
-    opts = uc.ChromeOptions()
+    opts = ChromeOptions()
     opts.add_argument("--headless=new")
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-gpu")
@@ -936,15 +943,24 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
     opts.add_argument("--silent")
     opts.add_argument("--remote-debugging-port=0")
     opts.add_argument("--disable-web-security")
+    opts.add_argument("--disable-extensions")
+    opts.add_argument("--disable-setuid-sandbox")
+    opts.add_argument("--single-process")
     opts.add_argument(
         "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     )
     opts.add_argument("--lang=en-US,en;q=0.9")
     opts.add_argument("--disable-blink-features=AutomationControlled")
+    opts.add_experimental_option("excludeSwitches", ["enable-automation"])
+    opts.add_experimental_option("useAutomationExtension", False)
 
     try:
-        driver = uc.Chrome(options=opts)
+        if _USE_WDM:
+            service = ChromeService(ChromeDriverManager().install())
+            driver  = webdriver.Chrome(service=service, options=opts)
+        else:
+            driver  = webdriver.Chrome(options=opts)
     except WebDriverException as e:
         push(emit_event("error", message=f"ChromeDriver failed: {e}"))
         queue.put_nowait(None)

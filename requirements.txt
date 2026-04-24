@@ -10,6 +10,6 @@ python-jose[cryptography]
 passlib[bcrypt]
 bcrypt==4.0.1
 fonttools
-undetected-chromedriver
 selenium
 selenium-stealth
+webdriver-manager
