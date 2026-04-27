@@ -18,6 +18,17 @@ from fontTools.ttLib import TTFont
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# Playwright browser path (set by Render env var)
+os.environ.setdefault(
+    "PLAYWRIGHT_BROWSERS_PATH",
+    "/opt/render/project/src/.playwright-browsers"
+)
+try:
+    from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+    _PLAYWRIGHT_OK = True
+except ImportError:
+    _PLAYWRIGHT_OK = False
+
 # ── Auth imports ─────────────────────────────────────────────
 from auth import (
     User, UserCreate, UserLogin, Token, UserOut,
@@ -931,28 +942,92 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         {"User-Agent": "curl/7.88.1", "Accept": "*/*"},
     ]
 
-    def _fetch_page(target_url):
+    def _fetch_page_requests(target_url):
+        """Pure HTTP fetch with UA rotation."""
         import time as _t
         last_exc = None
         for i, hdrs in enumerate(_UA_LIST):
             try:
                 if i > 0:
-                    push(emit_event("status", message=f"  Retrying with profile {i+1}…"))
                     _t.sleep(0.5 * i)
                 r = req_lib.get(target_url, headers=hdrs, timeout=25,
                                 allow_redirects=True, verify=False)
                 if r.status_code in (403, 401, 429) and i < len(_UA_LIST) - 1:
-                    push(emit_event("status", message=f"  Got {r.status_code}, trying next profile…"))
                     continue
                 if r.status_code == 200:
-                    return r
+                    return r.text, r.url
                 r.raise_for_status()
-                return r
+                return r.text, r.url
             except Exception as e:
                 last_exc = e
                 if i < len(_UA_LIST) - 1:
                     continue
         raise last_exc or Exception(f"All fetch attempts failed for {target_url}")
+
+    def _fetch_page_browser(target_url):
+        """Playwright browser fetch — handles JS-rendered sites and WAF-blocked sites."""
+        if not _PLAYWRIGHT_OK:
+            raise Exception("Playwright not available")
+        pw = sync_playwright().start()
+        try:
+            browser = pw.chromium.launch(
+                headless=True,
+                args=["--no-sandbox","--disable-gpu","--disable-dev-shm-usage",
+                      "--disable-blink-features=AutomationControlled",
+                      "--disable-setuid-sandbox","--single-process"],
+            )
+            ctx = browser.new_context(
+                viewport={"width":1440,"height":900},
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+                locale="en-US",
+            )
+            ctx.add_init_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined})")
+            page = ctx.new_page()
+
+            # Intercept and collect font/CSS URLs as they load
+            intercepted_urls = []
+            def on_response(resp):
+                url_lower = resp.url.lower()
+                if any(ext in url_lower for ext in [".woff",".woff2",".ttf",".otf",".css"]):
+                    intercepted_urls.append(resp.url)
+            page.on("response", on_response)
+
+            page.goto(target_url, wait_until="domcontentloaded", timeout=30000)
+            try:
+                page.wait_for_load_state("networkidle", timeout=12000)
+            except PWTimeout:
+                pass
+
+            # Scroll to trigger lazy-loaded fonts
+            for _ in range(scroll_steps):
+                page.evaluate("window.scrollBy(0, window.innerHeight * 0.8)")
+                page.wait_for_timeout(600)
+
+            html     = page.content()
+            final_url = page.url
+
+            page.close(); ctx.close(); browser.close()
+            return html, final_url, intercepted_urls
+        finally:
+            try: pw.stop()
+            except: pass
+
+    def _fetch_page(target_url):
+        """Try browser first, fall back to plain HTTP."""
+        try:
+            push(emit_event("status", message=f"Fetching {target_url} (browser)…"))
+            html, final_url, extra_urls = _fetch_page_browser(target_url)
+            push(emit_event("status", message=f"  Browser fetch OK ({len(html):,} bytes)"))
+            return html, final_url, extra_urls
+        except Exception as e:
+            push(emit_event("status", message=f"  Browser unavailable ({e}) — trying HTTP…"))
+        try:
+            html, final_url = _fetch_page_requests(target_url)
+            push(emit_event("status", message=f"  HTTP fetch OK ({len(html):,} bytes)"))
+            return html, final_url, []
+        except Exception as e2:
+            push(emit_event("status", message=f"  HTTP also blocked ({e2}) — scanning with empty page"))
+            return "<html><head></head><body></body></html>", target_url, []
 
     def _parse_css_text(css_text, source_url=""):
         """Parse @font-face and font-family from a raw CSS string."""
@@ -1005,16 +1080,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         return urljoin(base_url, href)
 
     # ── Fetch the page ────────────────────────────────────────
-    push(emit_event("status", message=f"Fetching {url}…"))
-    try:
-        resp     = _fetch_page(url)
-        html     = resp.text
-        base_url = resp.url
-        push(emit_event("status", message=f"  Page fetched ({len(html):,} bytes)"))
-    except Exception as e:
-        push(emit_event("status", message=f"  Could not fetch page ({e}) — scanning CSS only"))
-        html     = "<html><head></head><body></body></html>"
-        base_url = url
+    html, base_url, browser_resource_urls = _fetch_page(url)
 
     try:
         soup = BeautifulSoup(html, "html.parser")
@@ -1091,6 +1157,37 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                          file_foundry, file_lic, make_font_file_path(filename), "preload")
             emit_font(fd)
             print(f"  [PRELOAD] {display_name}")
+
+        # ── Method 2b: Font files intercepted by browser ────────
+        for res_url in browser_resource_urls:
+            if not re.search(r"\.(woff2?|ttf|otf)(\?|#|$)", res_url, re.I):
+                continue
+            filename  = os.path.basename(urlparse(res_url).path)
+            fkey_file = filename.lower()
+            if fkey_file in seen_files or _SKIP_FILENAME_RE.search(filename):
+                seen_files.add(fkey_file); continue
+            seen_files.add(fkey_file)
+            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(res_url)
+            if not display_name: continue
+            fkey = family_key(family_name or display_name)
+            dn   = normalize_font(display_name)
+            if not is_text_font(fkey) or dn in seen_names: continue
+            seen_names.add(dn); emb_families.add(fkey)
+            fd = make_fd(display_name, family_name or display_name, fkey,
+                         file_foundry, file_lic, make_font_file_path(filename), "embedded")
+            emit_font(fd)
+            print(f"  [BROWSER-FONT] {display_name}")
+
+        # Also add CSS files intercepted by browser to our CSS parsing queue
+        for res_url in browser_resource_urls:
+            if not re.search(r"\.css(\?|#|$)", res_url, re.I): continue
+            if "fonts.googleapis.com" in res_url: continue
+            key = urlparse(res_url).path.lower()
+            if key not in seen_css_set:
+                seen_css_set.add(key)
+                # will be picked up by Method 4 below via unique_css_urls
+                # but we need to add them now before that loop
+                unique_css_urls_extra = getattr(_fetch_page, '_extra_css', [])
 
         # ── Method 3: Collect all external CSS stylesheets ────
         push(emit_event("status", message="Method 3 — Collecting CSS stylesheets…"))
