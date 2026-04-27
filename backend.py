@@ -1,22 +1,31 @@
-"""
+"""OPENAI_API_KEY
 FontScan – Enhanced Backend + JWT Authentication
 Run: python backend.py  →  http://localhost:8000
+
+Auth additions (everything else unchanged):
+  POST /login        — email + password → JWT token (1 hour)
+  POST /signup       — admin only: create team members
+  GET  /users        — admin only: list all users
+  DELETE /users/{id} — admin only: remove a user
+  GET  /me           — current logged-in user info
+  GET  /login        — serves login.html page
+  All /api/* routes now require Authorization: Bearer <token>
+  /api/scan uses ?token= query param (EventSource can't set headers)
 """
 
 import re, os, json, datetime, asyncio, concurrent.futures
 import requests as req_lib
 from io import BytesIO
-from urllib.parse import urlparse, parse_qs, urljoin
+from urllib.parse import urlparse, parse_qs
 from fastapi import FastAPI, Query, HTTPException, Depends, Header
 from fastapi.responses import StreamingResponse, HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import uvicorn
 from dotenv import load_dotenv
+
 from bs4 import BeautifulSoup
 from fontTools.ttLib import TTFont
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # ── Auth imports ─────────────────────────────────────────────
 from auth import (
@@ -30,6 +39,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL   = "gpt-4o"
 AI_CACHE_FILE  = "font_ai_cache.json"
 
+
+# ─────────────────────────────────────────────────────────────
+#  UNKNOWN VALUE HELPERS
 # ─────────────────────────────────────────────────────────────
 _UNKNOWN_VALUES = {
     "", "unknown", "check manually", "—", "-", "n/a",
@@ -612,6 +624,61 @@ def _parse_css_server_side(css_url: str) -> list:
     return results
 
 
+def _parse_css_text(css_text: str, source_url: str = "") -> list:
+    """Parse @font-face and font-family from a raw CSS string (e.g. inline <style> blocks)."""
+    results: list = []
+    seen_in_block: set = set()
+    css_clean = _COMMENT_RE.sub("", css_text)
+
+    for block_match in _FONT_FACE_BLOCK_RE.finditer(css_clean):
+        block = block_match.group(1)
+        ff_m  = _FF_VALUE_RE.search(block)
+        if not ff_m: continue
+        raw_family = ff_m.group(1).strip().strip("'\"").strip()
+        if not raw_family or not is_text_font(normalize_font(raw_family)): continue
+
+        src_m   = _SRC_URL_RE.search(block)
+        src_url = src_m.group(1).strip() if src_m else ""
+
+        if src_url and not src_url.startswith(("http://", "https://", "//")):
+            base    = source_url.rsplit("/", 1)[0]
+            src_url = base + "/" + src_url.lstrip("./")
+        if src_url.startswith("//"):
+            src_url = "https:" + src_url
+
+        foundry, lic = None, None
+        if src_url.startswith("http"):
+            foundry, lic = detect_from_cdn(src_url)
+
+        nkey = normalize_font(raw_family)
+        if nkey not in seen_in_block:
+            seen_in_block.add(nkey)
+            results.append({
+                "display": raw_family, "family": raw_family,
+                "foundry": foundry,    "license": lic,
+                "src_url": src_url,    "kind":    "font-face-css",
+            })
+
+    css_no_ff = _FONT_FACE_BLOCK_RE.sub("", css_clean)
+    for rule_match in _RULE_BLOCK_RE.finditer(css_no_ff):
+        block = rule_match.group(1)
+        for ff_m in _FF_VALUE_RE.finditer(block):
+            raw_val = ff_m.group(1).strip()
+            for part in raw_val.split(","):
+                raw_name = part.strip().strip("'\"").strip()
+                if not raw_name: continue
+                nname = normalize_font(raw_name)
+                if not is_text_font(nname) or nname in seen_in_block: continue
+                seen_in_block.add(nname)
+                results.append({
+                    "display": raw_name, "family": raw_name,
+                    "foundry": None,     "license": None,
+                    "src_url": "",       "kind":    "css-decl",
+                })
+
+    return results
+
+
 # ─────────────────────────────────────────────────────────────
 #  AI FONT LOOKUP (OpenAI)  — unchanged from original
 # ─────────────────────────────────────────────────────────────
@@ -907,133 +974,84 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             confidence=conf,
         )
 
+    # ── No browser needed — pure HTTP scanning ──────────────
+    HEADERS = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        ),
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    }
 
-    # ── UA profiles to rotate through on 403/block ───────────
-    _UA_LIST = [
-        # Chrome Windows
-        {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-         "Accept-Language": "en-US,en;q=0.9", "Accept-Encoding": "gzip, deflate, br",
-         "Upgrade-Insecure-Requests": "1", "Sec-Fetch-Dest": "document",
-         "Sec-Fetch-Mode": "navigate", "Sec-Fetch-Site": "none", "Sec-Fetch-User": "?1"},
-        # Firefox Windows
-        {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
-         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-         "Accept-Language": "en-US,en;q=0.5", "Accept-Encoding": "gzip, deflate, br"},
-        # Chrome macOS
-        {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-         "Accept-Language": "en-US,en;q=0.9"},
-        # Googlebot — enterprise/pharma sites often allow crawlers
-        {"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
-        # Curl fallback
-        {"User-Agent": "curl/7.88.1", "Accept": "*/*"},
-    ]
-
-    def _fetch_page(target_url):
-        import time as _t
-        last_exc = None
-        for i, hdrs in enumerate(_UA_LIST):
-            try:
-                if i > 0:
-                    push(emit_event("status", message=f"  Retrying with profile {i+1}…"))
-                    _t.sleep(0.5 * i)
-                r = req_lib.get(target_url, headers=hdrs, timeout=25,
-                                allow_redirects=True, verify=False)
-                if r.status_code in (403, 401, 429) and i < len(_UA_LIST) - 1:
-                    push(emit_event("status", message=f"  Got {r.status_code}, trying next profile…"))
-                    continue
-                if r.status_code == 200:
-                    return r
-                r.raise_for_status()
-                return r
-            except Exception as e:
-                last_exc = e
-                if i < len(_UA_LIST) - 1:
-                    continue
-        raise last_exc or Exception(f"All fetch attempts failed for {target_url}")
-
-    def _parse_css_text(css_text, source_url=""):
-        """Parse @font-face and font-family from a raw CSS string."""
-        results = []
-        seen = set()
-        css_clean = _COMMENT_RE.sub("", css_text)
-        for block_match in _FONT_FACE_BLOCK_RE.finditer(css_clean):
-            block = block_match.group(1)
-            ff_m = _FF_VALUE_RE.search(block)
-            if not ff_m: continue
-            raw_family = ff_m.group(1).strip().strip("'\"").strip()
-            if not raw_family or not is_text_font(normalize_font(raw_family)): continue
-            src_m = _SRC_URL_RE.search(block)
-            src_url = src_m.group(1).strip() if src_m else ""
-            if src_url and not src_url.startswith(("http://","https://","//")):
-                base = source_url.rsplit("/", 1)[0]
-                src_url = base + "/" + src_url.lstrip("./")
-            if src_url.startswith("//"):
-                src_url = "https:" + src_url
-            foundry, lic = (None, None)
-            if src_url.startswith("http"):
-                foundry, lic = detect_from_cdn(src_url)
-            nkey = normalize_font(raw_family)
-            if nkey not in seen:
-                seen.add(nkey)
-                results.append({"display": raw_family, "family": raw_family,
-                                 "foundry": foundry, "license": lic,
-                                 "src_url": src_url, "kind": "font-face-css"})
-        css_no_ff = _FONT_FACE_BLOCK_RE.sub("", css_clean)
-        for rule_match in _RULE_BLOCK_RE.finditer(css_no_ff):
-            block = rule_match.group(1)
-            for ff_m in _FF_VALUE_RE.finditer(block):
-                raw_val = ff_m.group(1).strip()
-                for part in raw_val.split(","):
-                    raw_name = part.strip().strip("'\"").strip()
-                    if not raw_name: continue
-                    nname = normalize_font(raw_name)
-                    if not is_text_font(nname) or nname in seen: continue
-                    seen.add(nname)
-                    results.append({"display": raw_name, "family": raw_name,
-                                    "foundry": None, "license": None,
-                                    "src_url": "", "kind": "css-decl"})
-        return results
-
-    def resolve_url(href):
-        if not href: return None
-        href = href.strip()
-        if href.startswith("http"): return href
-        if href.startswith("//"): return "https:" + href
-        return urljoin(base_url, href)
-
-    # ── Fetch the page ────────────────────────────────────────
-    push(emit_event("status", message=f"Fetching {url}…"))
     try:
-        resp     = _fetch_page(url)
-        html     = resp.text
+        push(emit_event("status", message=f"Fetching {url}…"))
+        resp = req_lib.get(url, headers=HEADERS, timeout=20, allow_redirects=True)
+        resp.raise_for_status()
+        html = resp.text
         base_url = resp.url
-        push(emit_event("status", message=f"  Page fetched ({len(html):,} bytes)"))
     except Exception as e:
-        push(emit_event("status", message=f"  Could not fetch page ({e}) — scanning CSS only"))
-        html     = "<html><head></head><body></body></html>"
-        base_url = url
+        push(emit_event("error", message=f"Failed to fetch page: {e}"))
+        queue.put_nowait(None)
+        return
 
     try:
         soup = BeautifulSoup(html, "html.parser")
 
-        # ── Method 1: Google Fonts <link> tags ────────────────
-        push(emit_event("status", message="Method 1 — Checking Google Fonts links…"))
+        def resolve(href):
+            if not href: return None
+            href = href.strip()
+            if href.startswith("http"): return href
+            if href.startswith("//"): return "https:" + href
+            from urllib.parse import urljoin
+            return urljoin(base_url, href)
+
+        # ── Method 1: <link rel=preload as=font> ──────────────────
+        push(emit_event("status", message="Method 1 — Checking preloaded fonts…"))
+        for tag in soup.find_all("link", rel=lambda r: r and "preload" in r, as_="font"):
+            pre_url = resolve(tag.get("href"))
+            if not pre_url: continue
+            filename  = os.path.basename(urlparse(pre_url).path)
+            fkey_file = filename.lower()
+            if fkey_file in seen_files: continue
+            if _SKIP_FILENAME_RE.search(filename):
+                seen_files.add(fkey_file)
+                continue
+            seen_files.add(fkey_file)
+            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(pre_url)
+            if not display_name: continue
+            fkey = family_key(family_name or display_name)
+            dn   = normalize_font(display_name)
+            if not is_text_font(fkey) or dn in seen_names: continue
+            seen_names.add(dn)
+            emb_families.add(fkey)
+            path = make_font_file_path(filename)
+            fd   = make_fd(display_name, family_name or display_name,
+                           fkey, file_foundry, file_lic, path, "preload")
+            emit_font(fd)
+            print(f"  [PRELOAD] {display_name}")
+
+        push(emit_event("status", message=f"  → {len(font_list)} fonts from preload hints"))
+
+        # ── Method 2: Google Fonts <link> tags ────────────────────
+        push(emit_event("status", message="Method 2 — Checking Google Fonts links…"))
         gf_hrefs = []
         for tag in soup.find_all("link", href=True):
             h = tag.get("href", "")
             if "fonts.googleapis.com" in h:
-                gf_hrefs.append(resolve_url(h))
+                gf_hrefs.append(resolve(h))
+        # also check @import in inline <style> tags
         for tag in soup.find_all("style"):
-            for m in re.findall(r'@import\s+url\(["\']?(https?://fonts\.googleapis\.com[^"\')\s]+)', tag.string or ""):
+            for m in re.findall(r'@import\s+url\(["\']?([^"\'\)\s]+)["\']?\)', tag.string or ""):
                 gf_hrefs.append(m)
-        for gf_url in set(filter(None, gf_hrefs)):
+        gf_hrefs = list(set(filter(None, gf_hrefs)))
+
+        for gf_url in gf_hrefs:
             try:
-                parsed = urlparse(gf_url)
-                qs = parse_qs(parsed.query)
-                for fp in qs.get("family", []):
+                parsed         = urlparse(gf_url)
+                qs             = parse_qs(parsed.query)
+                families_param = qs.get("family", [])
+                for fp in families_param:
                     for fpart in fp.split("|"):
                         fname_raw = fpart.split(":")[0].replace("+", " ").strip()
                         axes_part = fpart[len(fpart.split(":")[0]):].lstrip(":")
@@ -1041,9 +1059,10 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                         variants = []
                         if "wght@" in axes_part or "ital,wght@" in axes_part:
                             has_ital = "ital" in axes_part
-                            nums = re.findall(r"\d+", axes_part)
+                            nums = re.findall(r"[\d]+", axes_part)
                             if has_ital and len(nums) >= 2:
-                                for ital, wght in zip(nums[::2], nums[1::2]):
+                                pairs = list(zip(nums[::2], nums[1::2]))
+                                for ital, wght in pairs:
                                     variants.append((ital == "1", wght))
                             else:
                                 for w in nums:
@@ -1051,10 +1070,11 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                                         variants.append((False, w))
                         if not variants:
                             variants = [(False, "400")]
-                        w_map = {"100":"Thin","200":"ExtraLight","300":"Light","400":"Regular",
-                                 "500":"Medium","600":"SemiBold","700":"Bold","800":"ExtraBold","900":"Black"}
+                        w_map2 = {"100":"Thin","200":"ExtraLight","300":"Light",
+                                  "400":"Regular","500":"Medium","600":"SemiBold",
+                                  "700":"Bold","800":"ExtraBold","900":"Black"}
                         for is_italic, wght in variants:
-                            wlabel  = w_map.get(str(wght), f"W{wght}")
+                            wlabel  = w_map2.get(str(wght), f"W{wght}")
                             display = fname_raw
                             if wlabel and wlabel != "Regular": display += f" {wlabel}"
                             if is_italic: display += " Italic"
@@ -1063,147 +1083,160 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                             if dn in seen_names: continue
                             seen_names.add(dn)
                             emb_families.add(fkey)
-                            fd = make_fd(display, fname_raw, fkey, "Google", "Free (OFL)",
-                                         make_css_path("fonts.googleapis.com"), "google-fonts")
+                            path = make_css_path("fonts.googleapis.com")
+                            fd   = make_fd(display, fname_raw, fkey,
+                                           "Google", "Free (OFL)", path, "google-fonts")
                             emit_font(fd)
                             print(f"  [GF] {display}")
             except Exception as ex:
                 print(f"Google Fonts parse error: {ex}")
 
-        # ── Method 2: <link rel=preload as=font> ──────────────
-        push(emit_event("status", message="Method 2 — Checking preloaded fonts…"))
-        for tag in soup.find_all("link", attrs={"rel": lambda r: r and "preload" in (r if isinstance(r, list) else [r])}):
-            if tag.get("as") != "font": continue
-            pre_url = resolve_url(tag.get("href"))
-            if not pre_url: continue
-            filename  = os.path.basename(urlparse(pre_url).path)
-            fkey_file = filename.lower()
-            if fkey_file in seen_files or _SKIP_FILENAME_RE.search(filename):
-                seen_files.add(fkey_file); continue
-            seen_files.add(fkey_file)
-            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(pre_url)
-            if not display_name: continue
-            fkey = family_key(family_name or display_name)
-            dn   = normalize_font(display_name)
-            if not is_text_font(fkey) or dn in seen_names: continue
-            seen_names.add(dn); emb_families.add(fkey)
-            fd = make_fd(display_name, family_name or display_name, fkey,
-                         file_foundry, file_lic, make_font_file_path(filename), "preload")
-            emit_font(fd)
-            print(f"  [PRELOAD] {display_name}")
-
-        # ── Method 3: Collect all external CSS stylesheets ────
+        # ── Method 3: Collect all CSS URLs from <link> + <style> imports ──
         push(emit_event("status", message="Method 3 — Collecting CSS stylesheets…"))
         css_urls_raw = []
         for tag in soup.find_all("link", rel=lambda r: r and "stylesheet" in (r if isinstance(r, list) else [r])):
             href = tag.get("href", "")
             if href and "fonts.googleapis.com" not in href:
-                css_urls_raw.append(resolve_url(href))
+                css_urls_raw.append(resolve(href))
         for tag in soup.find_all("style"):
-            for m in re.findall(r'@import\s+url\(["\']?([^"\')\s]+)["\']?\)', tag.string or ""):
-                full = resolve_url(m)
+            for m in re.findall(r'@import\s+url\(["\']?([^"\'\)\s]+)["\']?\)', tag.string or ""):
+                full = resolve(m)
                 if full and "fonts.googleapis.com" not in full:
                     css_urls_raw.append(full)
-        seen_css_set = set()
-        unique_css_urls = []
+
+        seen_css_set: set = set()
+        unique_css_urls: list = []
         for cu in filter(None, css_urls_raw):
             key = urlparse(cu).path.lower()
             if key not in seen_css_set:
                 seen_css_set.add(key)
                 unique_css_urls.append(cu)
+
         print(f"  [CSS] {len(unique_css_urls)} stylesheet(s) found")
 
-        # ── Method 4: Parse each external CSS for @font-face ──
+        # ── Method 4: Parse each CSS for @font-face + font file URLs ──
         push(emit_event("status", message="Method 4 — Parsing @font-face rules from CSS…"))
         for css_url in unique_css_urls:
             css_filename = os.path.basename(urlparse(css_url).path) or "stylesheet.css"
             push(emit_event("status", message=f"  Parsing {css_filename}…"))
+
             for entry in _parse_css_server_side(css_url):
                 display  = entry["display"].strip()
                 family   = entry["family"].strip()
                 fkey     = normalize_font(family)
                 dn       = normalize_font(display)
+
                 if dn in seen_names or fkey in emb_families: continue
                 if not is_text_font(fkey): continue
+
                 seen_names.add(dn)
+
                 file_foundry = entry.get("foundry")
                 file_lic     = entry.get("license")
                 src_url      = entry.get("src_url", "")
-                if src_url and src_url.startswith("http") and not file_foundry:
-                    _, _, file_foundry, file_lic = get_font_info_from_file(src_url)
-                fd = make_fd(display, family, fkey, file_foundry, file_lic,
-                             make_css_path(css_url), entry["kind"])
-                emit_font(fd)
-        push(emit_event("status", message=f"  → {len(font_list)} fonts after external CSS"))
 
-        # ── Method 5: Parse inline <style> blocks ─────────────
+                # also grab direct font file URLs from CSS resources
+                if src_url and re.search(r'\.(woff2?|ttf|otf)(\?|#|$)', src_url, re.I):
+                    fname     = os.path.basename(urlparse(src_url).path)
+                    fkey_file = fname.lower()
+                    if fkey_file not in seen_files:
+                        seen_files.add(fkey_file)
+                        _, _, file_foundry2, file_lic2 = get_font_info_from_file(src_url)
+                        if file_foundry2 and not file_foundry:
+                            file_foundry, file_lic = file_foundry2, file_lic2
+
+                path = make_css_path(css_url)
+                fd   = make_fd(display, family, fkey, file_foundry, file_lic,
+                               path, entry["kind"])
+                emit_font(fd)
+
+        push(emit_event("status", message=f"  → {len(font_list)} fonts total after CSS parsing"))
+
+        # ── Method 5: Parse inline <style> tags for @font-face ────
         push(emit_event("status", message="Method 5 — Parsing inline <style> blocks…"))
         for style_tag in soup.find_all("style"):
             css_text = style_tag.string or ""
-            if not css_text.strip(): continue
+            if not css_text.strip():
+                continue
             for entry in _parse_css_text(css_text, source_url=base_url):
-                display = entry["display"].strip()
-                family  = entry["family"].strip()
-                fkey    = normalize_font(family)
-                dn      = normalize_font(display)
-                if dn in seen_names or not is_text_font(fkey): continue
+                display  = entry["display"].strip()
+                family   = entry["family"].strip()
+                fkey     = normalize_font(family)
+                dn       = normalize_font(display)
+                if dn in seen_names or not is_text_font(fkey):
+                    continue
                 seen_names.add(dn)
-                fd = make_fd(display, family, fkey, entry.get("foundry"), entry.get("license"),
-                             make_css_path(base_url), entry["kind"])
+                path = make_css_path(base_url)
+                fd   = make_fd(display, family, fkey,
+                               entry.get("foundry"), entry.get("license"),
+                               path, entry["kind"])
                 emit_font(fd)
                 print(f"  [INLINE] {display}")
+
         push(emit_event("status", message=f"  → {len(font_list)} fonts after inline styles"))
 
-        # ── Method 6: font-family in inline style= attributes ─
-        push(emit_event("status", message="Method 6 — Scanning inline style attributes…"))
+        # ── Method 6: Check font CDNs (Adobe, Fonts.com, Bunny) ───
+        push(emit_event("status", message="Method 6 — Checking font CDN links…"))
+        cdn_patterns = [
+            ("use.typekit.net",   "Adobe Fonts", "Commercial"),
+            ("use.fontawesome",   "Font Awesome", "Free (OFL)"),
+            ("fonts.bunny.net",   "Bunny Fonts",  "Free (OFL)"),
+            ("fast.fonts.net",    "Fonts.com",    "Commercial"),
+            ("cloud.typography",  "H&Co Typography", "Commercial"),
+        ]
+        all_tags_text = str(soup)
+        for cdn_domain, foundry, lic in cdn_patterns:
+            if cdn_domain in all_tags_text:
+                push(emit_event("status", message=f"  Found {foundry} CDN link"))
+                # fetch the CDN CSS and parse it
+                cdn_hrefs = []
+                for tag in soup.find_all(["link", "script"], src=True):
+                    s = tag.get("src", "")
+                    if cdn_domain in s:
+                        cdn_hrefs.append(resolve(s))
+                for tag in soup.find_all("link", href=True):
+                    h = tag.get("href", "")
+                    if cdn_domain in h:
+                        cdn_hrefs.append(resolve(h))
+                for cdn_url in filter(None, cdn_hrefs):
+                    for entry in _parse_css_server_side(cdn_url):
+                        display = entry["display"].strip()
+                        family  = entry["family"].strip()
+                        fkey    = normalize_font(family)
+                        dn      = normalize_font(display)
+                        if dn in seen_names or not is_text_font(fkey):
+                            continue
+                        seen_names.add(dn)
+                        path = make_css_path(cdn_url)
+                        fd   = make_fd(display, family, fkey, foundry, lic, path, entry["kind"])
+                        emit_font(fd)
+                        print(f"  [CDN:{foundry}] {display}")
+
+        # ── Method 7: font-family mentions in inline style attrs ──
+        push(emit_event("status", message="Method 7 — Scanning inline style attributes…"))
+        inline_families: set = set()
         for tag in soup.find_all(style=True):
             style_val = tag.get("style", "")
             for m in re.finditer(r"font-family\s*:\s*([^;}>]+)", style_val, re.I):
-                for part in m.group(1).split(","):
-                    fname = part.strip().strip("\"'")
-                    if not fname or fname.lower() in ("inherit","initial","unset","revert"): continue
-                    fkey = normalize_font(fname)
-                    dn   = normalize_font(fname)
-                    if dn in seen_names or not is_text_font(fkey): continue
-                    seen_names.add(dn)
-                    fd = make_fd(fname, fname, fkey, None, None,
-                                 make_css_path(base_url), "inline-style")
-                    emit_font(fd)
-                    print(f"  [INLINE-ATTR] {fname}")
+                raw = m.group(1).strip()
+                for part in raw.split(","):
+                    fname = part.strip().strip('"').strip("'")
+                    if fname and fname.lower() not in ("inherit","initial","unset","revert"):
+                        inline_families.add(fname)
+        for family in inline_families:
+            fkey = normalize_font(family)
+            dn   = normalize_font(family)
+            if dn in seen_names or not is_text_font(fkey):
+                continue
+            seen_names.add(dn)
+            path = make_css_path(base_url)
+            fd   = make_fd(family, family, fkey, None, None, path, "inline-style")
+            emit_font(fd)
+            print(f"  [INLINE-ATTR] {family}")
 
-        # ── Method 7: Font CDN links (Adobe, Typekit, Bunny…) ─
-        push(emit_event("status", message="Method 7 — Checking font CDN links…"))
-        cdn_checks = [
-            ("use.typekit.net",   "Adobe (Typekit)",   "Paid"),
-            ("fonts.bunny.net",   "Bunny Fonts (CDN)", "Free (OFL)"),
-            ("fast.fonts.net",    "Monotype",          "Paid"),
-            ("cloud.typography",  "Hoefler & Co.",     "Paid"),
-            ("kit.fontawesome",   "Font Awesome",      "Free/Paid"),
-        ]
-        page_text = str(soup)
-        for cdn_domain, foundry, lic in cdn_checks:
-            if cdn_domain not in page_text: continue
-            push(emit_event("status", message=f"  Found {foundry} CDN…"))
-            cdn_hrefs = []
-            for tag in soup.find_all(["link","script"]):
-                for attr in ("href","src"):
-                    val = tag.get(attr,"")
-                    if cdn_domain in val:
-                        cdn_hrefs.append(resolve_url(val))
-            for cdn_url in filter(None, cdn_hrefs):
-                for entry in _parse_css_server_side(cdn_url):
-                    display = entry["display"].strip()
-                    family  = entry["family"].strip()
-                    fkey    = normalize_font(family)
-                    dn      = normalize_font(display)
-                    if dn in seen_names or not is_text_font(fkey): continue
-                    seen_names.add(dn)
-                    fd = make_fd(display, family, fkey, foundry, lic,
-                                 make_css_path(cdn_url), entry["kind"])
-                    emit_font(fd)
-                    print(f"  [CDN:{foundry}] {display}")
+        push(emit_event("status", message=f"  → {len(font_list)} fonts total"))
 
-        # ── Done ──────────────────────────────────────────────
+        # ── Done ──────────────────────────────────────────────────
         total       = len(font_list)
         ai_count    = sum(1 for f in font_list if f.get("source") == "ai")
         restr_count = sum(1 for f in font_list if f.get("is_restricted"))
@@ -1225,6 +1258,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         print(f"Scanner error: {traceback.format_exc()}")
     finally:
         queue.put_nowait(None)
+
 
 # ─────────────────────────────────────────────────────────────
 #  FASTAPI APP
