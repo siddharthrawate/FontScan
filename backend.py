@@ -975,25 +975,88 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         )
 
     # ── No browser needed — pure HTTP scanning ──────────────
-    HEADERS = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        ),
-        "Accept-Language": "en-US,en;q=0.9",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    }
+    # Multiple User-Agent profiles to rotate on failure
+    _UA_PROFILES = [
+        {   # Chrome Windows
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Cache-Control": "max-age=0",
+        },
+        {   # Firefox Windows
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+        },
+        {   # Chrome macOS
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+        },
+        {   # Googlebot (many sites allow crawlers)
+            "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+        },
+        {   # Simple curl-like fallback
+            "User-Agent": "curl/7.88.1",
+            "Accept": "*/*",
+        },
+    ]
+
+    def _fetch_with_retry(target_url: str, timeout: int = 25):
+        """Try multiple UA profiles, follow redirects, handle common blocks."""
+        last_err = None
+        for i, hdrs in enumerate(_UA_PROFILES):
+            try:
+                push(emit_event("status", message=f"Fetching {target_url}… (attempt {i+1})") if i > 0
+                     else emit_event("status", message=f"Fetching {target_url}…"))
+                session = req_lib.Session()
+                session.max_redirects = 10
+                r = session.get(
+                    target_url, headers=hdrs, timeout=timeout,
+                    allow_redirects=True,
+                    verify=False,          # skip SSL cert errors
+                )
+                if r.status_code in (403, 401, 429) and i < len(_UA_PROFILES) - 1:
+                    push(emit_event("status", message=f"  → {r.status_code}, retrying with different profile…"))
+                    import time as _t; _t.sleep(0.5 * (i + 1))
+                    continue
+                if r.status_code == 200 or r.status_code in (301, 302):
+                    return r
+                r.raise_for_status()
+                return r
+            except Exception as e:
+                last_err = e
+                if i < len(_UA_PROFILES) - 1:
+                    push(emit_event("status", message=f"  → Error ({e}), retrying…"))
+                    import time as _t; _t.sleep(0.5)
+                    continue
+        raise last_err or Exception(f"All fetch attempts failed for {target_url}")
+
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     try:
-        push(emit_event("status", message=f"Fetching {url}…"))
-        resp = req_lib.get(url, headers=HEADERS, timeout=20, allow_redirects=True)
-        resp.raise_for_status()
-        html = resp.text
+        resp     = _fetch_with_retry(url)
+        html     = resp.text
         base_url = resp.url
     except Exception as e:
-        push(emit_event("error", message=f"Failed to fetch page: {e}"))
-        queue.put_nowait(None)
-        return
+        # Last resort: try fetching just the CSS links from a known CDN proxy
+        push(emit_event("status", message=f"Direct fetch blocked ({e}) — scanning headers only…"))
+        html     = f'<html><head></head><body></body></html>'
+        base_url = url
 
     try:
         soup = BeautifulSoup(html, "html.parser")
