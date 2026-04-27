@@ -624,6 +624,61 @@ def _parse_css_server_side(css_url: str) -> list:
     return results
 
 
+def _parse_css_text(css_text: str, source_url: str = "") -> list:
+    """Parse @font-face and font-family from a raw CSS string (e.g. inline <style> blocks)."""
+    results: list = []
+    seen_in_block: set = set()
+    css_clean = _COMMENT_RE.sub("", css_text)
+
+    for block_match in _FONT_FACE_BLOCK_RE.finditer(css_clean):
+        block = block_match.group(1)
+        ff_m  = _FF_VALUE_RE.search(block)
+        if not ff_m: continue
+        raw_family = ff_m.group(1).strip().strip("'\"").strip()
+        if not raw_family or not is_text_font(normalize_font(raw_family)): continue
+
+        src_m   = _SRC_URL_RE.search(block)
+        src_url = src_m.group(1).strip() if src_m else ""
+
+        if src_url and not src_url.startswith(("http://", "https://", "//")):
+            base    = source_url.rsplit("/", 1)[0]
+            src_url = base + "/" + src_url.lstrip("./")
+        if src_url.startswith("//"):
+            src_url = "https:" + src_url
+
+        foundry, lic = None, None
+        if src_url.startswith("http"):
+            foundry, lic = detect_from_cdn(src_url)
+
+        nkey = normalize_font(raw_family)
+        if nkey not in seen_in_block:
+            seen_in_block.add(nkey)
+            results.append({
+                "display": raw_family, "family": raw_family,
+                "foundry": foundry,    "license": lic,
+                "src_url": src_url,    "kind":    "font-face-css",
+            })
+
+    css_no_ff = _FONT_FACE_BLOCK_RE.sub("", css_clean)
+    for rule_match in _RULE_BLOCK_RE.finditer(css_no_ff):
+        block = rule_match.group(1)
+        for ff_m in _FF_VALUE_RE.finditer(block):
+            raw_val = ff_m.group(1).strip()
+            for part in raw_val.split(","):
+                raw_name = part.strip().strip("'\"").strip()
+                if not raw_name: continue
+                nname = normalize_font(raw_name)
+                if not is_text_font(nname) or nname in seen_in_block: continue
+                seen_in_block.add(nname)
+                results.append({
+                    "display": raw_name, "family": raw_name,
+                    "foundry": None,     "license": None,
+                    "src_url": "",       "kind":    "css-decl",
+                })
+
+    return results
+
+
 # ─────────────────────────────────────────────────────────────
 #  AI FONT LOOKUP (OpenAI)  — unchanged from original
 # ─────────────────────────────────────────────────────────────
@@ -1096,6 +1151,90 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 emit_font(fd)
 
         push(emit_event("status", message=f"  → {len(font_list)} fonts total after CSS parsing"))
+
+        # ── Method 5: Parse inline <style> tags for @font-face ────
+        push(emit_event("status", message="Method 5 — Parsing inline <style> blocks…"))
+        for style_tag in soup.find_all("style"):
+            css_text = style_tag.string or ""
+            if not css_text.strip():
+                continue
+            for entry in _parse_css_text(css_text, source_url=base_url):
+                display  = entry["display"].strip()
+                family   = entry["family"].strip()
+                fkey     = normalize_font(family)
+                dn       = normalize_font(display)
+                if dn in seen_names or not is_text_font(fkey):
+                    continue
+                seen_names.add(dn)
+                path = make_css_path(base_url)
+                fd   = make_fd(display, family, fkey,
+                               entry.get("foundry"), entry.get("license"),
+                               path, entry["kind"])
+                emit_font(fd)
+                print(f"  [INLINE] {display}")
+
+        push(emit_event("status", message=f"  → {len(font_list)} fonts after inline styles"))
+
+        # ── Method 6: Check font CDNs (Adobe, Fonts.com, Bunny) ───
+        push(emit_event("status", message="Method 6 — Checking font CDN links…"))
+        cdn_patterns = [
+            ("use.typekit.net",   "Adobe Fonts", "Commercial"),
+            ("use.fontawesome",   "Font Awesome", "Free (OFL)"),
+            ("fonts.bunny.net",   "Bunny Fonts",  "Free (OFL)"),
+            ("fast.fonts.net",    "Fonts.com",    "Commercial"),
+            ("cloud.typography",  "H&Co Typography", "Commercial"),
+        ]
+        all_tags_text = str(soup)
+        for cdn_domain, foundry, lic in cdn_patterns:
+            if cdn_domain in all_tags_text:
+                push(emit_event("status", message=f"  Found {foundry} CDN link"))
+                # fetch the CDN CSS and parse it
+                cdn_hrefs = []
+                for tag in soup.find_all(["link", "script"], src=True):
+                    s = tag.get("src", "")
+                    if cdn_domain in s:
+                        cdn_hrefs.append(resolve(s))
+                for tag in soup.find_all("link", href=True):
+                    h = tag.get("href", "")
+                    if cdn_domain in h:
+                        cdn_hrefs.append(resolve(h))
+                for cdn_url in filter(None, cdn_hrefs):
+                    for entry in _parse_css_server_side(cdn_url):
+                        display = entry["display"].strip()
+                        family  = entry["family"].strip()
+                        fkey    = normalize_font(family)
+                        dn      = normalize_font(display)
+                        if dn in seen_names or not is_text_font(fkey):
+                            continue
+                        seen_names.add(dn)
+                        path = make_css_path(cdn_url)
+                        fd   = make_fd(display, family, fkey, foundry, lic, path, entry["kind"])
+                        emit_font(fd)
+                        print(f"  [CDN:{foundry}] {display}")
+
+        # ── Method 7: font-family mentions in inline style attrs ──
+        push(emit_event("status", message="Method 7 — Scanning inline style attributes…"))
+        inline_families: set = set()
+        for tag in soup.find_all(style=True):
+            style_val = tag.get("style", "")
+            for m in re.finditer(r"font-family\s*:\s*([^;}>]+)", style_val, re.I):
+                raw = m.group(1).strip()
+                for part in raw.split(","):
+                    fname = part.strip().strip('"').strip("'")
+                    if fname and fname.lower() not in ("inherit","initial","unset","revert"):
+                        inline_families.add(fname)
+        for family in inline_families:
+            fkey = normalize_font(family)
+            dn   = normalize_font(family)
+            if dn in seen_names or not is_text_font(fkey):
+                continue
+            seen_names.add(dn)
+            path = make_css_path(base_url)
+            fd   = make_fd(family, family, fkey, None, None, path, "inline-style")
+            emit_font(fd)
+            print(f"  [INLINE-ATTR] {family}")
+
+        push(emit_event("status", message=f"  → {len(font_list)} fonts total"))
 
         # ── Done ──────────────────────────────────────────────────
         total       = len(font_list)
