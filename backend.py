@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 import uvicorn
 from dotenv import load_dotenv
 
-from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
+from bs4 import BeautifulSoup
 from fontTools.ttLib import TTFont
 
 # ── Auth imports ─────────────────────────────────────────────
@@ -919,188 +919,79 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             confidence=conf,
         )
 
-    push(emit_event("status", message="Starting stealth browser…"))
-
-    pw_instance = sync_playwright().start()
-    try:
-        browser = pw_instance.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-gpu",
-                "--disable-dev-shm-usage",
-                "--disable-web-security",
-                "--disable-blink-features=AutomationControlled",
-                "--lang=en-US",
-            ]
-        )
-    except Exception as e:
-        push(emit_event("error", message=f"ChromeDriver failed: {e}"))
-        queue.put_nowait(None)
-        pw_instance.stop()
-        return
-
-    context = browser.new_context(
-        viewport={"width": 1440, "height": 900},
-        user_agent=(
+    # ── No browser needed — pure HTTP scanning ──────────────
+    HEADERS = {
+        "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         ),
-        locale="en-US",
-        extra_http_headers={"Accept-Language": "en-US,en;q=0.9"},
-    )
-    context.add_init_script("""
-        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-        Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3]});
-        window.chrome = {runtime: {}};
-    """)
-    page = context.new_page()
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    }
 
     try:
-        push(emit_event("status", message=f"Loading {url}…"))
-        try:
-            page.goto(url, wait_until="domcontentloaded", timeout=max(wait_sec, 20) * 1000)
-        except PlaywrightTimeout:
-            push(emit_event("error", message="Page did not load"))
-            return
+        push(emit_event("status", message=f"Fetching {url}…"))
+        resp = req_lib.get(url, headers=HEADERS, timeout=20, allow_redirects=True)
+        resp.raise_for_status()
+        html = resp.text
+        base_url = resp.url
+    except Exception as e:
+        push(emit_event("error", message=f"Failed to fetch page: {e}"))
+        queue.put_nowait(None)
+        return
 
-        try:
-            page.wait_for_load_state("networkidle", timeout=max(wait_sec, 10) * 1000)
-        except PlaywrightTimeout:
-            pass
+    try:
+        soup = BeautifulSoup(html, "html.parser")
 
-        try:
-            for _ in range(max(0, scroll_steps)):
-                page.evaluate("window.scrollBy(0, window.innerHeight * 0.8)")
-                page.wait_for_timeout(800)
-            page.evaluate("window.scrollTo(0, 0)")
-        except Exception:
-            pass
+        def resolve(href):
+            if not href: return None
+            href = href.strip()
+            if href.startswith("http"): return href
+            if href.startswith("//"): return "https:" + href
+            from urllib.parse import urljoin
+            return urljoin(base_url, href)
 
-        # ── Method 1: Actual font file resources ──────────────
-        push(emit_event("status", message="Method 1 — Scanning font file resources…"))
-        try:
-            resources = page.evaluate("""() => {
-                try {
-                    return performance.getEntriesByType("resource")
-                        .filter(r => r && r.name &&
-                            r.name.match(/\.(woff2?|ttf|otf)(\?|#|$)/i))
-                        .map(r => r.name);
-                } catch(e) { return []; }
-            }""") or []
-        except Exception:
-            resources = []
-
-        for res_url in resources:
-            filename  = os.path.basename(urlparse(res_url).path)
+        # ── Method 1: <link rel=preload as=font> ──────────────────
+        push(emit_event("status", message="Method 1 — Checking preloaded fonts…"))
+        for tag in soup.find_all("link", rel=lambda r: r and "preload" in r, as_="font"):
+            pre_url = resolve(tag.get("href"))
+            if not pre_url: continue
+            filename  = os.path.basename(urlparse(pre_url).path)
             fkey_file = filename.lower()
             if fkey_file in seen_files: continue
             if _SKIP_FILENAME_RE.search(filename):
                 seen_files.add(fkey_file)
                 continue
             seen_files.add(fkey_file)
-
-            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(res_url)
+            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(pre_url)
             if not display_name: continue
-
-            display_name = display_name.strip()
             fkey = family_key(family_name or display_name)
-            if not is_text_font(fkey) or not is_text_font(normalize_font(display_name)): continue
-
+            dn   = normalize_font(display_name)
+            if not is_text_font(fkey) or dn in seen_names: continue
+            seen_names.add(dn)
             emb_families.add(fkey)
-            seen_names.add(normalize_font(display_name))
             path = make_font_file_path(filename)
             fd   = make_fd(display_name, family_name or display_name,
-                           fkey, file_foundry, file_lic, path, "embedded")
+                           fkey, file_foundry, file_lic, path, "preload")
             emit_font(fd)
-            print(f"  [FILE] {display_name}")
+            print(f"  [PRELOAD] {display_name}")
 
-        push(emit_event("status", message=f"  → {len(font_list)} fonts from files"))
+        push(emit_event("status", message=f"  → {len(font_list)} fonts from preload hints"))
 
-        # ── Method 2: @font-face from CSS files ───────────────
-        push(emit_event("status", message="Method 2 — Parsing @font-face from CSS files…"))
+        # ── Method 2: Google Fonts <link> tags ────────────────────
+        push(emit_event("status", message="Method 2 — Checking Google Fonts links…"))
+        gf_hrefs = []
+        for tag in soup.find_all("link", href=True):
+            h = tag.get("href", "")
+            if "fonts.googleapis.com" in h:
+                gf_hrefs.append(resolve(h))
+        # also check @import in inline <style> tags
+        for tag in soup.find_all("style"):
+            for m in re.findall(r'@import\s+url\(["\']?([^"\'\)\s]+)["\']?\)', tag.string or ""):
+                gf_hrefs.append(m)
+        gf_hrefs = list(set(filter(None, gf_hrefs)))
 
-        font_faces = page.evaluate("""() => {
-            const result = [];
-            function processSS(ss, sheetHref) {
-                try {
-                    for (const rule of ss.cssRules || []) {
-                        if (rule.type === 5) {
-                            const family = (rule.style.fontFamily || '').replace(/['"]/g,'').trim();
-                            const style  = (rule.style.fontStyle  || 'normal').trim();
-                            const weight = (rule.style.fontWeight || 'normal').trim();
-                            const src    = rule.style.src || '';
-                            if (family) result.push({family, style, weight, src, sheet: sheetHref});
-                        }
-                        if (rule.cssRules) { try { processSS(rule, sheetHref); } catch(e) {} }
-                    }
-                } catch(e) {}
-            }
-            try {
-                for (const ss of document.styleSheets) {
-                    if (ss.href && ss.href !== '__inline__') processSS(ss, ss.href);
-                }
-            } catch(e) {}
-            return result;
-        }""") or []
-
-        for ff in font_faces:
-            family  = (ff.get("family") or "").strip()
-            style   = (ff.get("style")  or "normal").strip()
-            weight  = (ff.get("weight") or "normal").strip()
-            src_str = ff.get("src", "")
-            sheet   = ff.get("sheet", "")
-
-            if not sheet or sheet == "__inline__": continue
-            if not family or not is_text_font(normalize_font(family)): continue
-
-            w_map = {"100":"Thin","200":"ExtraLight","300":"Light","400":"Regular",
-                     "500":"Medium","600":"SemiBold","700":"Bold","800":"ExtraBold","900":"Black"}
-            wlabel  = w_map.get(weight, weight if weight not in ("normal", "400") else "")
-            slabel  = "Italic" if "italic" in style.lower() else ""
-            suffix  = " ".join(filter(None, [wlabel, slabel]))
-            display = f"{family} {suffix}".strip() if (suffix and suffix.lower() not in family.lower()) else family
-
-            dn   = normalize_font(display)
-            fkey = normalize_font(family)
-            if dn in seen_names: continue
-            seen_names.add(dn)
-
-            file_foundry, file_lic = None, None
-            url_match = re.search(r'url\(["\']?([^"\')\s]+)["\']?\)', src_str)
-            if url_match:
-                furl = url_match.group(1)
-                if furl.startswith("http"):
-                    _, _, file_foundry, file_lic = get_font_info_from_file(furl)
-
-            emb_families.add(fkey)
-            path = make_css_path(sheet)
-            fd   = make_fd(display, family, fkey, file_foundry, file_lic, path, "font-face")
-            emit_font(fd)
-            print(f"  [@font-face] {display}")
-
-        push(emit_event("status", message=f"  → {len(font_list)} fonts total so far"))
-
-        # ── Method 3: Google Fonts <link> tags ────────────────
-        push(emit_event("status", message="Method 3 — Checking Google Fonts links…"))
-
-        gf_links = page.evaluate("""() => {
-            const links = [];
-            document.querySelectorAll('link[href*="fonts.googleapis.com"]').forEach(l => links.push(l.href));
-            try {
-                for (const ss of document.styleSheets) {
-                    try {
-                        for (const r of ss.cssRules) {
-                            if (r.type === 3 && r.href && r.href.includes('fonts.googleapis.com'))
-                                links.push(r.href);
-                        }
-                    } catch(e) {}
-                }
-            } catch(e) {}
-            return [...new Set(links)];
-        }""") or []
-
-        for gf_url in gf_links:
+        for gf_url in gf_hrefs:
             try:
                 parsed         = urlparse(gf_url)
                 qs             = parse_qs(parsed.query)
@@ -1110,7 +1001,6 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                         fname_raw = fpart.split(":")[0].replace("+", " ").strip()
                         axes_part = fpart[len(fpart.split(":")[0]):].lstrip(":")
                         if not fname_raw: continue
-
                         variants = []
                         if "wght@" in axes_part or "ital,wght@" in axes_part:
                             has_ital = "ital" in axes_part
@@ -1125,7 +1015,6 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                                         variants.append((False, w))
                         if not variants:
                             variants = [(False, "400")]
-
                         w_map2 = {"100":"Thin","200":"ExtraLight","300":"Light",
                                   "400":"Regular","500":"Medium","600":"SemiBold",
                                   "700":"Bold","800":"ExtraBold","900":"Black"}
@@ -1134,7 +1023,6 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                             display = fname_raw
                             if wlabel and wlabel != "Regular": display += f" {wlabel}"
                             if is_italic: display += " Italic"
-
                             dn   = normalize_font(display)
                             fkey = normalize_font(fname_raw)
                             if dn in seen_names: continue
@@ -1148,65 +1036,31 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             except Exception as ex:
                 print(f"Google Fonts parse error: {ex}")
 
-        # ── Method 4: <link rel=preload as=font> ──────────────
-        push(emit_event("status", message="Method 4 — Checking preloaded fonts…"))
+        # ── Method 3: Collect all CSS URLs from <link> + <style> imports ──
+        push(emit_event("status", message="Method 3 — Collecting CSS stylesheets…"))
+        css_urls_raw = []
+        for tag in soup.find_all("link", rel=lambda r: r and "stylesheet" in (r if isinstance(r, list) else [r])):
+            href = tag.get("href", "")
+            if href and "fonts.googleapis.com" not in href:
+                css_urls_raw.append(resolve(href))
+        for tag in soup.find_all("style"):
+            for m in re.findall(r'@import\s+url\(["\']?([^"\'\)\s]+)["\']?\)', tag.string or ""):
+                full = resolve(m)
+                if full and "fonts.googleapis.com" not in full:
+                    css_urls_raw.append(full)
 
-        preloads = page.evaluate("""() => {
-            return Array.from(
-                document.querySelectorAll('link[rel="preload"][as="font"]')
-            ).map(l => l.href).filter(Boolean);
-        }""") or []
-
-        for pre_url in preloads:
-            filename  = os.path.basename(urlparse(pre_url).path)
-            fkey_file = filename.lower()
-            if fkey_file in seen_files: continue
-            if _SKIP_FILENAME_RE.search(filename):
-                seen_files.add(fkey_file)
-                continue
-            seen_files.add(fkey_file)
-
-            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(pre_url)
-            if not display_name: continue
-
-            fkey = family_key(family_name or display_name)
-            dn   = normalize_font(display_name)
-            if not is_text_font(fkey) or dn in seen_names: continue
-
-            seen_names.add(dn)
-            emb_families.add(fkey)
-            path = make_font_file_path(filename)
-            fd   = make_fd(display_name, family_name or display_name,
-                           fkey, file_foundry, file_lic, path, "preload")
-            emit_font(fd)
-            print(f"  [PRELOAD] {display_name}")
-
-        # ── Method 5: Server-side CSS file parsing ────────────
-        push(emit_event("status", message="Method 5 — Server-side CSS parsing…"))
-
-        try:
-            css_resource_urls = page.evaluate("""() => {
-                try {
-                    return performance.getEntriesByType("resource")
-                        .filter(r => r && r.name &&
-                            r.name.match(/\\.css(\\?|#|$)/i) &&
-                            !r.name.includes('fonts.googleapis.com'))
-                        .map(r => r.name);
-                } catch(e) { return []; }
-            }""") or []
-        except Exception:
-            css_resource_urls = []
-
-        seen_css_urls: set  = set()
+        seen_css_set: set = set()
         unique_css_urls: list = []
-        for cu in css_resource_urls:
+        for cu in filter(None, css_urls_raw):
             key = urlparse(cu).path.lower()
-            if key not in seen_css_urls:
-                seen_css_urls.add(key)
+            if key not in seen_css_set:
+                seen_css_set.add(key)
                 unique_css_urls.append(cu)
 
-        print(f"  [CSS-FETCH] {len(unique_css_urls)} unique CSS files")
+        print(f"  [CSS] {len(unique_css_urls)} stylesheet(s) found")
 
+        # ── Method 4: Parse each CSS for @font-face + font file URLs ──
+        push(emit_event("status", message="Method 4 — Parsing @font-face rules from CSS…"))
         for css_url in unique_css_urls:
             css_filename = os.path.basename(urlparse(css_url).path) or "stylesheet.css"
             push(emit_event("status", message=f"  Parsing {css_filename}…"))
@@ -1226,8 +1080,15 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 file_lic     = entry.get("license")
                 src_url      = entry.get("src_url", "")
 
-                if src_url and src_url.startswith("http") and not file_foundry:
-                    _, _, file_foundry, file_lic = get_font_info_from_file(src_url)
+                # also grab direct font file URLs from CSS resources
+                if src_url and re.search(r'\.(woff2?|ttf|otf)(\?|#|$)', src_url, re.I):
+                    fname     = os.path.basename(urlparse(src_url).path)
+                    fkey_file = fname.lower()
+                    if fkey_file not in seen_files:
+                        seen_files.add(fkey_file)
+                        _, _, file_foundry2, file_lic2 = get_font_info_from_file(src_url)
+                        if file_foundry2 and not file_foundry:
+                            file_foundry, file_lic = file_foundry2, file_lic2
 
                 path = make_css_path(css_url)
                 fd   = make_fd(display, family, fkey, file_foundry, file_lic,
@@ -1236,7 +1097,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
 
         push(emit_event("status", message=f"  → {len(font_list)} fonts total after CSS parsing"))
 
-        # ── Done ──────────────────────────────────────────────
+        # ── Done ──────────────────────────────────────────────────
         total       = len(font_list)
         ai_count    = sum(1 for f in font_list if f.get("source") == "ai")
         restr_count = sum(1 for f in font_list if f.get("is_restricted"))
@@ -1257,13 +1118,6 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         push(emit_event("error", message=str(e)))
         print(f"Scanner error: {traceback.format_exc()}")
     finally:
-        try:
-            page.close()
-            context.close()
-            browser.close()
-        except: pass
-        try: pw_instance.stop()
-        except: pass
         queue.put_nowait(None)
 
 
