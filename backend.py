@@ -24,19 +24,7 @@ from sqlalchemy.orm import Session
 import uvicorn
 from dotenv import load_dotenv
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.chrome.options import Options as ChromeOptions
-try:
-    from webdriver_manager.chrome import ChromeDriverManager
-    _USE_WDM = True
-except ImportError:
-    _USE_WDM = False
-from selenium_stealth import stealth
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import WebDriverException, TimeoutException, NoSuchWindowException
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 from fontTools.ttLib import TTFont
 
 # ── Auth imports ─────────────────────────────────────────────
@@ -933,113 +921,73 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
 
     push(emit_event("status", message="Starting stealth browser…"))
 
-    opts = ChromeOptions()
-    opts.add_argument("--headless=new")
-    opts.add_argument("--no-sandbox")
-    opts.add_argument("--disable-gpu")
-    opts.add_argument("--disable-dev-shm-usage")
-    opts.add_argument("--window-size=1440,900")
-    opts.add_argument("--log-level=3")
-    opts.add_argument("--silent")
-    opts.add_argument("--remote-debugging-port=0")
-    opts.add_argument("--disable-web-security")
-    opts.add_argument("--disable-extensions")
-    opts.add_argument("--disable-setuid-sandbox")
-    opts.add_argument("--single-process")
-    opts.add_argument(
-        "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    )
-    opts.add_argument("--lang=en-US,en;q=0.9")
-    opts.add_argument("--disable-blink-features=AutomationControlled")
-    opts.add_experimental_option("excludeSwitches", ["enable-automation"])
-    opts.add_experimental_option("useAutomationExtension", False)
-
+    pw_instance = sync_playwright().start()
     try:
-        if _USE_WDM:
-            service = ChromeService(ChromeDriverManager().install())
-            driver  = webdriver.Chrome(service=service, options=opts)
-        else:
-            driver  = webdriver.Chrome(options=opts)
-    except WebDriverException as e:
+        browser = pw_instance.chromium.launch(
+            headless=True,
+            args=[
+                "--no-sandbox",
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--disable-web-security",
+                "--disable-blink-features=AutomationControlled",
+                "--lang=en-US",
+            ]
+        )
+    except Exception as e:
         push(emit_event("error", message=f"ChromeDriver failed: {e}"))
         queue.put_nowait(None)
+        pw_instance.stop()
         return
 
-    import time as _time
-    _time.sleep(0.4)
-
-    try:
-        stealth(driver, languages=["en-US","en"], vendor="Google Inc.",
-                platform="Win32", webgl_vendor="Intel Inc.",
-                renderer="Intel Iris OpenGL Engine", fix_hairline=True)
-    except NoSuchWindowException:
-        push(emit_event("error", message="Chrome window closed before stealth patches applied."))
-        try: driver.quit()
-        except: pass
-        queue.put_nowait(None)
-        return
-    except Exception as e:
-        print(f"⚠ stealth() failed (non-fatal): {e}")
-
-    _JS_IDLE = """
-        try {
-            if (document.readyState !== 'complete') return false;
-            const entries = performance.getEntriesByType('resource');
-            const now = performance.now();
-            return entries.filter(e => e.responseEnd === 0 ||
-                (now - e.responseEnd) < 500).length === 0;
-        } catch(e) { return true; }
-    """
+    context = browser.new_context(
+        viewport={"width": 1440, "height": 900},
+        user_agent=(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        ),
+        locale="en-US",
+        extra_http_headers={"Accept-Language": "en-US,en;q=0.9"},
+    )
+    context.add_init_script("""
+        Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
+        Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3]});
+        window.chrome = {runtime: {}};
+    """)
+    page = context.new_page()
 
     try:
         push(emit_event("status", message=f"Loading {url}…"))
-        driver.get(url)
-
         try:
-            WebDriverWait(driver, max(wait_sec, 15)).until(
-                EC.presence_of_element_located((By.TAG_NAME, "body"))
-            )
-        except TimeoutException:
+            page.goto(url, wait_until="domcontentloaded", timeout=max(wait_sec, 20) * 1000)
+        except PlaywrightTimeout:
             push(emit_event("error", message="Page did not load"))
             return
 
         try:
-            WebDriverWait(driver, max(wait_sec, 10)).until(
-                lambda d: d.execute_script(_JS_IDLE)
-            )
-        except TimeoutException:
+            page.wait_for_load_state("networkidle", timeout=max(wait_sec, 10) * 1000)
+        except PlaywrightTimeout:
             pass
 
         try:
             for _ in range(max(0, scroll_steps)):
-                prev_y = driver.execute_script("return window.scrollY;")
-                driver.execute_script("window.scrollBy(0, window.innerHeight * 0.8);")
-                try:
-                    WebDriverWait(driver, 1.5).until(
-                        lambda d, py=prev_y: d.execute_script("return window.scrollY;") != py
-                    )
-                except TimeoutException:
-                    pass
-                try:
-                    WebDriverWait(driver, 0.8).until(lambda d: d.execute_script(_JS_IDLE))
-                except TimeoutException:
-                    pass
-            driver.execute_script("window.scrollTo(0, 0);")
+                page.evaluate("window.scrollBy(0, window.innerHeight * 0.8)")
+                page.wait_for_timeout(800)
+            page.evaluate("window.scrollTo(0, 0)")
         except Exception:
             pass
 
         # ── Method 1: Actual font file resources ──────────────
         push(emit_event("status", message="Method 1 — Scanning font file resources…"))
         try:
-            resources = driver.execute_script("""
+            resources = page.evaluate("""() => {
                 try {
                     return performance.getEntriesByType("resource")
                         .filter(r => r && r.name &&
-                            r.name.match(/\\.(woff2?|ttf|otf)(\\?|#|$)/i))
+                            r.name.match(/\.(woff2?|ttf|otf)(\?|#|$)/i))
                         .map(r => r.name);
                 } catch(e) { return []; }
-            """) or []
+            }""") or []
         except Exception:
             resources = []
 
@@ -1072,7 +1020,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         # ── Method 2: @font-face from CSS files ───────────────
         push(emit_event("status", message="Method 2 — Parsing @font-face from CSS files…"))
 
-        font_faces = driver.execute_script("""
+        font_faces = page.evaluate("""() => {
             const result = [];
             function processSS(ss, sheetHref) {
                 try {
@@ -1094,7 +1042,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 }
             } catch(e) {}
             return result;
-        """) or []
+        }""") or []
 
         for ff in font_faces:
             family  = (ff.get("family") or "").strip()
@@ -1136,7 +1084,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         # ── Method 3: Google Fonts <link> tags ────────────────
         push(emit_event("status", message="Method 3 — Checking Google Fonts links…"))
 
-        gf_links = driver.execute_script("""
+        gf_links = page.evaluate("""() => {
             const links = [];
             document.querySelectorAll('link[href*="fonts.googleapis.com"]').forEach(l => links.push(l.href));
             try {
@@ -1150,7 +1098,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 }
             } catch(e) {}
             return [...new Set(links)];
-        """) or []
+        }""") or []
 
         for gf_url in gf_links:
             try:
@@ -1203,11 +1151,11 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         # ── Method 4: <link rel=preload as=font> ──────────────
         push(emit_event("status", message="Method 4 — Checking preloaded fonts…"))
 
-        preloads = driver.execute_script("""
+        preloads = page.evaluate("""() => {
             return Array.from(
                 document.querySelectorAll('link[rel="preload"][as="font"]')
             ).map(l => l.href).filter(Boolean);
-        """) or []
+        }""") or []
 
         for pre_url in preloads:
             filename  = os.path.basename(urlparse(pre_url).path)
@@ -1237,7 +1185,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         push(emit_event("status", message="Method 5 — Server-side CSS parsing…"))
 
         try:
-            css_resource_urls = driver.execute_script("""
+            css_resource_urls = page.evaluate("""() => {
                 try {
                     return performance.getEntriesByType("resource")
                         .filter(r => r && r.name &&
@@ -1245,7 +1193,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                             !r.name.includes('fonts.googleapis.com'))
                         .map(r => r.name);
                 } catch(e) { return []; }
-            """) or []
+            }""") or []
         except Exception:
             css_resource_urls = []
 
@@ -1309,7 +1257,12 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         push(emit_event("error", message=str(e)))
         print(f"Scanner error: {traceback.format_exc()}")
     finally:
-        try: driver.quit()
+        try:
+            page.close()
+            context.close()
+            browser.close()
+        except: pass
+        try: pw_instance.stop()
         except: pass
         queue.put_nowait(None)
 
