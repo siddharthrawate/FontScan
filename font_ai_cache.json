@@ -8260,5 +8260,107 @@
       "css_path": "fonts.googleapis.com",
       "confidence": "medium"
     }
+  ],
+  "&quot": {
+    "foundry": "Unknown Foundry",
+    "designer": "Unknown Designer",
+    "license": "Restricted",
+    "license_detail": "The font name '&quot' suggests it might be a placeholder or error, not a real font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "website_fonts_glenmarkpharma.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Regular",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Open Sans Bold",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
+  ],
+  "website_fonts_sunpharma.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Regular",
+      "family": "Open Sans",
+      "foundry": "Ascender Corporation",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Open Sans Bold",
+      "family": "Open Sans",
+      "foundry": "Ascender Corporation",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
   ]
 }
