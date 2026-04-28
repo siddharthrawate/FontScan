@@ -55,8 +55,17 @@ def _is_unknown(val: str) -> bool:
 #  FONT TYPE CLASSIFICATION
 # ─────────────────────────────────────────────────────────────
 def classify_font_type(kind: str) -> str:
-    css_kinds = {"google-fonts", "css-decl"}
-    return "CSS Font" if kind in css_kinds else "Embedded Font"
+    if kind in ("google-fonts",):
+        return "Google Fonts (CSS)"
+    if kind in ("css-decl", "font-face-css"):
+        return "CSS Embedded"
+    if kind in ("preload", "embedded"):
+        return "Embedded Font"
+    if kind in ("inline-style",):
+        return "Inline CSS"
+    if kind in ("ai-identified",):
+        return "AI Identified"
+    return "Embedded Font"
 
 
 # ─────────────────────────────────────────────────────────────
@@ -535,12 +544,50 @@ def lookup_db(font_key: str):
             return v
     return None
 
-def make_font_file_path(filename: str) -> str:
-    return f"Inspect > Application > Frames > Top > Font > {filename}"
+def make_font_file_path(filename: str, source_url: str = "") -> str:
+    """Generate Chrome DevTools-style path for an embedded font file."""
+    if source_url:
+        parsed = urlparse(source_url)
+        domain = parsed.netloc or source_url
+        parts  = [p for p in parsed.path.split("/") if p]
+        if parts:
+            folder = " > ".join(parts[:-1]) if len(parts) > 1 else ""
+            return (
+                f"Application > Frames > top > {domain} > {folder} > {parts[-1]}"
+                if folder else
+                f"Application > Frames > top > {domain} > {parts[-1]}"
+            )
+    return f"Application > Frames > top > Fonts > {filename}"
 
 def make_css_path(sheet_href: str) -> str:
+    """Generate Chrome DevTools-style path for a CSS stylesheet."""
+    if not sheet_href or sheet_href.startswith("AI"):
+        return sheet_href
+    if sheet_href.startswith("http"):
+        parsed = urlparse(sheet_href)
+        domain = parsed.netloc or ""
+        parts  = [p for p in parsed.path.split("/") if p]
+        if parts:
+            folder = " > ".join(parts[:-1]) if len(parts) > 1 else ""
+            file   = parts[-1]
+            return (
+                f"Application > Frames > top > {domain} > {folder} > {file}"
+                if folder else
+                f"Application > Frames > top > {domain} > {file}"
+            )
+        return f"Application > Frames > top > {domain} > (index)"
     filename = os.path.basename(urlparse(sheet_href).path) or sheet_href
-    return f"Inspect > Application > Frames > Top > css > {filename}"
+    return f"Application > Frames > top > css > {filename}"
+
+def make_inline_path(base_url: str) -> str:
+    """Path for inline <style> block fonts."""
+    parsed = urlparse(base_url)
+    domain = parsed.netloc or base_url
+    return f"Application > Frames > top > {domain} > (inline <style>)"
+
+def make_gf_path(font_family: str) -> str:
+    """Path for Google Fonts."""
+    return f"Application > Frames > top > fonts.googleapis.com > css2?family={font_family.replace(' ', '+')}"
 
 
 # ─────────────────────────────────────────────────────────────
@@ -859,20 +906,19 @@ def _ai_identify_website_fonts(url: str, notify=None) -> list:
             return cached
 
     prompt = (
-        f"List the fonts used on the website: {url} (domain: {domain})\n\n"
-        "For each font, return a JSON array where each element has:\n"
-        "  - name: full font name (e.g. 'EY Interstate Regular')\n"
-        "  - family: font family (e.g. 'EY Interstate')\n"
-        "  - foundry: type foundry or creator\n"
-        "  - license: one of 'Free (OFL)', 'Free', 'Paid', 'Restricted - Licensed only', 'Commercial'\n"
-        "  - confidence: 'high', 'medium', or 'low'\n\n"
-        "Base your answer on:\n"
-        "1. Known brand guidelines for this company/website\n"
-        "2. Fonts commonly associated with this industry/brand\n"
-        "3. Publicly available font information\n\n"
-        "Return ONLY a valid JSON array. No markdown, no explanation. Example:\n"
-        '[{"name":"Inter Regular","family":"Inter","foundry":"Rasmus Andersson",'
-        '"license":"Free (OFL)","confidence":"high"}]'
+        f"List ALL fonts used on the website: {url} (domain: {domain})\n\n"
+        "Return a JSON array. Each element must have:\n"
+        "  - name: full font name with weight/style (e.g. 'EY Interstate Regular', 'Roboto Bold', 'Open Sans Italic')\n"
+        "  - family: font family name (e.g. 'EY Interstate', 'Roboto')\n"
+        "  - foundry: exact type foundry or creator name\n"
+        "  - license: EXACTLY one of: 'Free (OFL)', 'Free', 'Paid', 'Restricted - Licensed only'\n"
+        "  - css_path: how the font is likely loaded, e.g. 'fonts.googleapis.com', 'use.typekit.net', 'self-hosted CSS', 'system font'\n"
+        "  - confidence: 'high' if you are certain, 'medium' if likely, 'low' if guessing\n\n"
+        "Include ALL font weights and styles you know are used (Regular, Bold, Light, Italic etc).\n"
+        "Base your answer on: brand guidelines, known font usage, CDN patterns for this company.\n"
+        "Return ONLY a valid JSON array, no markdown.\n"
+        f'Example: [{{"name":"Inter Regular","family":"Inter","foundry":"Rasmus Andersson",'
+        f'"license":"Free (OFL)","css_path":"fonts.googleapis.com","confidence":"high"}}]'
     )
 
     def _evt(type_, **kw):
@@ -1235,7 +1281,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             if not is_text_font(fkey) or dn in seen_names: continue
             seen_names.add(dn); emb_families.add(fkey)
             fd = make_fd(display_name, family_name or display_name, fkey,
-                         file_foundry, file_lic, make_font_file_path(filename), "preload")
+                         file_foundry, file_lic, make_font_file_path(filename, pre_url), "preload")
             emit_font(fd)
             print(f"  [PRELOAD] {display_name}")
 
@@ -1255,7 +1301,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             if not is_text_font(fkey) or dn in seen_names: continue
             seen_names.add(dn); emb_families.add(fkey)
             fd = make_fd(display_name, family_name or display_name, fkey,
-                         file_foundry, file_lic, make_font_file_path(filename), "embedded")
+                         file_foundry, file_lic, make_font_file_path(filename, res_url), "embedded")
             emit_font(fd)
             print(f"  [BROWSER-FONT] {display_name}")
 
@@ -1327,7 +1373,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 if dn in seen_names or not is_text_font(fkey): continue
                 seen_names.add(dn)
                 fd = make_fd(display, family, fkey, entry.get("foundry"), entry.get("license"),
-                             make_css_path(base_url), entry["kind"])
+                             make_inline_path(base_url), entry["kind"])
                 emit_font(fd)
                 print(f"  [INLINE] {display}")
         push(emit_event("status", message=f"  → {len(font_list)} fonts after inline styles"))
@@ -1345,7 +1391,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                     if dn in seen_names or not is_text_font(fkey): continue
                     seen_names.add(dn)
                     fd = make_fd(fname, fname, fkey, None, None,
-                                 make_css_path(base_url), "inline-style")
+                             make_inline_path(base_url), "inline-style")
                     emit_font(fd)
                     print(f"  [INLINE-ATTR] {fname}")
 
@@ -1411,16 +1457,27 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 else:
                     lic = "Paid"
 
+                # Build a proper path from AI's css_path hint
+                css_hint = af.get("css_path", "")
+                if css_hint and "googleapis" in css_hint:
+                    ai_path = make_gf_path(family)
+                elif css_hint and ("typekit" in css_hint or "adobe" in css_hint):
+                    ai_path = f"Application > Frames > top > use.typekit.net > (Adobe Fonts)"
+                elif css_hint and "typekit" not in css_hint and css_hint not in ("", "self-hosted CSS", "system font"):
+                    ai_path = f"Application > Frames > top > {css_hint}"
+                else:
+                    ai_path = make_inline_path(url)
+
                 fd = dict(
                     site_url=url,
                     name=name,
                     family=family,
                     foundry=foundry,
                     license=lic,
-                    path=f"AI identified ({url})",
+                    path=ai_path,
                     source="ai",
                     kind="ai-identified",
-                    font_type="body",
+                    font_type=classify_font_type("ai-identified"),
                     is_restricted="restrict" in lic.lower(),
                     designer=af.get("designer", ""),
                     license_detail="",
