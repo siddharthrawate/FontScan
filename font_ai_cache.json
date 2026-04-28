@@ -8218,5 +8218,47 @@
     "category": "Sans-serif",
     "confidence": "high",
     "source": "ai"
-  }
+  },
+  "website_fonts_kpit.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Regular",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Open Sans Bold",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
+  ]
 }
