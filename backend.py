@@ -545,49 +545,28 @@ def lookup_db(font_key: str):
     return None
 
 def make_font_file_path(filename: str, source_url: str = "") -> str:
-    """Generate Chrome DevTools-style path for an embedded font file."""
-    if source_url:
-        parsed = urlparse(source_url)
-        domain = parsed.netloc or source_url
-        parts  = [p for p in parsed.path.split("/") if p]
-        if parts:
-            folder = " > ".join(parts[:-1]) if len(parts) > 1 else ""
-            return (
-                f"Application > Frames > top > {domain} > {folder} > {parts[-1]}"
-                if folder else
-                f"Application > Frames > top > {domain} > {parts[-1]}"
-            )
-    return f"Application > Frames > top > Fonts > {filename}"
+    """Embedded font file path."""
+    fname = os.path.basename(urlparse(source_url).path) if source_url else filename
+    if not fname:
+        fname = filename
+    return f"Application > Frames > top > Font > {fname}"
 
 def make_css_path(sheet_href: str) -> str:
-    """Generate Chrome DevTools-style path for a CSS stylesheet."""
-    if not sheet_href or sheet_href.startswith("AI"):
-        return sheet_href
-    if sheet_href.startswith("http"):
-        parsed = urlparse(sheet_href)
-        domain = parsed.netloc or ""
-        parts  = [p for p in parsed.path.split("/") if p]
-        if parts:
-            folder = " > ".join(parts[:-1]) if len(parts) > 1 else ""
-            file   = parts[-1]
-            return (
-                f"Application > Frames > top > {domain} > {folder} > {file}"
-                if folder else
-                f"Application > Frames > top > {domain} > {file}"
-            )
-        return f"Application > Frames > top > {domain} > (index)"
-    filename = os.path.basename(urlparse(sheet_href).path) or sheet_href
-    return f"Application > Frames > top > css > {filename}"
+    """CSS stylesheet path."""
+    if not sheet_href:
+        return "Application > Frames > top > css > (unknown)"
+    fname = os.path.basename(urlparse(sheet_href).path) if sheet_href.startswith("http") else sheet_href
+    if not fname:
+        fname = "(index)"
+    return f"Application > Frames > top > css > {fname}"
 
-def make_inline_path(base_url: str) -> str:
-    """Path for inline <style> block fonts."""
-    parsed = urlparse(base_url)
-    domain = parsed.netloc or base_url
-    return f"Application > Frames > top > {domain} > (inline <style>)"
+def make_inline_path(base_url: str = "") -> str:
+    """Inline <style> block path."""
+    return "Application > Frames > top > css > (inline <style>)"
 
 def make_gf_path(font_family: str) -> str:
-    """Path for Google Fonts."""
-    return f"Application > Frames > top > fonts.googleapis.com > css2?family={font_family.replace(' ', '+')}"
+    """Google Fonts path."""
+    return "Application > Frames > top > css > (Google Fonts)"
 
 
 # ─────────────────────────────────────────────────────────────
