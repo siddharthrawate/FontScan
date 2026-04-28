@@ -1,15 +1,14 @@
 services:
   - type: web
     name: fontscan
-    env: python
-    buildCommand: bash build.sh
-    startCommand: uvicorn backend:app --host 0.0.0.0 --port $PORT
+    env: docker
+    dockerfilePath: ./Dockerfile
     plan: starter
     envVars:
       - key: OPENAI_API_KEY
         sync: false
       - key: PLAYWRIGHT_BROWSERS_PATH
-        value: /opt/render/project/src/.playwright-browsers
+        value: /usr/local/lib/playwright-browsers
     disk:
       name: fontscan-data
       mountPath: /app
