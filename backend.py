@@ -644,32 +644,6 @@ def make_gf_path(font_family: str) -> str:
     return make_inspect_path("css", "(Google Fonts)")
 
 
-def infer_source_type(kind: str, path: str = "", source_url: str = "") -> str:
-    kind_l = (kind or "").lower()
-    path_l = (path or "").lower()
-    src_l = (source_url or "").lower()
-    joined = " ".join([kind_l, path_l, src_l])
-    if "font >" in path_l or kind_l in ("embedded", "preload"):
-        return "Embedded font"
-    if "google" in joined or "typekit" in joined or "adobe" in joined or "bunny" in joined or "fonts.net" in joined:
-        return "External CDN font"
-    if "css" in path_l or "css" in kind_l or "inline" in kind_l:
-        return "Loaded CSS file"
-    if "system" in joined or "default" in joined:
-        return "System/default browser font"
-    return "Loaded CSS file"
-
-
-def source_priority(source_type: str) -> int:
-    order = {
-        "Embedded font": 1,
-        "Loaded CSS file": 2,
-        "External CDN font": 3,
-        "System/default browser font": 4,
-    }
-    return order.get(source_type or "", 99)
-
-
 # ─────────────────────────────────────────────────────────────
 #  SERVER-SIDE CSS PARSER  (Method 5)  — unchanged from original
 # ─────────────────────────────────────────────────────────────
@@ -1091,70 +1065,30 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
     seen_names   = set()
     emb_families = set()
     font_list    = []
-    font_index   = {}
-
-    def _merge_listish(existing, incoming):
-        vals = []
-        for raw in [existing, incoming]:
-            if not raw:
-                continue
-            if isinstance(raw, str):
-                parts = [p.strip() for p in raw.split(",") if p.strip()]
-            else:
-                parts = [str(p).strip() for p in raw if str(p).strip()]
-            for p in parts:
-                if p not in vals:
-                    vals.append(p)
-        return vals
 
     def record(fd):
-        key = (
-            fd.get("site_url", ""),
-            variant_key(fd.get("name", "")),
-        )
-        if key in font_index:
-            idx = font_index[key]
-            cur = font_list[idx]
-            cur["used_on_elements"] = _merge_listish(cur.get("used_on_elements"), fd.get("used_on_elements"))
-            cur["used_on_elements"] = ", ".join(cur["used_on_elements"][:12]) if cur["used_on_elements"] else ""
-            if source_priority(fd.get("source_type")) < source_priority(cur.get("source_type")):
-                for field in ("path", "source_type", "css_file", "file_name", "font_type", "kind"):
-                    if fd.get(field):
-                        cur[field] = fd.get(field)
-            for field in ("foundry", "license", "designer", "license_detail", "confidence", "source", "family"):
-                if (not cur.get(field) or _is_unknown(str(cur.get(field, "")))) and fd.get(field):
-                    cur[field] = fd.get(field)
-            cur["is_restricted"] = cur.get("license") == "Restricted" or fd.get("license") == "Restricted"
-        else:
-            fd["used_on_elements"] = ", ".join(_merge_listish("", fd.get("used_on_elements"))[:12])
-            font_index[key] = len(font_list)
-            font_list.append(fd)
+        font_list.append(fd)
         if scan_id in _scan_history:
             _scan_history[scan_id]["fonts"] = font_list.copy()
 
     def emit_font(fd):
         raw_lic = normalize_license_label(fd.get("license", ""))
         fd["license"] = raw_lic
+        l = raw_lic.strip().lower()
 
         if raw_lic not in ("Free", "Paid", "Restricted"):
             return
 
         fd["font_type"] = classify_font_type(fd.get("kind", ""))
-        fd["source_type"] = fd.get("source_type") or infer_source_type(
-            fd.get("kind", ""), fd.get("path", ""), fd.get("full_path", "")
-        )
 
         fd["is_restricted"] = (raw_lic == "Restricted")
         record(fd)
         push(emit_event("font", **fd))
 
     def make_fd(display: str, family: str, fkey: str,
-                file_foundry, file_lic, path: str, kind: str,
-                full_path: str = "", used_on_elements: str = "") -> dict:
+                file_foundry, file_lic, path: str, kind: str) -> dict:
         foundry, lic, src, designer, lic_detail, conf = _resolve(
             fkey, file_foundry, file_lic, use_ai, notify=push)
-        file_name = os.path.basename(urlparse(full_path or path or "").path) if (full_path or path) else ""
-        css_file = file_name if "css" in (path or "").lower() else ""
         return dict(
             site_url=url,
             name=display,
@@ -1162,18 +1096,13 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             foundry=foundry,
             license=lic,
             path=path,
-            full_path=full_path or path,
-            file_name=file_name,
-            css_file=css_file,
             source=src,
             kind=kind,
-            source_type=infer_source_type(kind, path, full_path),
             font_type=classify_font_type(kind),
             is_restricted=False,
             designer=designer,
             license_detail=lic_detail,
             confidence=conf,
-            used_on_elements=used_on_elements,
         )
 
 
@@ -1368,7 +1297,6 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                       style: String(meta.style || ""),
                       stretch: String(meta.stretch || ""),
                       source: meta.source || "",
-                      elements: Array.isArray(meta.elements) ? meta.elements : [],
                     });
                   };
                   const walkSheet = (sheet, depth = 0) => {
@@ -1407,7 +1335,6 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                         style: fontFace.style,
                         stretch: fontFace.stretch,
                         source: "document.fonts",
-                        elements: [],
                       });
                     }
                   } catch (e) {}
@@ -1423,15 +1350,11 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                       .slice(0, 400);
                     for (const el of nodes) {
                       const cs = getComputedStyle(el);
-                      const els = [el.tagName.toLowerCase()];
-                      if (el.getAttribute("role")) els.push(`[role="${el.getAttribute("role")}"]`);
-                      if (el.classList && el.classList.length) els.push("." + Array.from(el.classList).slice(0, 2).join("."));
                       pushUsed(cs.fontFamily, {
                         weight: cs.fontWeight,
                         style: cs.fontStyle,
                         stretch: cs.fontStretch,
                         source: "computed-style",
-                        elements: els,
                       });
                     }
                   } catch (e) {}
@@ -1534,13 +1457,6 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
 
     try:
         soup = BeautifulSoup(html, "html.parser")
-        used_elements_map = {}
-        for uf in browser_inspection.get("used_fonts", []):
-            fam_key = normalize_font(uf.get("family", ""))
-            if not fam_key:
-                continue
-            merged = _merge_listish(used_elements_map.get(fam_key, []), uf.get("elements", []))
-            used_elements_map[fam_key] = merged[:12]
 
         # ── Method 1: embedded font files from preload/browser ─
         push(emit_event("status", message="Method 1 — Checking embedded font files…"))
@@ -1560,8 +1476,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             if not is_text_font(fkey) or dn in seen_names: continue
             seen_names.add(dn); emb_families.add(fkey)
             fd = make_fd(display_name, family_name or display_name, fkey,
-                         file_foundry, file_lic, make_font_file_path(filename, pre_url), "preload",
-                         full_path=pre_url, used_on_elements=used_elements_map.get(fkey, []))
+                         file_foundry, file_lic, make_font_file_path(filename, pre_url), "preload")
             emit_font(fd)
             print(f"  [PRELOAD] {display_name}")
 
@@ -1585,8 +1500,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             if not is_text_font(fkey) or dn in seen_names: continue
             seen_names.add(dn); emb_families.add(fkey)
             fd = make_fd(display_name, family_name or display_name, fkey,
-                         file_foundry, file_lic, make_font_file_path(filename, res_url), "embedded",
-                         full_path=res_url, used_on_elements=used_elements_map.get(fkey, []))
+                         file_foundry, file_lic, make_font_file_path(filename, res_url), "embedded")
             emit_font(fd)
             print(f"  [BROWSER-FONT] {display_name}")
 
@@ -1637,8 +1551,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                     fd_path = make_font_file_path(os.path.basename(urlparse(src_url).path), src_url)
                     fd_kind = "embedded"
                     emb_families.add(fkey)
-                fd = make_fd(display, family, fkey, file_foundry, file_lic, fd_path, fd_kind,
-                             full_path=src_url or css_url, used_on_elements=used_elements_map.get(fkey, []))
+                fd = make_fd(display, family, fkey, file_foundry, file_lic, fd_path, fd_kind)
                 emit_font(fd)
         push(emit_event("status", message=f"  → {len(font_list)} fonts after external CSS"))
 
@@ -1686,8 +1599,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                             if dn in seen_names or fkey in emb_families: continue
                             seen_names.add(dn)
                             fd = make_fd(display, fname_raw, fkey, "Google", "Free (OFL)",
-                                         make_css_path("fonts.googleapis.com"), "google-fonts",
-                                         full_path=gf_url, used_on_elements=used_elements_map.get(fkey, []))
+                                         make_css_path("fonts.googleapis.com"), "google-fonts")
                             emit_font(fd)
                             print(f"  [GF] {display}")
             except Exception as ex:
@@ -1706,8 +1618,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 if dn in seen_names or not is_text_font(fkey): continue
                 seen_names.add(dn)
                 fd = make_fd(display, family, fkey, entry.get("foundry"), entry.get("license"),
-                             make_inline_path(base_url), entry["kind"],
-                             full_path=base_url, used_on_elements=used_elements_map.get(fkey, []))
+                             make_inline_path(base_url), entry["kind"])
                 emit_font(fd)
                 print(f"  [INLINE] {display}")
         push(emit_event("status", message=f"  → {len(font_list)} fonts after inline styles"))
@@ -1725,8 +1636,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                     if dn in seen_names or not is_text_font(fkey): continue
                     seen_names.add(dn)
                     fd = make_fd(fname, fname, fkey, None, None,
-                             make_inline_path(base_url), "inline-style",
-                             full_path=base_url, used_on_elements=used_elements_map.get(fkey, []))
+                             make_inline_path(base_url), "inline-style")
                     emit_font(fd)
                     print(f"  [INLINE-ATTR] {fname}")
 
@@ -1753,8 +1663,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 continue
             seen_names.add(dn)
             fd = make_fd(display, family, fkey, None, None,
-                         make_inline_path(base_url), "inline-style",
-                         full_path=base_url, used_on_elements=used_elements_map.get(fkey, []))
+                         make_inline_path(base_url), "inline-style")
             emit_font(fd)
             print(f"  [LIVE] {display}")
         push(emit_event("status", message=f"  → {len(font_list)} fonts after live browser inspection"))
@@ -1787,8 +1696,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                     if dn in seen_names or not is_text_font(fkey): continue
                     seen_names.add(dn)
                     fd = make_fd(display, family, fkey, foundry, lic,
-                                 make_css_path(cdn_url), entry["kind"],
-                                 full_path=cdn_url, used_on_elements=used_elements_map.get(fkey, []))
+                                 make_css_path(cdn_url), entry["kind"])
                     emit_font(fd)
                     print(f"  [CDN:{foundry}] {display}")
 
@@ -1840,18 +1748,13 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                     foundry=foundry,
                     license=lic,
                     path=ai_path,
-                    full_path=af.get("css_path", "") or ai_path,
-                    file_name=os.path.basename(urlparse(af.get("css_path", "")).path) if af.get("css_path") else "",
-                    css_file=os.path.basename(urlparse(af.get("css_path", "")).path) if af.get("css_path") else "",
                     source="ai",
                     kind="ai-identified",
-                    source_type=infer_source_type("ai-identified", ai_path, af.get("css_path", "")),
                     font_type=classify_font_type("ai-identified"),
                     is_restricted="restrict" in lic.lower(),
                     designer=af.get("designer", ""),
                     license_detail="",
                     confidence=conf,
-                    used_on_elements=", ".join(used_elements_map.get(fkey, [])[:12]),
                 )
                 # Use emit_font so license filtering is applied consistently
                 emit_font(fd)
