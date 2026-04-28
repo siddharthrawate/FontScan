@@ -8362,5 +8362,151 @@
       "css_path": "fonts.googleapis.com",
       "confidence": "medium"
     }
+  ],
+  "website_fonts_ey.com": [
+    {
+      "name": "EY Interstate Regular",
+      "family": "EY Interstate",
+      "foundry": "Font Bureau",
+      "license": "Restricted - Licensed only",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "EY Interstate Bold",
+      "family": "EY Interstate",
+      "foundry": "Font Bureau",
+      "license": "Restricted - Licensed only",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "EY Interstate Light",
+      "family": "EY Interstate",
+      "foundry": "Font Bureau",
+      "license": "Restricted - Licensed only",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "Arial Regular",
+      "family": "Arial",
+      "foundry": "Monotype",
+      "license": "System font",
+      "css_path": "system font",
+      "confidence": "high"
+    },
+    {
+      "name": "Arial Bold",
+      "family": "Arial",
+      "foundry": "Monotype",
+      "license": "System font",
+      "css_path": "system font",
+      "confidence": "high"
+    }
+  ],
+  "var(--li4bo)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a CSS variable, not a specific font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "var(--qr8x0)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--qbwyqb)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--nkmqoe)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable, not a specific font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--li1trc)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a CSS variable, not a specific font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "var(--eou8yc)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--yfikf)": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "website_fonts_google.com": [
+    {
+      "name": "Product Sans Regular",
+      "family": "Product Sans",
+      "foundry": "Google",
+      "license": "Restricted - Licensed only",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    }
   ]
 }

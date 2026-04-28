@@ -57,15 +57,35 @@ def _is_unknown(val: str) -> bool:
 def classify_font_type(kind: str) -> str:
     if kind in ("google-fonts",):
         return "Google Fonts (CSS)"
-    if kind in ("css-decl", "font-face-css"):
-        return "CSS Embedded"
+    if kind in ("css-decl", "font-face-css", "inline-style"):
+        return "CSS Font"
     if kind in ("preload", "embedded"):
         return "Embedded Font"
-    if kind in ("inline-style",):
-        return "Inline CSS"
     if kind in ("ai-identified",):
         return "AI Identified"
     return "Embedded Font"
+
+
+def normalize_license_label(value: str) -> str:
+    """Collapse licenses to the only UI categories we want to show."""
+    raw = (value or "").strip()
+    if not raw:
+        return ""
+
+    low = raw.lower()
+    if "icon/symbol" in low:
+        return "Icon/Symbol - skip"
+    if "os default" in low:
+        return "OS Default"
+    if "restrict" in low:
+        return "Restricted"
+    if "free" in low and "paid" in low:
+        return "Paid"
+    if "paid" in low or "commercial" in low:
+        return "Paid"
+    if "free" in low:
+        return "Free"
+    return ""
 
 
 # ─────────────────────────────────────────────────────────────
@@ -509,6 +529,16 @@ def normalize_font(name: str) -> str:
     name = re.sub(r"\s+", " ", name)
     return name.strip().lower()
 
+
+def normalize_font_variant(name: str) -> str:
+    """Normalize a concrete font variant without stripping weight/style words."""
+    if not name:
+        return ""
+    name = name.replace('"', "").replace("'", "")
+    name = re.sub(r"[-_]+", " ", name)
+    name = re.sub(r"\s+", " ", name)
+    return name.strip().lower()
+
 def is_text_font(name: str) -> bool:
     n = normalize_font(name)
     return bool(n) and not any(i in n for i in IGNORE)
@@ -536,6 +566,46 @@ def parse_license(text: str):
         if kw in t: return "Paid"
     return None
 
+
+def infer_font_names_from_filename(font_url: str):
+    """Best-effort fallback when a font file lacks readable metadata."""
+    filename = os.path.basename(urlparse(font_url).path or "")
+    stem, _ = os.path.splitext(filename)
+    if not stem:
+        return None, None
+
+    cleaned = re.sub(r"[_+]+", " ", stem)
+    cleaned = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", cleaned)
+    cleaned = re.sub(r"[-]+", " ", cleaned)
+    cleaned = re.sub(r"\b(vf|variable|webfont)\b", "", cleaned, flags=re.I)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    if not cleaned:
+        return None, None
+
+    parts = cleaned.split()
+    if not parts:
+        return None, None
+
+    style_words = {
+        "thin", "hairline", "extralight", "ultralight", "light", "book", "regular",
+        "roman", "medium", "semibold", "demibold", "bold", "extrabold", "ultrabold",
+        "black", "heavy", "italic", "oblique", "condensed", "narrow", "extended",
+    }
+    compact = [re.sub(r"[^a-z]", "", p.lower()) for p in parts]
+    split_at = len(parts)
+    for idx, token in enumerate(compact):
+        if token in style_words:
+            split_at = idx
+            break
+
+    family_parts = parts[:split_at] if split_at > 0 else parts[:1]
+    style_parts = parts[split_at:] if split_at < len(parts) else []
+    family_name = " ".join(family_parts).strip()
+    display_name = " ".join([family_name, *style_parts]).strip() or family_name
+    if not family_name:
+        return None, None
+    return display_name, family_name
+
 def lookup_db(font_key: str):
     key = normalize_font(font_key)
     if key in FONT_DB: return FONT_DB[key]
@@ -544,29 +614,60 @@ def lookup_db(font_key: str):
             return v
     return None
 
+
+def make_inspect_path(section: str, item: str) -> str:
+    """Format source paths like Chrome DevTools Application/Frames."""
+    return f"Inspect > Application > Frames > Top > {section} > {item}"
+
 def make_font_file_path(filename: str, source_url: str = "") -> str:
     """Embedded font file path."""
     fname = os.path.basename(urlparse(source_url).path) if source_url else filename
     if not fname:
         fname = filename
-    return f"Application > Frames > top > Font > {fname}"
+    return make_inspect_path("Font", fname)
 
 def make_css_path(sheet_href: str) -> str:
     """CSS stylesheet path."""
     if not sheet_href:
-        return "Application > Frames > top > css > (unknown)"
+        return make_inspect_path("css", "(unknown)")
     fname = os.path.basename(urlparse(sheet_href).path) if sheet_href.startswith("http") else sheet_href
     if not fname:
         fname = "(index)"
-    return f"Application > Frames > top > css > {fname}"
+    return make_inspect_path("css", fname)
 
 def make_inline_path(base_url: str = "") -> str:
     """Inline <style> block path."""
-    return "Application > Frames > top > css > (inline <style>)"
+    return make_inspect_path("css", "(inline <style>)")
 
 def make_gf_path(font_family: str) -> str:
     """Google Fonts path."""
-    return "Application > Frames > top > css > (Google Fonts)"
+    return make_inspect_path("css", "(Google Fonts)")
+
+
+def infer_source_type(kind: str, path: str = "", source_url: str = "") -> str:
+    kind_l = (kind or "").lower()
+    path_l = (path or "").lower()
+    src_l = (source_url or "").lower()
+    joined = " ".join([kind_l, path_l, src_l])
+    if "font >" in path_l or kind_l in ("embedded", "preload"):
+        return "Embedded font"
+    if "google" in joined or "typekit" in joined or "adobe" in joined or "bunny" in joined or "fonts.net" in joined:
+        return "External CDN font"
+    if "css" in path_l or "css" in kind_l or "inline" in kind_l:
+        return "Loaded CSS file"
+    if "system" in joined or "default" in joined:
+        return "System/default browser font"
+    return "Loaded CSS file"
+
+
+def source_priority(source_type: str) -> int:
+    order = {
+        "Embedded font": 1,
+        "Loaded CSS file": 2,
+        "External CDN font": 3,
+        "System/default browser font": 4,
+    }
+    return order.get(source_type or "", 99)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -588,8 +689,12 @@ _CSS_FETCH_HEADERS = {
 }
 
 
-def _parse_css_server_side(css_url: str) -> list:
+def _parse_css_server_side(css_url: str, visited: set | None = None) -> list:
     results: list = []
+    visited = visited or set()
+    if css_url in visited:
+        return results
+    visited.add(css_url)
     try:
         r = req_lib.get(css_url, timeout=12, headers={**_CSS_FETCH_HEADERS, "Referer": css_url})
         if r.status_code != 200:
@@ -600,6 +705,13 @@ def _parse_css_server_side(css_url: str) -> list:
         return results
 
     css_text = _COMMENT_RE.sub("", r.text)
+
+    for import_url in re.findall(r'@import\s+(?:url\()?["\']?([^"\')\s;]+)', css_text, re.I):
+        if import_url.startswith("//"):
+            import_url = "https:" + import_url
+        elif not import_url.startswith(("http://", "https://")):
+            import_url = urljoin(css_url, import_url)
+        results.extend(_parse_css_server_side(import_url, visited))
 
     for block_match in _FONT_FACE_BLOCK_RE.finditer(css_text):
         block = block_match.group(1)
@@ -754,7 +866,8 @@ def get_font_info_from_file(font_url: str):
     try:
         r = req_lib.get(font_url, timeout=15)
         if r.status_code != 200:
-            return None, None, cdn_f, cdn_l
+            display_name, family_name = infer_font_names_from_filename(font_url)
+            return display_name, family_name, cdn_f, cdn_l
         font  = TTFont(BytesIO(r.content))
         names = font["name"].names
 
@@ -777,7 +890,10 @@ def get_font_info_from_file(font_url: str):
         subfamily   = _g(2) or ""
 
         if not full_name and not family_name:
-            return None, None, cdn_f, cdn_l
+            display_name, family_name = infer_font_names_from_filename(font_url)
+            if not display_name:
+                return None, None, cdn_f, cdn_l
+            return display_name, family_name, cdn_f, cdn_l
 
         if full_name:
             display_name = full_name
@@ -814,7 +930,8 @@ def get_font_info_from_file(font_url: str):
 
     except Exception as e:
         print(f"Font file parse error for {font_url}: {e}")
-        return None, None, cdn_f, cdn_l
+        display_name, family_name = infer_font_names_from_filename(font_url)
+        return display_name, family_name, cdn_f, cdn_l
 
 
 # ─────────────────────────────────────────────────────────────
@@ -967,47 +1084,77 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         clean = _WEIGHT_RE.sub("", display_name or "").strip()
         return normalize_font(clean) if clean else normalize_font(display_name or "")
 
+    def variant_key(display_name: str) -> str:
+        return normalize_font_variant(display_name or "")
+
     seen_files   = set()
     seen_names   = set()
     emb_families = set()
     font_list    = []
+    font_index   = {}
+
+    def _merge_listish(existing, incoming):
+        vals = []
+        for raw in [existing, incoming]:
+            if not raw:
+                continue
+            if isinstance(raw, str):
+                parts = [p.strip() for p in raw.split(",") if p.strip()]
+            else:
+                parts = [str(p).strip() for p in raw if str(p).strip()]
+            for p in parts:
+                if p not in vals:
+                    vals.append(p)
+        return vals
 
     def record(fd):
-        font_list.append(fd)
+        key = (
+            fd.get("site_url", ""),
+            variant_key(fd.get("name", "")),
+        )
+        if key in font_index:
+            idx = font_index[key]
+            cur = font_list[idx]
+            cur["used_on_elements"] = _merge_listish(cur.get("used_on_elements"), fd.get("used_on_elements"))
+            cur["used_on_elements"] = ", ".join(cur["used_on_elements"][:12]) if cur["used_on_elements"] else ""
+            if source_priority(fd.get("source_type")) < source_priority(cur.get("source_type")):
+                for field in ("path", "source_type", "css_file", "file_name", "font_type", "kind"):
+                    if fd.get(field):
+                        cur[field] = fd.get(field)
+            for field in ("foundry", "license", "designer", "license_detail", "confidence", "source", "family"):
+                if (not cur.get(field) or _is_unknown(str(cur.get(field, "")))) and fd.get(field):
+                    cur[field] = fd.get(field)
+            cur["is_restricted"] = cur.get("license") == "Restricted" or fd.get("license") == "Restricted"
+        else:
+            fd["used_on_elements"] = ", ".join(_merge_listish("", fd.get("used_on_elements"))[:12])
+            font_index[key] = len(font_list)
+            font_list.append(fd)
         if scan_id in _scan_history:
             _scan_history[scan_id]["fonts"] = font_list.copy()
 
     def emit_font(fd):
-        raw_lic = fd.get("license", "")
-        l       = raw_lic.strip().lower()
+        raw_lic = normalize_license_label(fd.get("license", ""))
+        fd["license"] = raw_lic
 
-        if l in ("os default",) or "os default" in l or "icon/symbol" in l:
+        if raw_lic not in ("Free", "Paid", "Restricted"):
             return
 
         fd["font_type"] = classify_font_type(fd.get("kind", ""))
+        fd["source_type"] = fd.get("source_type") or infer_source_type(
+            fd.get("kind", ""), fd.get("path", ""), fd.get("full_path", "")
+        )
 
-        if "restricted" in l:
-            fd["is_restricted"] = True
-            record(fd)
-            push(emit_event("font", **fd))
-            return
-
-        if l.startswith("free"):
-            fd["license"] = "Free"
-        elif "paid" in l:
-            fd["license"] = "Free/Paid" if l.startswith("free") else "Paid"
-        else:
-            print(f"  [SUPPRESS unknown] {fd.get('name')} → {raw_lic}")
-            return
-
-        fd["is_restricted"] = False
+        fd["is_restricted"] = (raw_lic == "Restricted")
         record(fd)
         push(emit_event("font", **fd))
 
     def make_fd(display: str, family: str, fkey: str,
-                file_foundry, file_lic, path: str, kind: str) -> dict:
+                file_foundry, file_lic, path: str, kind: str,
+                full_path: str = "", used_on_elements: str = "") -> dict:
         foundry, lic, src, designer, lic_detail, conf = _resolve(
             fkey, file_foundry, file_lic, use_ai, notify=push)
+        file_name = os.path.basename(urlparse(full_path or path or "").path) if (full_path or path) else ""
+        css_file = file_name if "css" in (path or "").lower() else ""
         return dict(
             site_url=url,
             name=display,
@@ -1015,13 +1162,18 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             foundry=foundry,
             license=lic,
             path=path,
+            full_path=full_path or path,
+            file_name=file_name,
+            css_file=css_file,
             source=src,
             kind=kind,
+            source_type=infer_source_type(kind, path, full_path),
             font_type=classify_font_type(kind),
             is_restricted=False,
             designer=designer,
             license_detail=lic_detail,
             confidence=conf,
+            used_on_elements=used_on_elements,
         )
 
 
@@ -1094,9 +1246,54 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
             intercepted_urls = []
             def on_response(resp):
                 url_lower = resp.url.lower()
-                if any(ext in url_lower for ext in [".woff",".woff2",".ttf",".otf",".css"]):
+                req_type = ""
+                try:
+                    req_type = resp.request.resource_type or ""
+                except Exception:
+                    req_type = ""
+                if req_type in ("font", "stylesheet") or any(ext in url_lower for ext in [".woff",".woff2",".ttf",".otf",".eot",".css"]):
                     intercepted_urls.append(resp.url)
             page.on("response", on_response)
+
+            def _human_interact():
+                """Mimic a basic human audit: accept prompts, open menus, reveal lazy UI."""
+                selectors = [
+                    'button[id*="cookie" i]', 'button[class*="cookie" i]', '[aria-label*="cookie" i]',
+                    'button:has-text("Accept")', 'button:has-text("Accept all")',
+                    'button:has-text("Allow all")', 'button:has-text("I agree")',
+                    'button:has-text("Got it")', 'button:has-text("Continue")',
+                    'button[aria-label*="menu" i]', 'button[aria-label*="open" i]',
+                    '[role="button"][aria-expanded="false"]', '.menu-toggle', '.hamburger',
+                    'nav button', 'header button',
+                ]
+                for sel in selectors:
+                    try:
+                        matches = page.locator(sel)
+                        count = min(matches.count(), 3)
+                        for i in range(count):
+                            el = matches.nth(i)
+                            if not el.is_visible():
+                                continue
+                            el.click(timeout=1200)
+                            page.wait_for_timeout(700)
+                    except Exception:
+                        pass
+
+                try:
+                    links = page.locator('a, button, [role="button"]')
+                    count = min(links.count(), 12)
+                    for i in range(count):
+                        try:
+                            el = links.nth(i)
+                            text = (el.inner_text(timeout=500) or "").strip().lower()
+                            if any(k in text for k in ("menu", "more", "search", "product", "service", "work", "about")):
+                                if el.is_visible():
+                                    el.click(timeout=1000)
+                                    page.wait_for_timeout(600)
+                        except Exception:
+                            continue
+                except Exception:
+                    pass
 
             page.goto(target_url, wait_until="domcontentloaded", timeout=30000)
             try:
@@ -1109,11 +1306,158 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 page.evaluate("window.scrollBy(0, window.innerHeight * 0.8)")
                 page.wait_for_timeout(600)
 
+            _human_interact()
+            try:
+                page.wait_for_load_state("networkidle", timeout=4000)
+            except Exception:
+                pass
+
+            try:
+                page.wait_for_timeout(max(1000, int(wait_sec) * 250))
+            except Exception:
+                pass
+
+            inspection = page.evaluate("""
+                () => {
+                  const abs = (u) => {
+                    try { return new URL(u, document.baseURI).href; } catch { return u || ""; }
+                  };
+                  const genericFamilies = new Set([
+                    "inherit", "initial", "unset", "revert", "default", "auto",
+                    "serif", "sans-serif", "monospace", "system-ui", "ui-serif",
+                    "ui-sans-serif", "ui-monospace", "emoji", "math", "fangsong",
+                    "-apple-system", "blinkmacsystemfont"
+                  ]);
+                  const cleanFamily = (value) => {
+                    if (!value) return "";
+                    let raw = String(value).trim();
+                    if (!raw) return "";
+                    const varMatch = raw.match(/var\((--[^),\s]+)/i);
+                    if (varMatch) {
+                      const resolved = getComputedStyle(document.documentElement).getPropertyValue(varMatch[1]).trim();
+                      if (resolved) raw = resolved;
+                    }
+                    const parts = raw
+                      .split(",")
+                      .map(v => v.replace(/["']/g, "").trim())
+                      .filter(Boolean);
+                    for (const part of parts) {
+                      const p = part.toLowerCase();
+                      if (!genericFamilies.has(p) && !p.startsWith("var(")) return part;
+                    }
+                    return "";
+                  };
+                  const cssUrls = new Set();
+                  const usedFonts = [];
+                  const fontUrls = new Set();
+                  const seenUsed = new Set();
+                  const pushUsed = (family, meta = {}) => {
+                    const fam = cleanFamily(family);
+                    if (!fam) return;
+                    const sig = [
+                      fam.toLowerCase(),
+                      String(meta.weight || ""),
+                      String(meta.style || ""),
+                      String(meta.stretch || ""),
+                    ].join("|");
+                    if (seenUsed.has(sig)) return;
+                    seenUsed.add(sig);
+                    usedFonts.push({
+                      family: fam,
+                      weight: String(meta.weight || ""),
+                      style: String(meta.style || ""),
+                      stretch: String(meta.stretch || ""),
+                      source: meta.source || "",
+                      elements: Array.isArray(meta.elements) ? meta.elements : [],
+                    });
+                  };
+                  const walkSheet = (sheet, depth = 0) => {
+                    if (!sheet || depth > 6) return;
+                    try {
+                      if (sheet.href) cssUrls.add(abs(sheet.href));
+                      const rules = sheet.cssRules || [];
+                      for (const rule of rules) {
+                        if (!rule) continue;
+                        if (rule.href) cssUrls.add(abs(rule.href));
+                        if (rule.style && rule.style.fontFamily) {
+                          pushUsed(rule.style.fontFamily, { source: sheet.href || "inline-css" });
+                        }
+                        if (rule.cssText) {
+                          const familyMatch = rule.cssText.match(/font-family\\s*:\\s*([^;\\}\\n]+)/i);
+                          if (familyMatch) pushUsed(familyMatch[1], { source: sheet.href || "inline-css" });
+                          const urlMatches = rule.cssText.match(/url\\(([^)]+)\\)/gi) || [];
+                          for (const m of urlMatches) {
+                            const raw = m.replace(/^url\\(/i, "").replace(/\\)$/, "").replace(/["']/g, "").trim();
+                            if (raw) fontUrls.add(abs(raw));
+                          }
+                        }
+                        if (rule.styleSheet) walkSheet(rule.styleSheet, depth + 1);
+                      }
+                    } catch (e) {}
+                  };
+
+                  try {
+                    for (const sheet of Array.from(document.styleSheets || [])) walkSheet(sheet);
+                  } catch (e) {}
+
+                  try {
+                    for (const fontFace of Array.from(document.fonts || [])) {
+                      pushUsed(fontFace.family, {
+                        weight: fontFace.weight,
+                        style: fontFace.style,
+                        stretch: fontFace.stretch,
+                        source: "document.fonts",
+                        elements: [],
+                      });
+                    }
+                  } catch (e) {}
+
+                  try {
+                    const nodes = Array.from(document.querySelectorAll("body *"))
+                      .filter(el => {
+                        const txt = (el.innerText || el.textContent || "").trim();
+                        if (!txt) return false;
+                        const r = el.getBoundingClientRect();
+                        return r.width > 0 && r.height > 0;
+                      })
+                      .slice(0, 400);
+                    for (const el of nodes) {
+                      const cs = getComputedStyle(el);
+                      const els = [el.tagName.toLowerCase()];
+                      if (el.getAttribute("role")) els.push(`[role="${el.getAttribute("role")}"]`);
+                      if (el.classList && el.classList.length) els.push("." + Array.from(el.classList).slice(0, 2).join("."));
+                      pushUsed(cs.fontFamily, {
+                        weight: cs.fontWeight,
+                        style: cs.fontStyle,
+                        stretch: cs.fontStretch,
+                        source: "computed-style",
+                        elements: els,
+                      });
+                    }
+                  } catch (e) {}
+
+                  try {
+                    for (const entry of performance.getEntriesByType("resource") || []) {
+                      const name = entry && entry.name ? abs(entry.name) : "";
+                      if (!name) continue;
+                      if (/\\.(woff2?|ttf|otf|eot)(\\?|#|$)/i.test(name)) fontUrls.add(name);
+                      if (/\\.css(\\?|#|$)/i.test(name)) cssUrls.add(name);
+                    }
+                  } catch (e) {}
+
+                  return {
+                    css_urls: Array.from(cssUrls),
+                    font_urls: Array.from(fontUrls),
+                    used_fonts: usedFonts,
+                  };
+                }
+            """)
+
             html     = page.content()
             final_url = page.url
 
             page.close(); ctx.close(); browser.close()
-            return html, final_url, intercepted_urls
+            return html, final_url, intercepted_urls, inspection
         finally:
             try: pw.stop()
             except: pass
@@ -1122,18 +1466,18 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         """Try browser first, fall back to plain HTTP."""
         try:
             push(emit_event("status", message=f"Fetching {target_url} (browser)…"))
-            html, final_url, extra_urls = _fetch_page_browser(target_url)
+            html, final_url, extra_urls, inspection = _fetch_page_browser(target_url)
             push(emit_event("status", message=f"  Browser fetch OK ({len(html):,} bytes)"))
-            return html, final_url, extra_urls
+            return html, final_url, extra_urls, inspection
         except Exception as e:
             push(emit_event("status", message=f"  Browser unavailable ({e}) — trying HTTP…"))
         try:
             html, final_url = _fetch_page_requests(target_url)
             push(emit_event("status", message=f"  HTTP fetch OK ({len(html):,} bytes)"))
-            return html, final_url, []
+            return html, final_url, [], {"css_urls": [], "font_urls": [], "used_fonts": []}
         except Exception as e2:
             push(emit_event("status", message=f"  HTTP also blocked ({e2}) — scanning with empty page"))
-            return "<html><head></head><body></body></html>", target_url, []
+            return "<html><head></head><body></body></html>", target_url, [], {"css_urls": [], "font_urls": [], "used_fonts": []}
 
     def _parse_css_text(css_text, source_url=""):
         """Parse @font-face and font-family from a raw CSS string."""
@@ -1186,13 +1530,120 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
         return urljoin(base_url, href)
 
     # ── Fetch the page ────────────────────────────────────────
-    html, base_url, browser_resource_urls = _fetch_page(url)
+    html, base_url, browser_resource_urls, browser_inspection = _fetch_page(url)
 
     try:
         soup = BeautifulSoup(html, "html.parser")
+        used_elements_map = {}
+        for uf in browser_inspection.get("used_fonts", []):
+            fam_key = normalize_font(uf.get("family", ""))
+            if not fam_key:
+                continue
+            merged = _merge_listish(used_elements_map.get(fam_key, []), uf.get("elements", []))
+            used_elements_map[fam_key] = merged[:12]
 
-        # ── Method 1: Google Fonts <link> tags ────────────────
-        push(emit_event("status", message="Method 1 — Checking Google Fonts links…"))
+        # ── Method 1: embedded font files from preload/browser ─
+        push(emit_event("status", message="Method 1 — Checking embedded font files…"))
+        for tag in soup.find_all("link", attrs={"rel": lambda r: r and "preload" in (r if isinstance(r, list) else [r])}):
+            if tag.get("as") != "font": continue
+            pre_url = resolve_url(tag.get("href"))
+            if not pre_url: continue
+            filename  = os.path.basename(urlparse(pre_url).path)
+            fkey_file = filename.lower()
+            if fkey_file in seen_files or _SKIP_FILENAME_RE.search(filename):
+                seen_files.add(fkey_file); continue
+            seen_files.add(fkey_file)
+            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(pre_url)
+            if not display_name: continue
+            fkey = family_key(family_name or display_name)
+            dn   = variant_key(display_name)
+            if not is_text_font(fkey) or dn in seen_names: continue
+            seen_names.add(dn); emb_families.add(fkey)
+            fd = make_fd(display_name, family_name or display_name, fkey,
+                         file_foundry, file_lic, make_font_file_path(filename, pre_url), "preload",
+                         full_path=pre_url, used_on_elements=used_elements_map.get(fkey, []))
+            emit_font(fd)
+            print(f"  [PRELOAD] {display_name}")
+
+        # ── Method 1b: Font files intercepted by browser ───────
+        browser_css_urls = []
+        browser_font_urls = list(browser_resource_urls) + list(browser_inspection.get("font_urls", []))
+        for res_url in browser_font_urls:
+            if not re.search(r"\.(woff2?|ttf|otf)(\?|#|$)", res_url, re.I):
+                if re.search(r"\.css(\?|#|$)", res_url, re.I) and "fonts.googleapis.com" not in res_url:
+                    browser_css_urls.append(res_url)
+                continue
+            filename  = os.path.basename(urlparse(res_url).path)
+            fkey_file = filename.lower()
+            if fkey_file in seen_files or _SKIP_FILENAME_RE.search(filename):
+                seen_files.add(fkey_file); continue
+            seen_files.add(fkey_file)
+            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(res_url)
+            if not display_name: continue
+            fkey = family_key(family_name or display_name)
+            dn   = variant_key(display_name)
+            if not is_text_font(fkey) or dn in seen_names: continue
+            seen_names.add(dn); emb_families.add(fkey)
+            fd = make_fd(display_name, family_name or display_name, fkey,
+                         file_foundry, file_lic, make_font_file_path(filename, res_url), "embedded",
+                         full_path=res_url, used_on_elements=used_elements_map.get(fkey, []))
+            emit_font(fd)
+            print(f"  [BROWSER-FONT] {display_name}")
+
+        # ── Method 2: Collect all external CSS stylesheets ─────
+        push(emit_event("status", message="Method 2 — Collecting CSS stylesheets…"))
+        css_urls_raw = []
+        for tag in soup.find_all("link", rel=lambda r: r and "stylesheet" in (r if isinstance(r, list) else [r])):
+            href = tag.get("href", "")
+            if href and "fonts.googleapis.com" not in href:
+                css_urls_raw.append(resolve_url(href))
+        for tag in soup.find_all("style"):
+            for m in re.findall(r'@import\s+url\(["\']?([^"\')\s]+)["\']?\)', tag.string or ""):
+                full = resolve_url(m)
+                if full and "fonts.googleapis.com" not in full:
+                    css_urls_raw.append(full)
+        css_urls_raw.extend(browser_css_urls)
+        css_urls_raw.extend(browser_inspection.get("css_urls", []))
+        seen_css_set = set()
+        unique_css_urls = []
+        for cu in filter(None, css_urls_raw):
+            key = urlparse(cu).path.lower()
+            if key not in seen_css_set:
+                seen_css_set.add(key)
+                unique_css_urls.append(cu)
+        print(f"  [CSS] {len(unique_css_urls)} stylesheet(s) found")
+
+        # ── Method 3: Parse each external CSS for @font-face ───
+        push(emit_event("status", message="Method 3 — Parsing @font-face rules from CSS…"))
+        for css_url in unique_css_urls:
+            css_filename = os.path.basename(urlparse(css_url).path) or "stylesheet.css"
+            push(emit_event("status", message=f"  Parsing {css_filename}…"))
+            for entry in _parse_css_server_side(css_url):
+                display  = entry["display"].strip()
+                family   = entry["family"].strip()
+                fkey     = normalize_font(family)
+                dn       = variant_key(display)
+                if dn in seen_names or fkey in emb_families: continue
+                if not is_text_font(fkey): continue
+                seen_names.add(dn)
+                file_foundry = entry.get("foundry")
+                file_lic     = entry.get("license")
+                src_url      = entry.get("src_url", "")
+                if src_url and src_url.startswith("http") and not file_foundry:
+                    _, _, file_foundry, file_lic = get_font_info_from_file(src_url)
+                fd_path = make_css_path(css_url)
+                fd_kind = entry["kind"]
+                if src_url and src_url.startswith("http"):
+                    fd_path = make_font_file_path(os.path.basename(urlparse(src_url).path), src_url)
+                    fd_kind = "embedded"
+                    emb_families.add(fkey)
+                fd = make_fd(display, family, fkey, file_foundry, file_lic, fd_path, fd_kind,
+                             full_path=src_url or css_url, used_on_elements=used_elements_map.get(fkey, []))
+                emit_font(fd)
+        push(emit_event("status", message=f"  → {len(font_list)} fonts after external CSS"))
+
+        # ── Method 4: Parse Google Fonts CSS links ─────────────
+        push(emit_event("status", message="Method 4 — Checking Google Fonts CSS…"))
         gf_hrefs = []
         for tag in soup.find_all("link", href=True):
             h = tag.get("href", "")
@@ -1230,116 +1681,19 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                             display = fname_raw
                             if wlabel and wlabel != "Regular": display += f" {wlabel}"
                             if is_italic: display += " Italic"
-                            dn   = normalize_font(display)
+                            dn   = variant_key(display)
                             fkey = normalize_font(fname_raw)
-                            if dn in seen_names: continue
+                            if dn in seen_names or fkey in emb_families: continue
                             seen_names.add(dn)
-                            emb_families.add(fkey)
                             fd = make_fd(display, fname_raw, fkey, "Google", "Free (OFL)",
-                                         make_css_path("fonts.googleapis.com"), "google-fonts")
+                                         make_css_path("fonts.googleapis.com"), "google-fonts",
+                                         full_path=gf_url, used_on_elements=used_elements_map.get(fkey, []))
                             emit_font(fd)
                             print(f"  [GF] {display}")
             except Exception as ex:
                 print(f"Google Fonts parse error: {ex}")
 
-        # ── Method 2: <link rel=preload as=font> ──────────────
-        push(emit_event("status", message="Method 2 — Checking preloaded fonts…"))
-        for tag in soup.find_all("link", attrs={"rel": lambda r: r and "preload" in (r if isinstance(r, list) else [r])}):
-            if tag.get("as") != "font": continue
-            pre_url = resolve_url(tag.get("href"))
-            if not pre_url: continue
-            filename  = os.path.basename(urlparse(pre_url).path)
-            fkey_file = filename.lower()
-            if fkey_file in seen_files or _SKIP_FILENAME_RE.search(filename):
-                seen_files.add(fkey_file); continue
-            seen_files.add(fkey_file)
-            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(pre_url)
-            if not display_name: continue
-            fkey = family_key(family_name or display_name)
-            dn   = normalize_font(display_name)
-            if not is_text_font(fkey) or dn in seen_names: continue
-            seen_names.add(dn); emb_families.add(fkey)
-            fd = make_fd(display_name, family_name or display_name, fkey,
-                         file_foundry, file_lic, make_font_file_path(filename, pre_url), "preload")
-            emit_font(fd)
-            print(f"  [PRELOAD] {display_name}")
-
-        # ── Method 2b: Font files intercepted by browser ────────
-        for res_url in browser_resource_urls:
-            if not re.search(r"\.(woff2?|ttf|otf)(\?|#|$)", res_url, re.I):
-                continue
-            filename  = os.path.basename(urlparse(res_url).path)
-            fkey_file = filename.lower()
-            if fkey_file in seen_files or _SKIP_FILENAME_RE.search(filename):
-                seen_files.add(fkey_file); continue
-            seen_files.add(fkey_file)
-            display_name, family_name, file_foundry, file_lic = get_font_info_from_file(res_url)
-            if not display_name: continue
-            fkey = family_key(family_name or display_name)
-            dn   = normalize_font(display_name)
-            if not is_text_font(fkey) or dn in seen_names: continue
-            seen_names.add(dn); emb_families.add(fkey)
-            fd = make_fd(display_name, family_name or display_name, fkey,
-                         file_foundry, file_lic, make_font_file_path(filename, res_url), "embedded")
-            emit_font(fd)
-            print(f"  [BROWSER-FONT] {display_name}")
-
-        # Also add CSS files intercepted by browser to our CSS parsing queue
-        for res_url in browser_resource_urls:
-            if not re.search(r"\.css(\?|#|$)", res_url, re.I): continue
-            if "fonts.googleapis.com" in res_url: continue
-            key = urlparse(res_url).path.lower()
-            if key not in seen_css_set:
-                seen_css_set.add(key)
-                # will be picked up by Method 4 below via unique_css_urls
-                # but we need to add them now before that loop
-                unique_css_urls_extra = getattr(_fetch_page, '_extra_css', [])
-
-        # ── Method 3: Collect all external CSS stylesheets ────
-        push(emit_event("status", message="Method 3 — Collecting CSS stylesheets…"))
-        css_urls_raw = []
-        for tag in soup.find_all("link", rel=lambda r: r and "stylesheet" in (r if isinstance(r, list) else [r])):
-            href = tag.get("href", "")
-            if href and "fonts.googleapis.com" not in href:
-                css_urls_raw.append(resolve_url(href))
-        for tag in soup.find_all("style"):
-            for m in re.findall(r'@import\s+url\(["\']?([^"\')\s]+)["\']?\)', tag.string or ""):
-                full = resolve_url(m)
-                if full and "fonts.googleapis.com" not in full:
-                    css_urls_raw.append(full)
-        seen_css_set = set()
-        unique_css_urls = []
-        for cu in filter(None, css_urls_raw):
-            key = urlparse(cu).path.lower()
-            if key not in seen_css_set:
-                seen_css_set.add(key)
-                unique_css_urls.append(cu)
-        print(f"  [CSS] {len(unique_css_urls)} stylesheet(s) found")
-
-        # ── Method 4: Parse each external CSS for @font-face ──
-        push(emit_event("status", message="Method 4 — Parsing @font-face rules from CSS…"))
-        for css_url in unique_css_urls:
-            css_filename = os.path.basename(urlparse(css_url).path) or "stylesheet.css"
-            push(emit_event("status", message=f"  Parsing {css_filename}…"))
-            for entry in _parse_css_server_side(css_url):
-                display  = entry["display"].strip()
-                family   = entry["family"].strip()
-                fkey     = normalize_font(family)
-                dn       = normalize_font(display)
-                if dn in seen_names or fkey in emb_families: continue
-                if not is_text_font(fkey): continue
-                seen_names.add(dn)
-                file_foundry = entry.get("foundry")
-                file_lic     = entry.get("license")
-                src_url      = entry.get("src_url", "")
-                if src_url and src_url.startswith("http") and not file_foundry:
-                    _, _, file_foundry, file_lic = get_font_info_from_file(src_url)
-                fd = make_fd(display, family, fkey, file_foundry, file_lic,
-                             make_css_path(css_url), entry["kind"])
-                emit_font(fd)
-        push(emit_event("status", message=f"  → {len(font_list)} fonts after external CSS"))
-
-        # ── Method 5: Parse inline <style> blocks ─────────────
+        # ── Method 5: Parse inline <style> blocks ──────────────
         push(emit_event("status", message="Method 5 — Parsing inline <style> blocks…"))
         for style_tag in soup.find_all("style"):
             css_text = style_tag.string or ""
@@ -1348,11 +1702,12 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 display = entry["display"].strip()
                 family  = entry["family"].strip()
                 fkey    = normalize_font(family)
-                dn      = normalize_font(display)
+                dn      = variant_key(display)
                 if dn in seen_names or not is_text_font(fkey): continue
                 seen_names.add(dn)
                 fd = make_fd(display, family, fkey, entry.get("foundry"), entry.get("license"),
-                             make_inline_path(base_url), entry["kind"])
+                             make_inline_path(base_url), entry["kind"],
+                             full_path=base_url, used_on_elements=used_elements_map.get(fkey, []))
                 emit_font(fd)
                 print(f"  [INLINE] {display}")
         push(emit_event("status", message=f"  → {len(font_list)} fonts after inline styles"))
@@ -1366,13 +1721,43 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                     fname = part.strip().strip("\"'")
                     if not fname or fname.lower() in ("inherit","initial","unset","revert"): continue
                     fkey = normalize_font(fname)
-                    dn   = normalize_font(fname)
+                    dn   = variant_key(fname)
                     if dn in seen_names or not is_text_font(fkey): continue
                     seen_names.add(dn)
                     fd = make_fd(fname, fname, fkey, None, None,
-                             make_inline_path(base_url), "inline-style")
+                             make_inline_path(base_url), "inline-style",
+                             full_path=base_url, used_on_elements=used_elements_map.get(fkey, []))
                     emit_font(fd)
                     print(f"  [INLINE-ATTR] {fname}")
+
+        # ── Method 6b: live browser inspection of used fonts ───
+        push(emit_event("status", message="Method 6b — Inspecting rendered page fonts…"))
+        for entry in browser_inspection.get("used_fonts", []):
+            family = (entry.get("family") or "").strip()
+            if not family:
+                continue
+            weight = (entry.get("weight") or "").strip()
+            style = (entry.get("style") or "").strip().lower()
+            display = family
+            weight_map = {
+                "100": "Thin", "200": "ExtraLight", "300": "Light", "400": "Regular",
+                "500": "Medium", "600": "SemiBold", "700": "Bold", "800": "ExtraBold", "900": "Black",
+            }
+            if weight in weight_map and weight_map[weight] != "Regular":
+                display = f"{display} {weight_map[weight]}"
+            if style == "italic" and "italic" not in display.lower():
+                display = f"{display} Italic"
+            fkey = normalize_font(family)
+            dn = variant_key(display)
+            if dn in seen_names or not is_text_font(fkey):
+                continue
+            seen_names.add(dn)
+            fd = make_fd(display, family, fkey, None, None,
+                         make_inline_path(base_url), "inline-style",
+                         full_path=base_url, used_on_elements=used_elements_map.get(fkey, []))
+            emit_font(fd)
+            print(f"  [LIVE] {display}")
+        push(emit_event("status", message=f"  → {len(font_list)} fonts after live browser inspection"))
 
         # ── Method 7: Font CDN links (Adobe, Typekit, Bunny…) ─
         push(emit_event("status", message="Method 7 — Checking font CDN links…"))
@@ -1398,11 +1783,12 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                     display = entry["display"].strip()
                     family  = entry["family"].strip()
                     fkey    = normalize_font(family)
-                    dn      = normalize_font(display)
+                    dn      = variant_key(display)
                     if dn in seen_names or not is_text_font(fkey): continue
                     seen_names.add(dn)
                     fd = make_fd(display, family, fkey, foundry, lic,
-                                 make_css_path(cdn_url), entry["kind"])
+                                 make_css_path(cdn_url), entry["kind"],
+                                 full_path=cdn_url, used_on_elements=used_elements_map.get(fkey, []))
                     emit_font(fd)
                     print(f"  [CDN:{foundry}] {display}")
 
@@ -1418,7 +1804,7 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 conf    = af.get("confidence", "medium")
                 if not name: continue
                 fkey = normalize_font(family or name)
-                dn   = normalize_font(name)
+                dn   = variant_key(name)
                 if dn in seen_names: continue
                 if not is_text_font(fkey): continue
                 seen_names.add(dn)
@@ -1441,9 +1827,9 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                 if css_hint and "googleapis" in css_hint:
                     ai_path = make_gf_path(family)
                 elif css_hint and ("typekit" in css_hint or "adobe" in css_hint):
-                    ai_path = f"Application > Frames > top > use.typekit.net > (Adobe Fonts)"
+                    ai_path = make_inspect_path("css", "use.typekit.net (Adobe Fonts)")
                 elif css_hint and "typekit" not in css_hint and css_hint not in ("", "self-hosted CSS", "system font"):
-                    ai_path = f"Application > Frames > top > {css_hint}"
+                    ai_path = make_inspect_path("css", css_hint)
                 else:
                     ai_path = make_inline_path(url)
 
@@ -1454,13 +1840,18 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                     foundry=foundry,
                     license=lic,
                     path=ai_path,
+                    full_path=af.get("css_path", "") or ai_path,
+                    file_name=os.path.basename(urlparse(af.get("css_path", "")).path) if af.get("css_path") else "",
+                    css_file=os.path.basename(urlparse(af.get("css_path", "")).path) if af.get("css_path") else "",
                     source="ai",
                     kind="ai-identified",
+                    source_type=infer_source_type("ai-identified", ai_path, af.get("css_path", "")),
                     font_type=classify_font_type("ai-identified"),
                     is_restricted="restrict" in lic.lower(),
                     designer=af.get("designer", ""),
                     license_detail="",
                     confidence=conf,
+                    used_on_elements=", ".join(used_elements_map.get(fkey, [])[:12]),
                 )
                 # Use emit_font so license filtering is applied consistently
                 emit_font(fd)
