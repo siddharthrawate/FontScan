@@ -842,6 +842,87 @@ def _resolve(font_key, file_foundry=None, file_lic=None, use_ai=True, notify=Non
 # ─────────────────────────────────────────────────────────────
 #  CORE SCANNER  — unchanged from original
 # ─────────────────────────────────────────────────────────────
+def _ai_identify_website_fonts(url: str, notify=None) -> list:
+    """Ask AI to identify fonts used on a website directly from its URL/brand."""
+    api_key = OPENAI_API_KEY
+    if not api_key or api_key.strip() in ("", "sk-YOUR-KEY-HERE", "YOUR_OPENAI_API_KEY"):
+        return []
+
+    from urllib.parse import urlparse as _up
+    domain = _up(url).netloc.replace("www.", "")
+
+    ck = f"website_fonts_{domain}"
+    if ck in _ai_cache:
+        cached = _ai_cache[ck]
+        if isinstance(cached, list) and cached:
+            print(f"  [AI-WEBSITE] Cache hit for {domain}: {len(cached)} fonts")
+            return cached
+
+    prompt = (
+        f"List the fonts used on the website: {url} (domain: {domain})\n\n"
+        "For each font, return a JSON array where each element has:\n"
+        "  - name: full font name (e.g. 'EY Interstate Regular')\n"
+        "  - family: font family (e.g. 'EY Interstate')\n"
+        "  - foundry: type foundry or creator\n"
+        "  - license: one of 'Free (OFL)', 'Free', 'Paid', 'Restricted - Licensed only', 'Commercial'\n"
+        "  - confidence: 'high', 'medium', or 'low'\n\n"
+        "Base your answer on:\n"
+        "1. Known brand guidelines for this company/website\n"
+        "2. Fonts commonly associated with this industry/brand\n"
+        "3. Publicly available font information\n\n"
+        "Return ONLY a valid JSON array. No markdown, no explanation. Example:\n"
+        '[{"name":"Inter Regular","family":"Inter","foundry":"Rasmus Andersson",'
+        '"license":"Free (OFL)","confidence":"high"}]'
+    )
+
+    def _evt(type_, **kw):
+        return f"data: {json.dumps({'type': type_, 'ts': datetime.datetime.now().isoformat(), **kw})}\n\n"
+
+    try:
+        if notify:
+            notify(_evt("status", message=f"  🤖 Asking AI to identify fonts for {domain}…"))
+
+        r = req_lib.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={
+                "model": OPENAI_MODEL,
+                "messages": [
+                    {"role": "system", "content": (
+                        "You are an expert in web typography. When asked about fonts on a website, "
+                        "provide your best knowledge of what fonts that brand/company uses. "
+                        "Always respond with a valid JSON array only."
+                    )},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": 0,
+                "max_tokens": 800,
+            },
+            timeout=30,
+        )
+
+        if r.status_code != 200:
+            print(f"⚠ AI website font lookup failed: {r.status_code}")
+            return []
+
+        raw = r.json()["choices"][0]["message"]["content"].strip()
+        # Clean up markdown if present
+        raw = re.sub(r"```json|```", "", raw).strip()
+        fonts = json.loads(raw)
+        if not isinstance(fonts, list):
+            return []
+
+        # Cache the result
+        _ai_cache[ck] = fonts
+        _save_ai_cache()
+        print(f"  [AI-WEBSITE] {domain}: {len(fonts)} fonts identified by AI")
+        return fonts
+
+    except Exception as e:
+        print(f"  [AI-WEBSITE] Failed for {domain}: {e}")
+        return []
+
+
 def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
 
     def emit_event(type_, **kw):
@@ -1299,6 +1380,57 @@ def _blocking_scan(url, wait_sec, scroll_steps, use_ai, queue, scan_id):
                                  make_css_path(cdn_url), entry["kind"])
                     emit_font(fd)
                     print(f"  [CDN:{foundry}] {display}")
+
+        # ── Method 8: AI website font identification (always runs) ──
+        if use_ai:
+            push(emit_event("status", message="Method 8 — AI font identification…"))
+            ai_fonts = _ai_identify_website_fonts(url, notify=push)
+            for af in ai_fonts:
+                name    = af.get("name", "").strip()
+                family  = af.get("family", name).strip()
+                foundry = af.get("foundry", "")
+                lic     = af.get("license", "")
+                conf    = af.get("confidence", "medium")
+                if not name: continue
+                fkey = normalize_font(family or name)
+                dn   = normalize_font(name)
+                if dn in seen_names: continue
+                if not is_text_font(fkey): continue
+                seen_names.add(dn)
+
+                # Normalise license string to match emit_font expectations
+                lic_lower = lic.lower()
+                if "free" in lic_lower and "ofl" in lic_lower:
+                    lic = "Free (OFL)"
+                elif "free" in lic_lower:
+                    lic = "Free"
+                elif "restrict" in lic_lower:
+                    lic = "Restricted - Licensed only"
+                elif "paid" in lic_lower or "commercial" in lic_lower:
+                    lic = "Paid"
+                else:
+                    lic = "Paid"
+
+                fd = dict(
+                    site_url=url,
+                    name=name,
+                    family=family,
+                    foundry=foundry,
+                    license=lic,
+                    path=f"AI identified ({url})",
+                    source="ai",
+                    kind="ai-identified",
+                    font_type="body",
+                    is_restricted="restrict" in lic.lower(),
+                    designer=af.get("designer", ""),
+                    license_detail="",
+                    confidence=conf,
+                )
+                # Use emit_font so license filtering is applied consistently
+                emit_font(fd)
+                print(f"  [AI-WEBSITE] {name} ({lic})")
+
+            push(emit_event("status", message=f"  → {len(font_list)} fonts after AI lookup"))
 
         # ── Done ──────────────────────────────────────────────
         total       = len(font_list)
