@@ -1060,30 +1060,30 @@
     "source": "ai"
   },
   "ffdincondensedbold": {
-    "foundry": "FontFont",
+    "foundry": "Monotype GmbH",
     "designer": "Albert-Jan Pool",
     "license": "Paid",
-    "license_detail": "Available for purchase through various font retailers such as MyFonts and FontShop.",
+    "license_detail": "Commercial license required for use",
     "year": 1995,
-    "category": "Sans Serif",
+    "category": "Sans-serif",
     "confidence": "high",
     "source": "ai"
   },
   "kairossanscondensedbold": {
-    "foundry": "T-26",
-    "designer": "Michael Cina",
+    "foundry": "Monotype Imaging Inc.",
+    "designer": "Unknown",
     "license": "Paid",
     "license_detail": "Commercial license required for use",
-    "year": 2001,
+    "year": "Unknown",
     "category": "Sans Serif",
-    "confidence": "high",
+    "confidence": "medium",
     "source": "ai"
   },
   "centurygothicpro": {
-    "foundry": "Monotype",
-    "designer": "Monotype Design Studio",
+    "foundry": "Monotype Imaging",
+    "designer": "Sol Hess",
     "license": "Paid",
-    "license_detail": "Century Gothic Pro is a commercial font available for purchase through Monotype and other authorized distributors.",
+    "license_detail": "Century Gothic Pro is a commercial font available for purchase through Monotype Imaging.",
     "year": 1991,
     "category": "Sans-serif",
     "confidence": "high",
@@ -1101,9 +1101,9 @@
   },
   "centurygothicregular": {
     "foundry": "Monotype Imaging",
-    "designer": "Monotype Design Studio",
+    "designer": "Sol Hess",
     "license": "Paid",
-    "license_detail": "Century Gothic is a commercial font available for purchase from Monotype and other font retailers.",
+    "license_detail": "Century Gothic is a commercial font available for purchase through Monotype Imaging.",
     "year": 1991,
     "category": "Sans-serif",
     "confidence": "high",
@@ -1121,7 +1121,7 @@
   },
   "ttnormsprolight": {
     "foundry": "TypeType",
-    "designer": "Jovanny Lemonad",
+    "designer": "Ivan Gladkikh, TypeType Team",
     "license": "Paid",
     "license_detail": "Commercial license available for purchase from TypeType",
     "year": 2017,
@@ -1131,7 +1131,7 @@
   },
   "ttnormspro": {
     "foundry": "TypeType",
-    "designer": "Jura Ivanov",
+    "designer": "Ivan Gladkikh, TypeType Team",
     "license": "Paid",
     "license_detail": "Commercial license available for purchase from TypeType",
     "year": 2017,
@@ -1153,17 +1153,17 @@
     "foundry": "TypeType",
     "designer": "TypeType Team",
     "license": "Paid",
-    "license_detail": "Commercial license available for purchase from TypeType",
+    "license_detail": "Commercial license required for use",
     "year": 2017,
     "category": "Sans-serif",
     "confidence": "high",
     "source": "ai"
   },
   "tradegothicbold": {
-    "foundry": "Linotype",
+    "foundry": "Monotype GmbH",
     "designer": "Jackson Burke",
     "license": "Paid",
-    "license_detail": "Available for purchase through various font retailers.",
+    "license_detail": "Trade Gothic is a commercial typeface available for purchase through Monotype.",
     "year": 1948,
     "category": "Sans-serif",
     "confidence": "high",
@@ -1173,20 +1173,20 @@
     "foundry": "TypeType",
     "designer": "TypeType Team",
     "license": "Paid",
-    "license_detail": "Commercial license available for purchase from TypeType",
+    "license_detail": "This font is available for purchase from TypeType and requires a commercial license for use.",
     "year": 2017,
-    "category": "Sans-serif",
+    "category": "Sans Serif",
     "confidence": "high",
     "source": "ai"
   },
   "kairossanscondensedmedium": {
-    "foundry": "T-26",
-    "designer": "Michael Cina",
+    "foundry": "Monotype Imaging Inc.",
+    "designer": "Unknown",
     "license": "Paid",
-    "license_detail": "Commercial license required for use",
-    "year": 2001,
+    "license_detail": "Typically requires purchase or subscription through Monotype.",
+    "year": "Unknown",
     "category": "Sans Serif",
-    "confidence": "high",
+    "confidence": "medium",
     "source": "ai"
   },
   "microsoft jhenghei": {
@@ -7840,10 +7840,10 @@
     "source": "ai"
   },
   "trajan": {
-    "foundry": "Adobe",
+    "foundry": "CastleType",
     "designer": "Carol Twombly",
     "license": "Paid",
-    "license_detail": "Available through Adobe Fonts/Typekit",
+    "license_detail": "Commercial license required for use",
     "year": 1989,
     "category": "Serif",
     "confidence": "high",
@@ -7853,7 +7853,7 @@
     "foundry": "Monotype",
     "designer": "Patricia Saunders",
     "license": "Paid",
-    "license_detail": "Monotype Corsiva is a commercial font available for purchase and licensing through Monotype.",
+    "license_detail": "Monotype Corsiva is a commercial font and requires a license for use.",
     "year": 1995,
     "category": "Script",
     "confidence": "high",
@@ -8506,6 +8506,544 @@
       "foundry": "Google",
       "license": "Free (OFL)",
       "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    }
+  ],
+  "website_fonts_xoriant.com": [
+    {
+      "name": "Open Sans Regular",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Bold",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Italic",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Christian Robertson",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Christian Robertson",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
+  ],
+  "website_fonts_asus.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Medium",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Noto Sans Regular",
+      "family": "Noto Sans",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Noto Sans Bold",
+      "family": "Noto Sans",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
+  ],
+  "website_fonts_bluestarqatar.com": [],
+  "website_fonts_openai.com": [
+    {
+      "name": "GT America Regular",
+      "family": "GT America",
+      "foundry": "Grilli Type",
+      "license": "Paid",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "GT America Bold",
+      "family": "GT America",
+      "foundry": "Grilli Type",
+      "license": "Paid",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "GT America Medium",
+      "family": "GT America",
+      "foundry": "Grilli Type",
+      "license": "Paid",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "GT America Light",
+      "family": "GT America",
+      "foundry": "Grilli Type",
+      "license": "Paid",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "GT America Italic",
+      "family": "GT America",
+      "foundry": "Grilli Type",
+      "license": "Paid",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    }
+  ],
+  "noto sans myanmar ui": {
+    "foundry": "Google",
+    "designer": "Monotype Design Team",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License 1.1",
+    "year": 2014,
+    "category": "Sans Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "noto sans khmer": {
+    "foundry": "Google",
+    "designer": "Monotype",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License 1.1",
+    "year": 2014,
+    "category": "Sans Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--p9t0se": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--zrmhvb": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "google sans flex": {
+    "foundry": "Google",
+    "designer": "Google",
+    "license": "Restricted",
+    "license_detail": "Google Sans Flex is a proprietary typeface used by Google and is not available for public use or distribution.",
+    "year": "2021",
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--ux39cb": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This is a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "google sans)": {
+    "foundry": "Google",
+    "designer": "Google",
+    "license": "Restricted",
+    "license_detail": "Google Sans is a proprietary font used by Google and is not available for public use or distribution.",
+    "year": 2018,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--a8mvjc": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "var(--kp9oe": {
+    "foundry": "Google Fonts",
+    "designer": "Unknown",
+    "license": "Free (OFL)",
+    "license_detail": "This font is available under the Open Font License, which allows for both personal and commercial use.",
+    "year": "Unknown",
+    "category": "Variable",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "var(--ovubze": {
+    "foundry": "Custom CSS Variable",
+    "designer": "N/A",
+    "license": "Free/Custom",
+    "license_detail": "This appears to be a CSS variable placeholder, not an actual font.",
+    "year": "N/A",
+    "category": "N/A",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--gm3-tooltip-plain-supporting--font": {
+    "foundry": "Google Material Design",
+    "designer": "Google",
+    "license": "Free/Custom",
+    "license_detail": "Part of Google's Material Design system, typically used under Google's terms for Material Design components.",
+    "year": 2023,
+    "category": "Variable",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--gm3-button--label--font": {
+    "foundry": "Google Material Design",
+    "designer": "Google",
+    "license": "OS Default",
+    "license_detail": "Bundled with Google Material Design components",
+    "year": 2021,
+    "category": "UI/UX",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--mdc-typography-subtitle1-font-family": {
+    "foundry": "Material Design Components",
+    "designer": "Google",
+    "license": "Free",
+    "license_detail": "Material Design Components are typically under an open-source license, often Apache 2.0.",
+    "year": 2014,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--mdc-typography-font-family": {
+    "foundry": "Material Design Components",
+    "designer": "Google",
+    "license": "Free",
+    "license_detail": "Part of Google's Material Design Components, typically under an open-source license",
+    "year": 2014,
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "sans-serif))": {
+    "foundry": "Generic",
+    "designer": "N/A",
+    "license": "OS Default",
+    "license_detail": "This is a generic font family name used in CSS to refer to any sans-serif font available on the system.",
+    "year": "N/A",
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--mdc-typography--font-family": {
+    "foundry": "Material Design Components",
+    "designer": "Google",
+    "license": "Free/Custom",
+    "license_detail": "Part of Google's Material Design Components, typically under an open-source license.",
+    "year": 2014,
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--mdc-typography-body2-font-family": {
+    "foundry": "Material Design Components",
+    "designer": "Google",
+    "license": "OS Default",
+    "license_detail": "Part of Material Design Components, typically used in web applications",
+    "year": 2014,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--mdc-typography-overline-font-family": {
+    "foundry": "Material Design Components",
+    "designer": "Google",
+    "license": "Free",
+    "license_detail": "Material Design Components are typically under an open-source license, often Apache 2.0.",
+    "year": 2018,
+    "category": "Web Framework",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--mdc-typography-headline6-font-family": {
+    "foundry": "Material Design Components",
+    "designer": "Google",
+    "license": "Free",
+    "license_detail": "Material Design Components are typically under an open-source license, often Apache or similar.",
+    "year": 2018,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--mdc-typography-body1-font-family": {
+    "foundry": "Material Design Components",
+    "designer": "Google",
+    "license": "Free/Custom",
+    "license_detail": "Part of Material Design Components, typically under an open-source license",
+    "year": 2018,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--mdc-typography-subtitle2-font-family": {
+    "foundry": "Material Design Components",
+    "designer": "Google",
+    "license": "Free",
+    "license_detail": "Material Design Components are typically under an open-source license, often Apache 2.0.",
+    "year": 2014,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--gm3-button-filled-label--font": {
+    "foundry": "Google Material Design",
+    "designer": "Google",
+    "license": "Restricted",
+    "license_detail": "Part of Google's Material Design system, typically used in web components and not distributed as a standalone font.",
+    "year": 2021,
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--gm3-button-outlined-label--font": {
+    "foundry": "Google Material Design",
+    "designer": "Google",
+    "license": "Free/Custom",
+    "license_detail": "Part of Google's Material Design system, typically used under the terms of the Material Design guidelines.",
+    "year": 2023,
+    "category": "UI/UX",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--gm3-button-filled-tonal-label--font": {
+    "foundry": "Google Material Design",
+    "designer": "Google",
+    "license": "Restricted",
+    "license_detail": "Part of Google's Material Design system, typically used in web components and not distributed as standalone fonts.",
+    "year": 2021,
+    "category": "Variable",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "var(--mdc-form-field-label--font": {
+    "foundry": "Material Design Components",
+    "designer": "Google",
+    "license": "Free",
+    "license_detail": "Material Design Components are typically under an open-source license, often Apache 2.0.",
+    "year": 2014,
+    "category": "Variable",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "website_fonts_mail.google.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Medium",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Arial Regular",
+      "family": "Arial",
+      "foundry": "Monotype",
+      "license": "Restricted - Licensed only",
+      "css_path": "system font",
+      "confidence": "medium"
+    },
+    {
+      "name": "Arial Bold",
+      "family": "Arial",
+      "foundry": "Monotype",
+      "license": "Restricted - Licensed only",
+      "css_path": "system font",
+      "confidence": "medium"
+    }
+  ],
+  "website_fonts_bluestar-ee.com": [],
+  "website_fonts_rolls-roycemotorcars.com": [
+    {
+      "name": "Rolls-Royce Serif Regular",
+      "family": "Rolls-Royce Serif",
+      "foundry": "Rolls-Royce Motor Cars",
+      "license": "Restricted - Licensed only",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "Rolls-Royce Serif Bold",
+      "family": "Rolls-Royce Serif",
+      "foundry": "Rolls-Royce Motor Cars",
+      "license": "Restricted - Licensed only",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "Rolls-Royce Sans Regular",
+      "family": "Rolls-Royce Sans",
+      "foundry": "Rolls-Royce Motor Cars",
+      "license": "Restricted - Licensed only",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    },
+    {
+      "name": "Rolls-Royce Sans Bold",
+      "family": "Rolls-Royce Sans",
+      "foundry": "Rolls-Royce Motor Cars",
+      "license": "Restricted - Licensed only",
+      "css_path": "self-hosted CSS",
+      "confidence": "high"
+    }
+  ],
+  "rethink sans": {
+    "foundry": "Indian Type Foundry",
+    "designer": "Satya Rajpurohit",
+    "license": "Paid",
+    "license_detail": "Available for purchase through various font retailers",
+    "year": 2015,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "website_fonts_timesofindia.indiatimes.com": [
+    {
+      "name": "Lato Regular",
+      "family": "Lato",
+      "foundry": "\u0141ukasz Dziedzic",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Lato Bold",
+      "family": "Lato",
+      "foundry": "\u0141ukasz Dziedzic",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Lato Italic",
+      "family": "Lato",
+      "foundry": "\u0141ukasz Dziedzic",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Georgia Regular",
+      "family": "Georgia",
+      "foundry": "Matthew Carter",
+      "license": "System font",
+      "css_path": "system font",
+      "confidence": "high"
+    },
+    {
+      "name": "Georgia Bold",
+      "family": "Georgia",
+      "foundry": "Matthew Carter",
+      "license": "System font",
+      "css_path": "system font",
+      "confidence": "high"
+    },
+    {
+      "name": "Arial Regular",
+      "family": "Arial",
+      "foundry": "Robin Nicholas, Patricia Saunders",
+      "license": "System font",
+      "css_path": "system font",
+      "confidence": "high"
+    },
+    {
+      "name": "Arial Bold",
+      "family": "Arial",
+      "foundry": "Robin Nicholas, Patricia Saunders",
+      "license": "System font",
+      "css_path": "system font",
       "confidence": "high"
     }
   ]
