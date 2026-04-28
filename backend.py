@@ -1,4 +1,4 @@
-"""OPENAI_API_KEY
+"""
 FontScan – Enhanced Backend + JWT Authentication
 Run: python backend.py  →  http://localhost:8000
 """

@@ -8,6 +8,8 @@ services:
     envVars:
       - key: OPENAI_API_KEY
         sync: false
+      - key: PLAYWRIGHT_BROWSERS_PATH
+        value: /opt/render/project/src/.playwright-browsers
     disk:
       name: fontscan-data
       mountPath: /app
