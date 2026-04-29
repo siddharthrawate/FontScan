@@ -9096,5 +9096,521 @@
       "css_path": "fonts.googleapis.com",
       "confidence": "medium"
     }
+  ],
+  "!important!important": {
+    "foundry": "The League of Moveable Type",
+    "designer": "Owen Earl",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2013,
+    "category": "Display",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "vox": {
+    "foundry": "Schizotype",
+    "designer": "Jeremy Dooley",
+    "license": "Paid",
+    "license_detail": "Available for purchase from various font retailers",
+    "year": 2018,
+    "category": "Sans Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "montserrat!important": {
+    "foundry": "Julieta Ulanovsky",
+    "designer": "Julieta Ulanovsky",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2011,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "website_fonts_synechron.com": [
+    {
+      "name": "Open Sans Regular",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Bold",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Italic",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Christian Robertson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Christian Robertson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
+  ],
+  "calibri": {
+    "foundry": "Microsoft",
+    "designer": "Lucas de Groot",
+    "license": "OS Default",
+    "license_detail": "Bundled with Microsoft Windows and Microsoft Office",
+    "year": 2007,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "website_fonts_bristlecone.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Regular",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Open Sans Bold",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
+  ],
+  "source sans": {
+    "foundry": "Adobe",
+    "designer": "Paul D. Hunt",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2012,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "website_fonts_bluestar.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Regular",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Open Sans Bold",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
+  ],
+  "fa": {
+    "foundry": "Font Awesome",
+    "designer": "Dave Gandy",
+    "license": "Icon/Symbol \u2014 skip",
+    "license_detail": "Font Awesome Free License",
+    "year": 2012,
+    "category": "Icon/Symbol",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "dosis": {
+    "foundry": "Impallari Type",
+    "designer": "Pablo Impallari, Edgar Tolentino, Pablo Cosgaya",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License 1.1",
+    "year": 2011,
+    "category": "Sans Serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "website_fonts_techmahindra.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Open Sans Regular",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Open Sans Bold",
+      "family": "Open Sans",
+      "foundry": "Steve Matteson",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
+  ],
+  "ea4e9277c58315dc s.p": {
+    "foundry": "Unknown Foundry",
+    "designer": "Unknown Designer",
+    "license": "Restricted",
+    "license_detail": "This appears to be a custom or proprietary font with limited information available.",
+    "year": "Unknown",
+    "category": "Unknown",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "a587c707f83040a7 s.p": {
+    "foundry": "Unknown Foundry",
+    "designer": "Unknown Designer",
+    "license": "Restricted",
+    "license_detail": "This font appears to be a custom or proprietary font, possibly used for specific branding or internal purposes.",
+    "year": "Unknown",
+    "category": "Custom/Proprietary",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "d9b78f03908807eb s.p": {
+    "foundry": "Unknown Foundry",
+    "designer": "Unknown Designer",
+    "license": "Restricted",
+    "license_detail": "This font appears to be a custom or proprietary font with limited information available.",
+    "year": "Unknown",
+    "category": "Unknown",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "f335e20854dcb85a s.p": {
+    "foundry": "Unknown Foundry",
+    "designer": "Unknown Designer",
+    "license": "Restricted",
+    "license_detail": "This appears to be a custom or proprietary font with limited information available.",
+    "year": "Unknown",
+    "category": "Unknown",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "f0fe88c3894b8dac s.p": {
+    "foundry": "Unknown Foundry",
+    "designer": "Unknown Designer",
+    "license": "Restricted",
+    "license_detail": "This font appears to be a custom or proprietary font, possibly with restricted usage rights.",
+    "year": "Unknown",
+    "category": "Unknown",
+    "confidence": "low",
+    "source": "ai"
+  },
+  "__defaultthemefont_76641f": {
+    "foundry": "Microsoft",
+    "designer": "Microsoft Corporation",
+    "license": "OS Default",
+    "license_detail": "Bundled with Windows operating system",
+    "year": "N/A",
+    "category": "System",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "__defaultthemefont_fallback_76641f": {
+    "foundry": "Microsoft",
+    "designer": "Microsoft Corporation",
+    "license": "OS Default",
+    "license_detail": "Bundled with Windows operating system",
+    "year": 2015,
+    "category": "System",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "website_fonts_adityabirla.com": [
+    {
+      "name": "Lato Regular",
+      "family": "Lato",
+      "foundry": "\u0141ukasz Dziedzic",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Lato Bold",
+      "family": "Lato",
+      "foundry": "\u0141ukasz Dziedzic",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Lato Italic",
+      "family": "Lato",
+      "foundry": "\u0141ukasz Dziedzic",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Lato Bold Italic",
+      "family": "Lato",
+      "foundry": "\u0141ukasz Dziedzic",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    }
+  ],
+  "caveat": {
+    "foundry": "Sinking Ship Creations",
+    "designer": "Pablo Impallari",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2016,
+    "category": "Handwriting",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "inter-": {
+    "foundry": "Rasmus Andersson",
+    "designer": "Rasmus Andersson",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2017,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "poppins- !important": {
+    "foundry": "Indian Type Foundry",
+    "designer": "Jonny Pinhorn",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2014,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "caveat-": {
+    "foundry": "Google Fonts",
+    "designer": "Pablo Impallari",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2016,
+    "category": "Handwriting",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "website_fonts_ceat.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Medium",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Light",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    }
+  ],
+  "luma-icons": {
+    "foundry": "Google",
+    "designer": "Google Material Design Team",
+    "license": "Icon/Symbol \u2014 skip",
+    "license_detail": "Luma Icons are part of Google's Material Icons, which are typically distributed under the Apache License 2.0, but as an icon/symbol font, it is categorized as 'Icon/Symbol \u2014 skip'.",
+    "year": 2014,
+    "category": "Icon/Symbol",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "pagebuilder-font": {
+    "foundry": "PageBuilder Foundry",
+    "designer": "PageBuilder Team",
+    "license": "Free/Custom",
+    "license_detail": "Custom license specific to PageBuilder usage",
+    "year": 2020,
+    "category": "Sans-serif",
+    "confidence": "medium",
+    "source": "ai"
+  },
+  "var(--bs-btn-font-family)": {
+    "foundry": "Bootstrap",
+    "designer": "Mark Otto, Jacob Thornton",
+    "license": "Free",
+    "license_detail": "Bootstrap is released under the MIT License.",
+    "year": 2011,
+    "category": "Web Framework",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "halvetica neue": {
+    "foundry": "Linotype",
+    "designer": "Max Miedinger",
+    "license": "Paid",
+    "license_detail": "Helvetica Neue is a commercial typeface available for purchase from Linotype and other font retailers.",
+    "year": 1983,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "quicksand": {
+    "foundry": "Andrew Paglinawan",
+    "designer": "Andrew Paglinawan",
+    "license": "Free (OFL)",
+    "license_detail": "SIL Open Font License, Version 1.1",
+    "year": 2008,
+    "category": "Sans-serif",
+    "confidence": "high",
+    "source": "ai"
+  },
+  "website_fonts_havells.com": [
+    {
+      "name": "Roboto Regular",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Bold",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Roboto Italic",
+      "family": "Roboto",
+      "foundry": "Google",
+      "license": "Free",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "high"
+    },
+    {
+      "name": "Lato Regular",
+      "family": "Lato",
+      "foundry": "\u0141ukasz Dziedzic",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    },
+    {
+      "name": "Lato Bold",
+      "family": "Lato",
+      "foundry": "\u0141ukasz Dziedzic",
+      "license": "Free (OFL)",
+      "css_path": "fonts.googleapis.com",
+      "confidence": "medium"
+    }
   ]
 }
